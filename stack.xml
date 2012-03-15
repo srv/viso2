@@ -1,0 +1,11 @@
+<stack>
+  <description brief="srv_vision">Computer Vision algorithms, 
+    developed and/or maintained by the Systems, Robotics and Vision group of the 
+    University of the Balearic Islands, Spain. http://srv.uib.es </description>
+  <author>Maintained by Stephan Wirth</author>
+  <license>GPL, LGPL, BSD</license>  
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/srv_vision</url>
+  <depend stack="ros" />
+
+</stack>
