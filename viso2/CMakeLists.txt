@@ -37,6 +37,13 @@ rosbuild_add_library(viso2
   src/libviso2/viso_mono.cpp
   src/libviso2/viso_stereo.cpp)
 
+include_directories(src/libviso2)
+
+rosbuild_add_executable(stereo_odometer
+  src/nodes/stereo_odometer.cpp)
+
+target_link_libraries(stereo_odometer viso2)
+
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
