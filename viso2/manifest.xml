@@ -15,6 +15,15 @@
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/viso2</url>
 
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="message_filters"/>
+  <depend package="image_transport"/>
+  <depend package="cv_bridge"/>
+  <depend package="image_geometry"/>
+  <depend package="tf"/>
+
 </package>
 
 
