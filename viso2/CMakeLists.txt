@@ -27,18 +27,15 @@ SET(CMAKE_CXX_FLAGS "-msse3")
 # make release version
 set(CMAKE_BUILD_TYPE Release)
 
-include_directories(${PROJECT_SOURCE_DIR}/include/${PROJECT_NAME})
-
-#common commands for building c++ executables and libraries
-rosbuild_add_library(${PROJECT_NAME} 
-  src/filter.cpp
-  src/matcher.cpp
-  src/matrix.cpp
-  src/reconstruction.cpp
-  src/triangle.cpp
-  src/viso.cpp
-  src/viso_mono.cpp
-  src/viso_stereo.cpp)
+rosbuild_add_library(viso2 
+  src/libviso2/filter.cpp
+  src/libviso2/matcher.cpp
+  src/libviso2/matrix.cpp
+  src/libviso2/reconstruction.cpp
+  src/libviso2/triangle.cpp
+  src/libviso2/viso.cpp
+  src/libviso2/viso_mono.cpp
+  src/libviso2/viso_stereo.cpp)
 
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
