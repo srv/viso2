@@ -24,25 +24,8 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 # use sse3 instruction set
 SET(CMAKE_CXX_FLAGS "-msse3")
 
-# make release version
-set(CMAKE_BUILD_TYPE Release)
-
-rosbuild_add_library(viso2 
-  src/libviso2/filter.cpp
-  src/libviso2/matcher.cpp
-  src/libviso2/matrix.cpp
-  src/libviso2/reconstruction.cpp
-  src/libviso2/triangle.cpp
-  src/libviso2/viso.cpp
-  src/libviso2/viso_mono.cpp
-  src/libviso2/viso_stereo.cpp)
-
-include_directories(src/libviso2)
-
 rosbuild_add_executable(stereo_odometer
-  src/nodes/stereo_odometer.cpp)
-
-target_link_libraries(stereo_odometer viso2)
+  src/stereo_odometer.cpp)
 
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
