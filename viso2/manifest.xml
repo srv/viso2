@@ -1,13 +1,19 @@
 <package>
   <description brief="viso2">
 
-     viso2
+    ROS-Package for libviso2.
+
+    See http://www.cvlibs.net/software/libviso2.html
 
   </description>
-  <author>Stephan Wirth</author>
+  <author>Andreas Geiger, maintained by: Stephan Wirth</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/viso2</url>
+
+  <export>
+    <cpp cflags="-I${prefix}/include/" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2"/>
+  </export>
 
 </package>
 
