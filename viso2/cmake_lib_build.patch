@@ -1,0 +1,26 @@
+--- CMakeLists.txt.orig	2012-03-19 15:04:35.073181840 +0100
++++ CMakeLists.txt	2012-03-19 15:06:50.022934142 +0100
+@@ -11,13 +11,17 @@
+ # use sse3 instruction set
+ SET(CMAKE_CXX_FLAGS "-msse3")
+ 
+-# sources
+-FILE(GLOB LIBVISO2_SRC_FILES "src/*.cpp")
+-
+ # make release version
+ set(CMAKE_BUILD_TYPE Release)
+ 
+-# demo program
+-add_executable(viso2 ${LIBVISO2_SRC_FILES})
+-target_link_libraries (viso2 png)
++# library
++add_library(viso2
++  src/filter.cpp
++  src/matcher.cpp
++  src/matrix.cpp
++  src/reconstruction.cpp
++  src/triangle.cpp
++  src/viso.cpp
++  src/viso_mono.cpp
++  src/viso_stereo.cpp)
+ 
