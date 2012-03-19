@@ -30,6 +30,7 @@ private:
 
   // publisher and subscriber
   ros::Publisher odom_pub_;
+  ros::Publisher pose_pub_;
   image_transport::SubscriberFilter left_sub_, right_sub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> left_info_sub_, right_info_sub_;
   typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ExactPolicy;
@@ -119,6 +120,7 @@ public:
 
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
+    pose_pub_ = local_nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
 
     integrated_pose_.setIdentity();
   }
@@ -225,16 +227,17 @@ protected:
     {
       if(visual_odometer_->process(l_image_data, r_image_data, dims))
       {
-        Matrix camera_motion = Matrix::inv(visual_odometer_->getMotion());
+        Matrix camera_motion = visual_odometer_->getMotion();
         btMatrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
+
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
         integrated_pose_ *= delta_transform;
 
-        // transform integrated pose to base link
+        // transform integrated pose to child frame
         tf::StampedTransform child_to_camera;
         try
         {
@@ -269,6 +272,13 @@ protected:
 
         // TODO fill covariances
         odom_pub_.publish(odometry);
+        
+        geometry_msgs::PoseStamped pose_msg;
+        pose_msg.header.stamp = odometry.header.stamp;
+        pose_msg.header.frame_id = odometry.header.frame_id;
+        pose_msg.pose = odometry.pose.pose;
+
+        pose_pub_.publish(pose_msg);
 
         if (publish_tf_)
         {
