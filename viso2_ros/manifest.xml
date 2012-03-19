@@ -1,0 +1,29 @@
+<package>
+  <description brief="viso2">
+
+    This is the ROS package for the library for visual odometry 
+    developed by A. Geiger from the Institute of Measurement and Control Systems
+    at Karlsruhe Institute of Technology.
+
+    http://www.rainsoft.de/software/libviso2.html
+
+    See the package viso2_ros for ros nodes that use this library.
+
+  </description>
+  <author>Andreas Geiger, Stephan Wirth</author>
+  <license>GPL</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/viso2</url>
+
+  <depend package="roscpp"/>
+  <depend package="sensor_msgs"/>
+  <depend package="nav_msgs"/>
+  <depend package="message_filters"/>
+  <depend package="image_transport"/>
+  <depend package="cv_bridge"/>
+  <depend package="image_geometry"/>
+  <depend package="tf"/>
+
+</package>
+
+
