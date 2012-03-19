@@ -68,8 +68,8 @@ public:
     ros::NodeHandle local_nh("~");
     loadParams(local_nh, visual_odometer_params_);
 
-    local_nh.param("frame_id", frame_id_, std::string("visual_odom"));
-    local_nh.param("child_frame_id", child_frame_id_, std::string("base_link"));
+    local_nh.param("frame_id", frame_id_, std::string("/visual_odom"));
+    local_nh.param("child_frame_id", child_frame_id_, std::string("/base_link"));
     local_nh.param("publish_tf", publish_tf_, true);
     
     // Resolve topic names
@@ -183,7 +183,7 @@ protected:
 
     // convert images if necessary
     uint8_t *l_image_data, *r_image_data;
-    uint8_t l_step, r_step;
+    int l_step, r_step;
     cv_bridge::CvImageConstPtr l_cv_ptr, r_cv_ptr;
     if (l_image_msg->encoding == sensor_msgs::image_encodings::MONO8)
     {
