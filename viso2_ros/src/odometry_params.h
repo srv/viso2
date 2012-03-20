@@ -51,8 +51,14 @@ void loadParams(const ros::NodeHandle& local_nh, VisualOdometryStereo::parameter
 /// loads mono specific params
 void loadParams(const ros::NodeHandle& local_nh, VisualOdometryMono::parameters& params)
 {
-  local_nh.getParam("camera_height",    params.height);
-  local_nh.getParam("camera_pitch",     params.pitch);
+  if (!local_nh.getParam("camera_height", params.height))
+  {
+    ROS_WARN("Parameter 'camera_height' is required but not set. Using default: %f", params.height);
+  }
+  if (!local_nh.getParam("camera_pitch", params.pitch))
+  {
+    ROS_WARN("Paramter 'camera_pitch' is required but not set. Using default: %f", params.pitch);
+  }
   local_nh.getParam("ransac_iters",     params.ransac_iters);
   local_nh.getParam("inlier_threshold", params.inlier_threshold);
   local_nh.getParam("motion_threshold", params.motion_threshold);
