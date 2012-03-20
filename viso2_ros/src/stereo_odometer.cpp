@@ -1,62 +1,34 @@
 
 #include <ros/ros.h>
-#include <nav_msgs/Odometry.h>
 
 #include <sensor_msgs/image_encodings.h>
 
 #include <image_geometry/stereo_camera_model.h>
-#include <tf/transform_listener.h>
-#include <tf/transform_broadcaster.h>
 #include <cv_bridge/cv_bridge.h>
 
 #include "stereo_processor.h"
+#include "odometer_base.h"
 
 #include "viso_stereo.h"
 
 namespace viso2_ros
 {
 
-class StereoOdometer : public StereoProcessor
+class StereoOdometer : public StereoProcessor, public OdometerBase
 {
 
 private:
 
-  // publisher
-  ros::Publisher odom_pub_;
-  ros::Publisher pose_pub_;
-
-  // tf related
-  std::string frame_id_;
-  std::string child_frame_id_;
-  bool publish_tf_;
-  tf::TransformListener tf_listener_;
-  tf::TransformBroadcaster tf_broadcaster_;
-
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
   VisualOdometryStereo::parameters visual_odometer_params_;
 
-  // the current integrated camera pose
-  tf::Transform integrated_pose_;
-  // timestamp of the last update
-  ros::Time last_update_time_;
-
 public:
 
-  StereoOdometer(const std::string& transport) : StereoProcessor(transport)
+  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase()
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
     loadParams(local_nh, visual_odometer_params_);
-
-    local_nh.param("frame_id", frame_id_, std::string("/visual_odom"));
-    local_nh.param("child_frame_id", child_frame_id_, std::string("/base_link"));
-    local_nh.param("publish_tf", publish_tf_, true);
-    
-    // advertise
-    odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
-    pose_pub_ = local_nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
-
-    integrated_pose_.setIdentity();
   }
 
 protected:
@@ -153,8 +125,8 @@ protected:
     if (first_run)
     {
       first_run = false;
-      last_update_time_ = l_image_msg->header.stamp;
       visual_odometer_->process(l_image_data, r_image_data, dims);
+      setSensorFrameId(l_image_msg->header.frame_id);
     }
     else
     {
@@ -168,57 +140,8 @@ protected:
 
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
-        integrated_pose_ *= delta_transform;
 
-        // transform integrated pose to child frame
-        tf::StampedTransform child_to_camera;
-        try
-        {
-          tf_listener_.lookupTransform(
-              child_frame_id_,
-              l_image_msg->header.frame_id,
-              ros::Time(0), child_to_camera);
-        }
-        catch (tf::TransformException& ex)
-        {
-          ROS_WARN("TransformException: %s", ex.what());
-          ROS_WARN("The tf from '%s' to '%s' does not seem to be available, "
-                   "will assume it as identity!", 
-                   child_frame_id_.c_str(),
-                   l_image_msg->header.frame_id.c_str());
-          child_to_camera.setIdentity();
-        }
-
-        tf::Transform child_transform = child_to_camera * integrated_pose_ * child_to_camera.inverse();
-
-        // calculate twist
-        tf::Transform delta_child_transform = child_to_camera * delta_transform * child_to_camera.inverse();
-        ros::Time current_time = l_image_msg->header.stamp;
-        double delta_t = (current_time - last_update_time_).toSec();
-        last_update_time_ = current_time;
-
-        nav_msgs::Odometry odometry;
-        odometry.header.stamp = l_image_msg->header.stamp;
-        odometry.header.frame_id = frame_id_;
-        odometry.child_frame_id = child_frame_id_;
-        tf::poseTFToMsg(child_transform, odometry.pose.pose);
-
-        // TODO fill covariances
-        odom_pub_.publish(odometry);
-        
-        geometry_msgs::PoseStamped pose_msg;
-        pose_msg.header.stamp = odometry.header.stamp;
-        pose_msg.header.frame_id = odometry.header.frame_id;
-        pose_msg.pose = odometry.pose.pose;
-
-        pose_pub_.publish(pose_msg);
-
-        if (publish_tf_)
-        {
-          tf_broadcaster_.sendTransform(
-              tf::StampedTransform(child_transform, l_image_msg->header.stamp,
-              frame_id_, child_frame_id_));
-        }
+        update(delta_transform, l_image_msg->header.stamp);
       }
       else
       {
