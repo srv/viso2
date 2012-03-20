@@ -1,10 +1,6 @@
 <package>
-  <description brief="viso2_ros">
-
-    This is the ROS wrapper for the library for visual odometry 
-    developed by A. Geiger from the Institute of Measurement and Control Systems
-    at Karlsruhe Institute of Technology.
-
+  <description brief="ROS-Wrapper for libviso2">
+    This is the ROS wrapper for libviso2, library for visual odometry (see package viso2).
   </description>
   <author>Stephan Wirth</author>
   <license>GPL</license>
