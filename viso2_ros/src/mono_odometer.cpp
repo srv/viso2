@@ -1,10 +1,14 @@
 #include <ros/ros.h>
 #include <sensor_msgs/image_encodings.h>
 #include <cv_bridge/cv_bridge.h>
+#include <image_transport/camera_subscriber.h>
+#include <image_transport/image_transport.h>
+#include <image_geometry/pinhole_camera_model.h>
 
 #include <viso_mono.h>
 
 #include "odometer_base.h"
+#include "odometry_params.h"
 
 namespace viso2_ros
 {
@@ -14,14 +18,16 @@ class MonoOdometer : public OdometerBase
 
 private:
 
-  boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
+  boost::shared_ptr<VisualOdometryMono> visual_odometer_;
   VisualOdometryMono::parameters visual_odometer_params_;
 
   image_transport::CameraSubscriber camera_sub_;
 
+  bool replace_;
+
 public:
 
-  MonoOdometer(const std::string& transport) : public OdometerBase()
+  MonoOdometer(const std::string& transport) : OdometerBase(), replace_(false)
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
@@ -32,7 +38,7 @@ public:
 
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
-    camera_sub_ = it.subscribeCamera("image", queue_size, &MonoOdometer::imageCallback, transport);
+    camera_sub_ = it.subscribeCamera("image", queue_size, &MonoOdometer::imageCallback, this, transport);
   }
 
 protected:
@@ -42,9 +48,11 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
  
+    bool first_run = false;
     // create odometer if not exists
     if (!visual_odometer_)
     {
+      first_run = true;
       // read calibration info from camera info message
       // to fill remaining odometer parameters
       image_geometry::PinholeCameraModel model;
@@ -53,6 +61,7 @@ protected:
       visual_odometer_params_.calib.cu = model.cx();
       visual_odometer_params_.calib.cv = model.cy();
       visual_odometer_.reset(new VisualOdometryMono(visual_odometer_params_));
+      setSensorFrameId(image_msg->header.frame_id);
     }
 
     // convert image if necessary
@@ -73,17 +82,17 @@ protected:
 
     // run the odometer
     int32_t dims[] = {image_msg->width, image_msg->height, step};
-    static bool first_run = true;
+    // on first run, only feed the odometer with first image pair without
+    // retrieving data
     if (first_run)
     {
-      first_run = false;
       visual_odometer_->process(image_data, dims);
-      setSensorFrameId(l_image_msg->header.frame_id);
     }
     else
     {
       if(visual_odometer_->process(image_data, dims))
       {
+        replace_ = false;
         Matrix camera_motion = visual_odometer_->getMotion();
         btMatrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
@@ -97,11 +106,11 @@ protected:
       }
       else
       {
-        ROS_ERROR("[mono_odometer]: Call to VisualOdometryMono::process() failed!");
+        ROS_DEBUG("[mono_odometer]: Call to VisualOdometryMono::process() failed. Assuming motion too small.");
+        replace_ = true;
       }
     }
   }
-
 };
 
 } // end of namespace

@@ -27,6 +27,9 @@ SET(CMAKE_CXX_FLAGS "-msse3")
 rosbuild_add_executable(stereo_odometer
   src/stereo_odometer.cpp)
 
+rosbuild_add_executable(mono_odometer
+  src/mono_odometer.cpp)
+
 #target_link_libraries(${PROJECT_NAME} another_library)
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)

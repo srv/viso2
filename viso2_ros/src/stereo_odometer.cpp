@@ -20,9 +20,12 @@ private:
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
   VisualOdometryStereo::parameters visual_odometer_params_;
 
+  bool replace_;
+
+
 public:
 
-  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase()
+  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase(), replace_(false)
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
@@ -38,9 +41,11 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
  
+    bool first_run = false;
     // create odometer if not exists
     if (!visual_odometer_)
     {
+      first_run = true;
       // read calibration info from camera info message
       // to fill remaining parameters
       image_geometry::StereoCameraModel model;
@@ -50,6 +55,7 @@ protected:
       visual_odometer_params_.calib.cu = model.left().cx();
       visual_odometer_params_.calib.cv = model.left().cy();
       visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
+      setSensorFrameId(l_info_msg->header.frame_id);
     }
 
     // convert images if necessary
@@ -85,17 +91,17 @@ protected:
 
     // run the odometer
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
-    static bool first_run = true;
+    // on first run, only feed the odometer with first image pair without
+    // retrieving data
     if (first_run)
     {
-      first_run = false;
       visual_odometer_->process(l_image_data, r_image_data, dims);
-      setSensorFrameId(l_image_msg->header.frame_id);
     }
     else
     {
-      if(visual_odometer_->process(l_image_data, r_image_data, dims))
+      if(visual_odometer_->process(l_image_data, r_image_data, dims, replace_))
       {
+        replace_ = false;
         Matrix camera_motion = visual_odometer_->getMotion();
         btMatrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
@@ -109,11 +115,11 @@ protected:
       }
       else
       {
-        ROS_ERROR("[stereo_odometer]: Call to VisualOdometryStereo::process() failed!");
+        ROS_DEBUG("[stereo_odometer]: Call to VisualOdometryStereo::process() failed. Assuming motion too small.");
+        replace_ = true;
       }
     }
   }
-
 };
 
 } // end of namespace
