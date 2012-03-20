@@ -1,15 +1,13 @@
-
 #include <ros/ros.h>
-
 #include <sensor_msgs/image_encodings.h>
-
 #include <image_geometry/stereo_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
 
+#include <viso_stereo.h>
+
 #include "stereo_processor.h"
 #include "odometer_base.h"
-
-#include "viso_stereo.h"
+#include "odometry_params.h"
 
 namespace viso2_ros
 {
@@ -28,45 +26,10 @@ public:
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
-    loadParams(local_nh, visual_odometer_params_);
+    odometry_params::loadParams(local_nh, visual_odometer_params_);
   }
 
 protected:
-
-  void loadParams(const ros::NodeHandle& local_nh, VisualOdometryStereo::parameters& params)
-  {
-    local_nh.getParam("ransac_iters",     params.ransac_iters);
-    local_nh.getParam("inlier_threshold", params.inlier_threshold);
-    local_nh.getParam("reweighting",      params.reweighting);
-    loadGeneralParams(local_nh, params);
-  }
-
-  void loadGeneralParams(const ros::NodeHandle& local_nh, VisualOdometry::parameters& params)
-  {
-    loadMatcherParams(local_nh, params.match);
-    loadBucketingParams(local_nh, params.bucket);
-  }
-
-  void loadMatcherParams(const ros::NodeHandle& local_nh, Matcher::parameters& params)
-  {
-    local_nh.getParam("nms_n",                  params.nms_n);
-    local_nh.getParam("nms_tau",                params.nms_tau);
-    local_nh.getParam("match_binsize",          params.match_binsize);
-    local_nh.getParam("match_radius",           params.match_radius);
-    local_nh.getParam("match_disp_tolerance",   params.match_disp_tolerance);
-    local_nh.getParam("outlier_disp_tolerance", params.outlier_disp_tolerance);
-    local_nh.getParam("outlier_flow_tolerance", params.outlier_flow_tolerance);
-    local_nh.getParam("multi_stage",            params.multi_stage);
-    local_nh.getParam("half_resolution",        params.half_resolution);
-    local_nh.getParam("refinement",             params.refinement);
-  }
-
-  void loadBucketingParams(const ros::NodeHandle& local_nh, VisualOdometry::bucketing& bucketing)
-  {
-    local_nh.getParam("max_features",  bucketing.max_features);
-    local_nh.getParam("bucket_width",  bucketing.bucket_width);
-    local_nh.getParam("bucket_height", bucketing.bucket_height);
-  }
 
   void imageCallback(
       const sensor_msgs::ImageConstPtr& l_image_msg,
@@ -79,6 +42,7 @@ protected:
     if (!visual_odometer_)
     {
       // read calibration info from camera info message
+      // to fill remaining parameters
       image_geometry::StereoCameraModel model;
       model.fromCameraInfo(*l_info_msg, *r_info_msg);
       visual_odometer_params_.base = model.baseline();
