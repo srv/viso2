@@ -4,8 +4,8 @@ clear all; close all; dbstop error;
 
 % parameter settings (for an example, please download
 % sequence '2010_03_09_drive_0019' from www.cvlibs.net)
-%img_dir     = '/home/geiger/5_Data/karlsruhe_dataset/2011_stereo/2010_03_09_drive_0019';
-img_dir     = 'C:\Users\geiger\Desktop\2010_03_09_drive_0019';
+img_dir     = '/home/geiger/5_Data/karlsruhe_dataset/2011_stereo/2010_03_09_drive_0019';
+%img_dir     = 'C:\Users\geiger\Desktop\2010_03_09_drive_0019';
 param.f     = 645.2;
 param.cu    = 635.9;
 param.cv    = 194.1;

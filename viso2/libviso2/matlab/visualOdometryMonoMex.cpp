@@ -123,14 +123,23 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     uint8_t* I_      = transpose<uint8_t>(I,dims);
     int32_t  dims_[] = {dims[1],dims[0],dims[1]};
         
-    // compute visual odometry, extrapolates linearly if matching failed
-    viso->process(I_,dims_,replace);
+    // compute visual odometry, return motion estimate on success
+    // (mapping from previous to current frame)
+    if (viso->process(I_,dims_,replace)) {
 
-    // return motion estimate (mapping from previous to current frame)
-    Matrix Tr_delta = ~(viso->getMotion());
-    const int tr_dims[] = {4,4};
-    plhs[0] = mxCreateNumericArray(2,tr_dims,mxDOUBLE_CLASS,mxREAL);
-    Tr_delta.getData((double*)mxGetPr(plhs[0]));
+      Matrix Tr_delta = ~(viso->getMotion());
+      const int tr_dims[] = {4,4};
+      plhs[0] = mxCreateNumericArray(2,tr_dims,mxDOUBLE_CLASS,mxREAL);
+      Tr_delta.getData((double*)mxGetPr(plhs[0]));
+      
+    // return empty transformation on failure
+    // (motion too small to estimate scale)
+    } else {
+      
+      // return motion estimate (mapping from previous to current frame)
+      const int tr_dims[] = {0,0};
+      plhs[0] = mxCreateNumericArray(2,tr_dims,mxDOUBLE_CLASS,mxREAL);     
+    }
     
     // release temporary memory
     free(I_);

@@ -31,7 +31,7 @@ public:
   // monocular-specific parameters (mandatory: height,pitch)
   struct parameters : public VisualOdometry::parameters {
     double                      height;           // camera height above ground (meters)
-    double                      pitch;            // camera pitch (rad, neg=pointing down)
+    double                      pitch;            // camera pitch (rad, negative=pointing down)
     int32_t                     ransac_iters;     // number of RANSAC iterations
     double                      inlier_threshold; // fundamental matrix inlier threshold
     double                      motion_threshold; // directly return false on small motions

@@ -4,8 +4,8 @@ clear all; close all; dbstop error;
 
 % parameter settings (for an example, please download
 % sequence '2010_03_09_drive_0019' from www.cvlibs.net)
-%img_dir      = '/home/geiger/5_Data/karlsruhe_dataset/2011_stereo/2010_03_09_drive_0019';
-img_dir     = 'C:\Users\geiger\Desktop\2010_03_09_drive_0019';
+img_dir      = '/home/geiger/5_Data/karlsruhe_dataset/2011_stereo/2010_03_09_drive_0019';
+%img_dir     = 'C:\Users\geiger\Desktop\2010_03_09_drive_0019';
 param.f      = 645.2;
 param.cu     = 635.9;
 param.cv     = 194.1;
@@ -30,18 +30,32 @@ set(gca,'YTick',-500:10:500);
 axis equal, grid on, hold on;
 
 % for all frames do
+replace = 0;
 for frame=first_frame:last_frame
   
-  % 1-index
+  % 1-based index
   k = frame-first_frame+1;
   
   % read current images
   I = imread([img_dir '/I1_' num2str(frame,'%06d') '.png']);
 
-  % compute and accumulate egomotion
-  Tr = visualOdometryMonoMex('process',I);
+  % compute egomotion
+  Tr = visualOdometryMonoMex('process',I,replace);
+  
+  % accumulate egomotion, starting with second frame
   if k>1
-    Tr_total{k} = Tr_total{k-1}*inv(Tr);
+    
+    % if motion estimate failed: set replace "current frame" to "yes"
+    % this will cause the "last frame" in the ring buffer unchanged
+    if isempty(Tr)
+      replace = 1;
+      Tr_total{k} = Tr_total{k-1};
+      
+    % on success: update total motion (=pose)
+    else
+      replace = 0;
+      Tr_total{k} = Tr_total{k-1}*inv(Tr);
+    end
   end
 
   % update image
