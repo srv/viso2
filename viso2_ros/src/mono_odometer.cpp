@@ -33,12 +33,9 @@ public:
     ros::NodeHandle local_nh("~");
     odometry_params::loadParams(local_nh, visual_odometer_params_);
 
-    int queue_size;
-    local_nh.param("queue_size", queue_size, 1);
-
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
-    camera_sub_ = it.subscribeCamera("image", queue_size, &MonoOdometer::imageCallback, this, transport);
+    camera_sub_ = it.subscribeCamera("image", 1, &MonoOdometer::imageCallback, this, transport);
   }
 
 protected:
