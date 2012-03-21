@@ -20,12 +20,9 @@ private:
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
   VisualOdometryStereo::parameters visual_odometer_params_;
 
-  bool replace_;
-
-
 public:
 
-  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase(), replace_(false)
+  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase()
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
@@ -102,17 +99,18 @@ protected:
     }
     else
     {
-      if(visual_odometer_->process(l_image_data, r_image_data, dims, replace_))
+      if (visual_odometer_->process(l_image_data, r_image_data, dims))
       {
-        replace_ = false;
         Matrix camera_motion = visual_odometer_->getMotion();
+        ROS_DEBUG("Found %i matches with %i inliers.", 
+                  visual_odometer_->getNumberOfMatches(),
+                  visual_odometer_->getNumberOfInliers());
+        ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << camera_motion);
+
         btMatrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
-
-        ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << camera_motion);
-
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
 
@@ -120,8 +118,8 @@ protected:
       }
       else
       {
-        ROS_DEBUG("Call to VisualOdometryStereo::process() failed. Assuming motion too small.");
-        replace_ = true;
+        ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
+        ROS_WARN_THROTTLE(1.0, "Visual Odometer got lost!");
       }
     }
   }
