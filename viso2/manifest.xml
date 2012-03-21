@@ -20,7 +20,7 @@
   <url>http://ros.org/wiki/viso2</url>
 
   <export>
-    <cpp cflags="-I${prefix}/libviso2/src/" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2"/>
+    <cpp cflags="-msse3 -I${prefix}/libviso2/src/" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2"/>
   </export>
 
 </package>

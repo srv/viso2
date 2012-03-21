@@ -21,9 +21,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
-# use sse3 instruction set
-SET(CMAKE_CXX_FLAGS "-msse3")
-
 rosbuild_add_executable(stereo_odometer
   src/stereo_odometer.cpp)
 
