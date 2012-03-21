@@ -59,7 +59,7 @@ protected:
       visual_odometer_params_.calib.cv = model.cy();
       visual_odometer_.reset(new VisualOdometryMono(visual_odometer_params_));
       setSensorFrameId(image_msg->header.frame_id);
-      ROS_INFO_STREAM("[mono_odometer]: Initialized libviso2 mono odometry "
+      ROS_INFO_STREAM("Initialized libviso2 mono odometry "
                       "with the following parameters:" << std::endl << 
                       visual_odometer_params_);
     }
@@ -106,7 +106,7 @@ protected:
       }
       else
       {
-        ROS_DEBUG("[mono_odometer]: Call to VisualOdometryMono::process() failed. Assuming motion too small.");
+        ROS_DEBUG("Call to VisualOdometryMono::process() failed. Assuming motion too small.");
         replace_ = true;
       }
     }

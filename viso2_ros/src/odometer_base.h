@@ -52,6 +52,11 @@ public:
     local_nh.param("origin_frame_id", origin_frame_id_, std::string("/visual_odom"));
     local_nh.param("base_frame_id", base_frame_id_, std::string("/base_link"));
     local_nh.param("publish_tf", publish_tf_, true);
+
+    ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
+                    "  origin_frame_id = " << origin_frame_id_ << std::endl <<
+                    "  base_frame_id   = " << base_frame_id_ << std::endl <<
+                    "  publish_tf      = " << (publish_tf_?"true":"false"));
     
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);

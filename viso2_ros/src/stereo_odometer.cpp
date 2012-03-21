@@ -56,7 +56,7 @@ protected:
       visual_odometer_params_.calib.cv = model.left().cy();
       visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
       setSensorFrameId(l_info_msg->header.frame_id);
-      ROS_INFO_STREAM("[stereo_odometer]: Initialized libviso2 stereo odometry "
+      ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
                       "with the following parameters:" << std::endl << 
                       visual_odometer_params_);
     }
@@ -111,7 +111,7 @@ protected:
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
 
-        ROS_DEBUG_STREAM("[stereo_odometer]: libviso2 returned the following motion:\n" << camera_motion);
+        ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << camera_motion);
 
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
@@ -120,7 +120,7 @@ protected:
       }
       else
       {
-        ROS_DEBUG("[stereo_odometer]: Call to VisualOdometryStereo::process() failed. Assuming motion too small.");
+        ROS_DEBUG("Call to VisualOdometryStereo::process() failed. Assuming motion too small.");
         replace_ = true;
       }
     }
