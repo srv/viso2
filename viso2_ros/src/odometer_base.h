@@ -91,20 +91,21 @@ protected:
 
     // transform integrated pose to base frame
     tf::StampedTransform base_to_sensor;
-    try
+    std::string error_msg;
+    if (tf_listener_.canTransform(base_frame_id_, sensor_frame_id_, ros::Time(0), &error_msg))
     {
       tf_listener_.lookupTransform(
           base_frame_id_,
           sensor_frame_id_,
           ros::Time(0), base_to_sensor);
     }
-    catch (tf::TransformException& ex)
+    else
     {
-      ROS_WARN("TransformException: %s", ex.what());
       ROS_WARN("The tf from '%s' to '%s' does not seem to be available, "
                 "will assume it as identity!", 
                 base_frame_id_.c_str(),
                 sensor_frame_id_.c_str());
+      ROS_DEBUG("Transform error: %s", error_msg.c_str());
       base_to_sensor.setIdentity();
     }
 
