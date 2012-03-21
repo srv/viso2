@@ -56,6 +56,9 @@ protected:
       visual_odometer_params_.calib.cv = model.left().cy();
       visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
       setSensorFrameId(l_info_msg->header.frame_id);
+      ROS_INFO_STREAM("[stereo_odometer]: Initialized libviso2 stereo odometry "
+                      "with the following parameters:" << std::endl << 
+                      visual_odometer_params_);
     }
 
     // convert images if necessary
@@ -108,6 +111,8 @@ protected:
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
 
+        ROS_DEBUG_STREAM("[stereo_odometer]: libviso2 returned the following motion:\n" << camera_motion);
+
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
 
@@ -130,7 +135,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "stereo_odometer");
   if (ros::names::remap("stereo") == "stereo") {
     ROS_WARN("'stereo' has not been remapped! Example command-line usage:\n"
-             "\t$ rosrun viso2 stereo_odometer stereo:=narrow_stereo image:=image_rect");
+             "\t$ rosrun viso2_ros stereo_odometer stereo:=narrow_stereo image:=image_rect");
   }
   if (ros::names::remap("image").find("rect") == std::string::npos) {
     ROS_WARN("stereo_odometer needs rectified input images. The used image "
