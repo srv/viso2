@@ -116,7 +116,7 @@ protected:
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
 
-        update(delta_transform, l_image_msg->header.stamp);
+        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
       }
       else
       {

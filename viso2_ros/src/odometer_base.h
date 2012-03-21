@@ -80,7 +80,7 @@ protected:
     twist_covariance_ = twist_covariance;
   }
 
-  void update(const tf::Transform& delta_transform, const ros::Time& timestamp)
+  void integrateAndPublish(const tf::Transform& delta_transform, const ros::Time& timestamp)
   {
     if (sensor_frame_id_.empty())
     {
