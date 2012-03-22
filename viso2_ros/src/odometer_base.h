@@ -27,8 +27,8 @@ private:
 
   // tf related
   std::string sensor_frame_id_;
-  std::string origin_frame_id_;
-  std::string base_frame_id_;
+  std::string odom_frame_id_;
+  std::string base_link_frame_id_;
   bool publish_tf_;
   tf::TransformListener tf_listener_;
   tf::TransformBroadcaster tf_broadcaster_;
@@ -49,14 +49,14 @@ public:
     // Read local parameters
     ros::NodeHandle local_nh("~");
 
-    local_nh.param("origin_frame_id", origin_frame_id_, std::string("/visual_odom"));
-    local_nh.param("base_frame_id", base_frame_id_, std::string("/base_link"));
+    local_nh.param("odom_frame_id", odom_frame_id_, std::string("/odom"));
+    local_nh.param("base_link_frame_id", base_link_frame_id_, std::string("/base_link"));
     local_nh.param("publish_tf", publish_tf_, true);
 
     ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
-                    "  origin_frame_id = " << origin_frame_id_ << std::endl <<
-                    "  base_frame_id   = " << base_frame_id_ << std::endl <<
-                    "  publish_tf      = " << (publish_tf_?"true":"false"));
+                    "  odom_frame_id      = " << odom_frame_id_ << std::endl <<
+                    "  base_link_frame_id = " << base_link_frame_id_ << std::endl <<
+                    "  publish_tf         = " << (publish_tf_?"true":"false"));
     
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
@@ -97,19 +97,19 @@ protected:
     // transform integrated pose to base frame
     tf::StampedTransform base_to_sensor;
     std::string error_msg;
-    if (tf_listener_.canTransform(base_frame_id_, sensor_frame_id_, ros::Time(0), &error_msg))
+    if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, ros::Time(0), &error_msg))
     {
       tf_listener_.lookupTransform(
-          base_frame_id_,
+          base_link_frame_id_,
           sensor_frame_id_,
           ros::Time(0), base_to_sensor);
     }
     else
     {
-      ROS_WARN("The tf from '%s' to '%s' does not seem to be available, "
-                "will assume it as identity!", 
-                base_frame_id_.c_str(),
-                sensor_frame_id_.c_str());
+      ROS_WARN_THROTTLE(10.0, "The tf from '%s' to '%s' does not seem to be available, "
+                              "will assume it as identity!", 
+                              base_link_frame_id_.c_str(),
+                              sensor_frame_id_.c_str());
       ROS_DEBUG("Transform error: %s", error_msg.c_str());
       base_to_sensor.setIdentity();
     }
@@ -118,8 +118,8 @@ protected:
 
     nav_msgs::Odometry odometry_msg;
     odometry_msg.header.stamp = timestamp;
-    odometry_msg.header.frame_id = origin_frame_id_;
-    odometry_msg.child_frame_id = base_frame_id_;
+    odometry_msg.header.frame_id = odom_frame_id_;
+    odometry_msg.child_frame_id = base_link_frame_id_;
     tf::poseTFToMsg(base_transform, odometry_msg.pose.pose);
 
     // calculate twist (not possible for first run as no delta_t can be computed)
@@ -157,7 +157,7 @@ protected:
     {
       tf_broadcaster_.sendTransform(
           tf::StampedTransform(base_transform, timestamp,
-          origin_frame_id_, base_frame_id_));
+          odom_frame_id_, base_link_frame_id_));
     }
 
     last_update_time_ = timestamp;
