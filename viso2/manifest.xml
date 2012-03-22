@@ -1,13 +1,11 @@
 <package>
   <description brief="ROS-Package for libviso2, library for visual odometry.">
 
-    ROS-Package for libviso2, a library for visual odometry created by Andeas Geiger
+    This is a ROS-Package for libviso2, a library for visual odometry created by Andeas Geiger
     from the Institute of Measurement and Control Systems at Karlsruhe Institute of Technology.
 
     Apart from the original libviso2 sources, this package contains
     a CMakeFile for easier integration into the ROS build system.
-
-    See the viso2_ros package for ros nodes that wrap this library.
 
     Please note that this code is licensed under GPL. For a commercial usage, please
     contact Andreas Geiger directly (see
@@ -18,6 +16,8 @@
   <license>GPL</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/viso2</url>
+
+  <versioncontrol type="git" url="git://github.com/srv/srv_vision.git"/>
 
   <export>
     <cpp cflags="-msse3 -I${prefix}/libviso2/src/" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2"/>

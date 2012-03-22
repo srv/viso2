@@ -6,6 +6,7 @@
   <license>GPL</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/viso2_ros</url>
+  <versioncontrol type="git" url="git://github.com/srv/srv_vision.git"/>
 
   <depend package="viso2"/>
   <depend package="roscpp"/>

@@ -6,6 +6,9 @@
   <license>GPL, LGPL, BSD</license>  
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/srv_vision</url>
+
+  <versioncontrol type="git" url="git://github.com/srv/srv_vision.git"/>
+
   <depend stack="ros" />
 
 </stack>
