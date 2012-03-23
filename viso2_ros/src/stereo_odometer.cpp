@@ -101,7 +101,7 @@ protected:
     {
       if (visual_odometer_->process(l_image_data, r_image_data, dims))
       {
-        Matrix camera_motion = visual_odometer_->getMotion();
+        Matrix camera_motion = Matrix::inv(visual_odometer_->getMotion());
         ROS_DEBUG("Found %i matches with %i inliers.", 
                   visual_odometer_->getNumberOfMatches(),
                   visual_odometer_->getNumberOfInliers());

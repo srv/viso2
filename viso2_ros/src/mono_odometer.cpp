@@ -93,7 +93,7 @@ protected:
       if(visual_odometer_->process(image_data, dims))
       {
         replace_ = false;
-        Matrix camera_motion = visual_odometer_->getMotion();
+        Matrix camera_motion = Matrix::inv(visual_odometer_->getMotion());
         ROS_DEBUG("Found %i matches with %i inliers.", 
                   visual_odometer_->getNumberOfMatches(),
                   visual_odometer_->getNumberOfInliers());
