@@ -2,6 +2,8 @@
 #include <sensor_msgs/image_encodings.h>
 #include <image_geometry/stereo_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
+#include <pcl_ros/point_cloud.h>
+#include <pcl/point_types.h>
 
 #include <viso_stereo.h>
 
@@ -20,13 +22,19 @@ private:
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
   VisualOdometryStereo::parameters visual_odometer_params_;
 
+  ros::Publisher point_cloud_pub_;
+
 public:
+
+  typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
   StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase()
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
     odometry_params::loadParams(local_nh, visual_odometer_params_);
+
+    point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
   }
 
 protected:
@@ -115,6 +123,11 @@ protected:
         tf::Transform delta_transform(rot_mat, t);
 
         integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+        if (point_cloud_pub_.getNumSubscribers() > 0)
+        {
+          computeAndPublishPointCloud(l_info_msg, r_info_msg, visual_odometer_->getMatches());
+        }
       }
       else
       {
@@ -122,6 +135,35 @@ protected:
         ROS_WARN_THROTTLE(1.0, "Visual Odometer got lost!");
       }
     }
+  }
+
+  void computeAndPublishPointCloud(
+      const sensor_msgs::CameraInfoConstPtr& l_info_msg,
+      const sensor_msgs::CameraInfoConstPtr& r_info_msg, 
+      const std::vector<Matcher::p_match>& matches)
+  {
+    // read calibration info from camera info message
+    image_geometry::StereoCameraModel model;
+    model.fromCameraInfo(*l_info_msg, *r_info_msg);
+    PointCloud::Ptr point_cloud(new PointCloud());
+    point_cloud->header.frame_id = l_info_msg->header.frame_id;
+    point_cloud->header.stamp = l_info_msg->header.stamp;
+    point_cloud->width = 1;
+    point_cloud->height = matches.size();
+    point_cloud->points.resize(matches.size());
+    for (size_t i = 0; i < matches.size(); ++i)
+    {
+      cv::Point2d left_uv;
+      left_uv.x = matches[i].u1c; left_uv.y = matches[i].v1c;
+      cv::Point3d point;
+      double disparity = matches[i].u1c - matches[i].u2c;
+      model.projectDisparityTo3d(left_uv, disparity, point);
+      point_cloud->points[i].x = point.x;
+      point_cloud->points[i].y = point.y;
+      point_cloud->points[i].z = point.z;
+    }
+    ROS_DEBUG("Publishing point cloud with %zu points.", point_cloud->size());
+    point_cloud_pub_.publish(point_cloud);
   }
 };
 
