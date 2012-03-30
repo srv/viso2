@@ -74,9 +74,9 @@ private:
                "\t* stereo_image_proc is not running.\n"
                "\t  Does `rosnode info %s` show any connections?\n"
                "\t* The cameras are not synchronized.\n"
-               "\t  Try restarting stereo_odometer with parameter _approximate_sync:=True\n"
+               "\t  Try restarting the node with parameter _approximate_sync:=True\n"
                "\t* The network is too slow. One or more images are dropped from each tuple.\n"
-               "\t  Try restarting stereo_odometer, increasing parameter 'queue_size' (currently %d)",
+               "\t  Try restarting the node, increasing parameter 'queue_size' (currently %d)",
                left_received_, left_sub_.getTopic().c_str(),
                right_received_, right_sub_.getTopic().c_str(),
                left_info_received_, left_info_sub_.getTopic().c_str(),
