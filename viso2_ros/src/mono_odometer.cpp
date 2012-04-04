@@ -112,6 +112,9 @@ protected:
       {
         ROS_DEBUG("Call to VisualOdometryMono::process() failed. Assuming motion too small.");
         replace_ = true;
+        tf::Transform delta_transform;
+        delta_transform.setIdentity();
+        integrateAndPublish(delta_transform, image_msg->header.stamp);
       }
     }
   }
