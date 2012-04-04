@@ -14,6 +14,30 @@
 namespace viso2_ros
 {
 
+// some arbitrary values (0.1m linear cov. 10deg. angular cov.)
+static const boost::array<double, 36> STANDARD_POSE_COVARIANCE =
+{ { 0.1, 0, 0, 0, 0, 0,
+    0, 0.1, 0, 0, 0, 0,
+    0, 0, 0.1, 0, 0, 0,
+    0, 0, 0, 0.17, 0, 0,
+    0, 0, 0, 0, 0.17, 0,
+    0, 0, 0, 0, 0, 0.17 } };
+static const boost::array<double, 36> STANDARD_TWIST_COVARIANCE =
+{ { 0.05, 0, 0, 0, 0, 0,
+    0, 0.05, 0, 0, 0, 0,
+    0, 0, 0.05, 0, 0, 0,
+    0, 0, 0, 0.09, 0, 0,
+    0, 0, 0, 0, 0.09, 0,
+    0, 0, 0, 0, 0, 0.09 } };
+static const boost::array<double, 36> BAD_COVARIANCE =
+{ { 9999, 0, 0, 0, 0, 0,
+    0, 9999, 0, 0, 0, 0,
+    0, 0, 9999, 0, 0, 0,
+    0, 0, 0, 9999, 0, 0,
+    0, 0, 0, 0, 9999, 0,
+    0, 0, 0, 0, 0, 9999 } };
+
+
 class StereoOdometer : public StereoProcessor, public OdometerBase
 {
 
@@ -122,6 +146,9 @@ protected:
         btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
 
+        setPoseCovariance(STANDARD_POSE_COVARIANCE);
+        setTwistCovariance(STANDARD_TWIST_COVARIANCE);
+
         integrateAndPublish(delta_transform, l_image_msg->header.stamp);
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
@@ -131,6 +158,12 @@ protected:
       }
       else
       {
+        setPoseCovariance(BAD_COVARIANCE);
+        setTwistCovariance(BAD_COVARIANCE);
+        tf::Transform delta_transform;
+        delta_transform.setIdentity();
+        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
         ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
         ROS_WARN_THROTTLE(1.0, "Visual Odometer got lost!");
       }
