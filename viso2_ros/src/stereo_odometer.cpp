@@ -50,7 +50,7 @@ private:
 
 public:
 
-  typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
+  typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud; //MMC
 
   StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase()
   {
@@ -153,7 +153,7 @@ protected:
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
         {
-          computeAndPublishPointCloud(l_info_msg, r_info_msg, visual_odometer_->getMatches());
+          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg, visual_odometer_->getMatches()); //MMC
         }
       }
       else
@@ -172,6 +172,7 @@ protected:
 
   void computeAndPublishPointCloud(
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
+      const sensor_msgs::ImageConstPtr& l_image_msg,  //MMC
       const sensor_msgs::CameraInfoConstPtr& r_info_msg, 
       const std::vector<Matcher::p_match>& matches)
   {
@@ -187,13 +188,31 @@ protected:
     for (size_t i = 0; i < matches.size(); ++i)
     {
       cv::Point2d left_uv;
-      left_uv.x = matches[i].u1c; left_uv.y = matches[i].v1c;
+      left_uv.x = matches[i].u1c;
+      left_uv.y = matches[i].v1c;
       cv::Point3d point;
       double disparity = matches[i].u1c - matches[i].u2c;
       model.projectDisparityTo3d(left_uv, disparity, point);
       point_cloud->points[i].x = point.x;
       point_cloud->points[i].y = point.y;
       point_cloud->points[i].z = point.z;
+      //MMC new data
+
+      try
+      {
+        cv_bridge::CvImageConstPtr cv_ptr;
+        cv_ptr = cv_bridge::toCvShare(l_image_msg, sensor_msgs::image_encodings::RGB8);
+        cv::Vec3b colors = cv_ptr->image.at<cv::Vec3b>(left_uv.y,left_uv.x);
+        point_cloud->points[i].r = colors[0];
+        point_cloud->points[i].g = colors[1];
+        point_cloud->points[i].b = colors[2];
+      }
+      catch (cv_bridge::Exception& e)
+      {
+        ROS_ERROR("cv_bridge exception: %s", e.what());
+      }
+
+      //MMC fnew data
     }
     ROS_DEBUG("Publishing point cloud with %zu points.", point_cloud->size());
     point_cloud_pub_.publish(point_cloud);
