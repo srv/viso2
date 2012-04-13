@@ -135,10 +135,10 @@ protected:
       odometry_msg.twist.twist.linear.x = delta_base_transform.getOrigin().getX() / delta_t;
       odometry_msg.twist.twist.linear.y = delta_base_transform.getOrigin().getY() / delta_t;
       odometry_msg.twist.twist.linear.z = delta_base_transform.getOrigin().getZ() / delta_t;
-      btQuaternion delta_rot = delta_base_transform.getRotation();
+      tf::Quaternion delta_rot = delta_base_transform.getRotation();
       btScalar angle = delta_rot.getAngle();
-      btVector3 axis = delta_rot.getAxis();
-      btVector3 angular_twist = axis * angle / delta_t;
+      tf::Vector3 axis = delta_rot.getAxis();
+      tf::Vector3 angular_twist = axis * angle / delta_t;
       odometry_msg.twist.twist.angular.x = angular_twist.x();
       odometry_msg.twist.twist.angular.y = angular_twist.y();
       odometry_msg.twist.twist.angular.z = angular_twist.z();
