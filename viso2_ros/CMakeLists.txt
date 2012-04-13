@@ -11,6 +11,10 @@ include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
 
 rosbuild_init()
 
+rosbuild_add_boost_directories()
+
+find_package(OpenCV)
+
 #set the default path for built executables to the "bin" directory
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 #set the default path for built libraries to the "lib" directory
@@ -27,7 +31,9 @@ rosbuild_add_executable(stereo_odometer
 rosbuild_add_executable(mono_odometer
   src/mono_odometer.cpp)
 
-#target_link_libraries(${PROJECT_NAME} another_library)
+target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES})
+rosbuild_link_boost(stereo_odometer signals)
+target_link_libraries(mono_odometer ${OpenCV_LIBRARIES})
 #rosbuild_add_boost_directories()
 #rosbuild_link_boost(${PROJECT_NAME} thread)
 #rosbuild_add_executable(example examples/example.cpp)
