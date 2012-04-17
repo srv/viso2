@@ -153,7 +153,7 @@ protected:
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
         {
-          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg, visual_odometer_->getMatches());
+          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg, visual_odometer_->getMatches(), visual_odometer_->getInlierIndices());
         }
       }
       else
@@ -174,7 +174,8 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::ImageConstPtr& l_image_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg, 
-      const std::vector<Matcher::p_match>& matches)
+      const std::vector<Matcher::p_match>& matches,
+      const std::vector<int32_t>& inlier_indices)
   {
     try
     {
@@ -187,21 +188,21 @@ protected:
       point_cloud->header.frame_id = l_info_msg->header.frame_id;
       point_cloud->header.stamp = l_info_msg->header.stamp;
       point_cloud->width = 1;
-      point_cloud->height = matches.size();
-      point_cloud->points.resize(matches.size());
+      point_cloud->height = inlier_indices.size();
+      point_cloud->points.resize(inlier_indices.size());
 
-      for (size_t i = 0; i < matches.size(); ++i)
+      for (size_t i = 0; i < inlier_indices.size(); ++i)
       {
+        const Matcher::p_match& match = matches[inlier_indices[i]];
         cv::Point2d left_uv;
-        left_uv.x = matches[i].u1c;
-        left_uv.y = matches[i].v1c;
+        left_uv.x = match.u1c;
+        left_uv.y = match.v1c;
         cv::Point3d point;
-        double disparity = matches[i].u1c - matches[i].u2c;
+        double disparity = match.u1c - match.u2c;
         model.projectDisparityTo3d(left_uv, disparity, point);
         point_cloud->points[i].x = point.x;
         point_cloud->points[i].y = point.y;
         point_cloud->points[i].z = point.z;
-        //MMC new data
         cv::Vec3b colors = cv_ptr->image.at<cv::Vec3b>(left_uv.y,left_uv.x);
         point_cloud->points[i].r = colors[0];
         point_cloud->points[i].g = colors[1];
