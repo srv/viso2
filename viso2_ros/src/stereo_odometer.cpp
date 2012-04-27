@@ -125,17 +125,17 @@ protected:
 
     // run the odometer
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
-    // on first run or when odometer got lost, only feed the odometer with first image pair without
+    // on first run or when odometer got lost, only feed the odometer with image pair without
     // retrieving data
     if (first_run || got_lost_)
     {
       visual_odometer_->process(l_image_data, r_image_data, dims);
+      got_lost_ = false;
     }
     else
     {
       if (visual_odometer_->process(l_image_data, r_image_data, dims))
       {
-        got_lost_ = false;
         Matrix camera_motion = Matrix::inv(visual_odometer_->getMotion());
         ROS_DEBUG("Found %i matches with %i inliers.", 
                   visual_odometer_->getNumberOfMatches(),
