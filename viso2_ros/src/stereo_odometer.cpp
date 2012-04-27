@@ -48,11 +48,13 @@ private:
 
   ros::Publisher point_cloud_pub_;
 
+  bool got_lost_;
+
 public:
 
   typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
 
-  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase()
+  StereoOdometer(const std::string& transport) : StereoProcessor(transport), OdometerBase(), got_lost_(false)
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
@@ -123,9 +125,9 @@ protected:
 
     // run the odometer
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
-    // on first run, only feed the odometer with first image pair without
+    // on first run or when odometer got lost, only feed the odometer with first image pair without
     // retrieving data
-    if (first_run)
+    if (first_run || got_lost_)
     {
       visual_odometer_->process(l_image_data, r_image_data, dims);
     }
@@ -133,6 +135,7 @@ protected:
     {
       if (visual_odometer_->process(l_image_data, r_image_data, dims))
       {
+        got_lost_ = false;
         Matrix camera_motion = Matrix::inv(visual_odometer_->getMotion());
         ROS_DEBUG("Found %i matches with %i inliers.", 
                   visual_odometer_->getNumberOfMatches(),
@@ -166,6 +169,7 @@ protected:
 
         ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
         ROS_WARN_THROTTLE(1.0, "Visual Odometer got lost!");
+        got_lost_ = true;
       }
     }
   }
