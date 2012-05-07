@@ -86,7 +86,7 @@ protected:
       visual_odometer_params_.calib.cu = model.left().cx();
       visual_odometer_params_.calib.cv = model.left().cy();
       visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
-      setSensorFrameId(l_info_msg->header.frame_id);
+      if (l_info_msg->header.frame_id != "") setSensorFrameId(l_info_msg->header.frame_id);
       ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
                       "with the following parameters:" << std::endl << 
                       visual_odometer_params_);

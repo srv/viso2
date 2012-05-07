@@ -52,6 +52,7 @@ public:
     local_nh.param("odom_frame_id", odom_frame_id_, std::string("/odom"));
     local_nh.param("base_link_frame_id", base_link_frame_id_, std::string("/base_link"));
     local_nh.param("publish_tf", publish_tf_, true);
+    local_nh.param("sensor_frame_id", sensor_frame_id_, std::string(""));
 
     ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
                     "  odom_frame_id      = " << odom_frame_id_ << std::endl <<
