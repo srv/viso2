@@ -51,6 +51,7 @@ public:
 
     local_nh.param("odom_frame_id", odom_frame_id_, std::string("/odom"));
     local_nh.param("base_link_frame_id", base_link_frame_id_, std::string("/base_link"));
+    local_nh.param("sensor_frame_id", sensor_frame_id_, std::string("/camera"));
     local_nh.param("publish_tf", publish_tf_, true);
 
     ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
@@ -132,16 +133,19 @@ protected:
     else
     {
       double delta_t = (timestamp - last_update_time_).toSec();
-      odometry_msg.twist.twist.linear.x = delta_base_transform.getOrigin().getX() / delta_t;
-      odometry_msg.twist.twist.linear.y = delta_base_transform.getOrigin().getY() / delta_t;
-      odometry_msg.twist.twist.linear.z = delta_base_transform.getOrigin().getZ() / delta_t;
-      tf::Quaternion delta_rot = delta_base_transform.getRotation();
-      btScalar angle = delta_rot.getAngle();
-      tf::Vector3 axis = delta_rot.getAxis();
-      tf::Vector3 angular_twist = axis * angle / delta_t;
-      odometry_msg.twist.twist.angular.x = angular_twist.x();
-      odometry_msg.twist.twist.angular.y = angular_twist.y();
-      odometry_msg.twist.twist.angular.z = angular_twist.z();
+      if (delta_t)
+      {
+        odometry_msg.twist.twist.linear.x = delta_base_transform.getOrigin().getX() / delta_t;
+        odometry_msg.twist.twist.linear.y = delta_base_transform.getOrigin().getY() / delta_t;
+        odometry_msg.twist.twist.linear.z = delta_base_transform.getOrigin().getZ() / delta_t;
+        tf::Quaternion delta_rot = delta_base_transform.getRotation();
+        btScalar angle = delta_rot.getAngle();
+        tf::Vector3 axis = delta_rot.getAxis();
+        tf::Vector3 angular_twist = axis * angle / delta_t;
+        odometry_msg.twist.twist.angular.x = angular_twist.x();
+        odometry_msg.twist.twist.angular.y = angular_twist.y();
+        odometry_msg.twist.twist.angular.z = angular_twist.z();
+      }
     }
 
     odometry_msg.pose.covariance = pose_covariance_;

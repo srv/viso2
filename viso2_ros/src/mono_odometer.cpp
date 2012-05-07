@@ -58,7 +58,7 @@ protected:
       visual_odometer_params_.calib.cu = model.cx();
       visual_odometer_params_.calib.cv = model.cy();
       visual_odometer_.reset(new VisualOdometryMono(visual_odometer_params_));
-      setSensorFrameId(image_msg->header.frame_id);
+      if (image_msg->header.frame_id != "") setSensorFrameId(image_msg->header.frame_id);
       ROS_INFO_STREAM("Initialized libviso2 mono odometry "
                       "with the following parameters:" << std::endl << 
                       visual_odometer_params_);
