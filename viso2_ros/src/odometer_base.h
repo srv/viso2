@@ -76,6 +76,11 @@ protected:
     sensor_frame_id_ = frame_id;
   }
 
+  std::string getSensorFrameId() const
+  {
+    return sensor_frame_id_;
+  }
+
   void setPoseCovariance(const boost::array<double, 36>& pose_covariance)
   {
     pose_covariance_ = pose_covariance;

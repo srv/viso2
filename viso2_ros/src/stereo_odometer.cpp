@@ -189,7 +189,7 @@ protected:
       image_geometry::StereoCameraModel model;
       model.fromCameraInfo(*l_info_msg, *r_info_msg);
       PointCloud::Ptr point_cloud(new PointCloud());
-      point_cloud->header.frame_id = l_info_msg->header.frame_id;
+      point_cloud->header.frame_id = getSensorFrameId();
       point_cloud->header.stamp = l_info_msg->header.stamp;
       point_cloud->width = 1;
       point_cloud->height = inlier_indices.size();
