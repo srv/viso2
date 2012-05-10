@@ -130,12 +130,7 @@ protected:
 
     // calculate twist (not possible for first run as no delta_t can be computed)
     tf::Transform delta_base_transform = base_to_sensor * delta_transform * base_to_sensor.inverse();
-    static bool first_run = true;
-    if (first_run)
-    {
-      first_run = false;
-    }
-    else
+    if (!last_update_time_.isZero())
     {
       double delta_t = (timestamp - last_update_time_).toSec();
       if (delta_t)
