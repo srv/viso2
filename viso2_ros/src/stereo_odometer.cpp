@@ -207,10 +207,10 @@ protected:
         point_cloud->points[i].x = point.x;
         point_cloud->points[i].y = point.y;
         point_cloud->points[i].z = point.z;
-        cv::Vec3b colors = cv_ptr->image.at<cv::Vec3b>(left_uv.y,left_uv.x);
-        point_cloud->points[i].r = colors[0];
-        point_cloud->points[i].g = colors[1];
-        point_cloud->points[i].b = colors[2];
+        cv::Vec3b color = cv_ptr->image.at<cv::Vec3b>(left_uv.y,left_uv.x);
+        point_cloud->points[i].r = color[0];
+        point_cloud->points[i].g = color[1];
+        point_cloud->points[i].b = color[2];
       }
       ROS_DEBUG("Publishing point cloud with %zu points.", point_cloud->size());
       point_cloud_pub_.publish(point_cloud);
