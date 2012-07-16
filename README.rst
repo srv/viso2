@@ -1,4 +1,4 @@
-srv_vision
+viso2
 ==========
-ROS Stack with computer vision algorithms. See 
-http://www.ros.org/wiki/srv_vision for the list of contained packages.
+ROS Stack containing a wrapper for libviso2, a visual odometry library. 
+http://www.ros.org/wiki/viso2 for the list of contained packages.
