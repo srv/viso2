@@ -15,9 +15,9 @@
   <author>Andreas Geiger/geiger@kit.edu, maintained by: Stephan Wirth/stephan.wirth@uib.es</author>
   <license>GPL</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/viso2</url>
+  <url>http://ros.org/wiki/libviso2</url>
 
-  <versioncontrol type="git" url="git://github.com/srv/srv_vision.git"/>
+  <versioncontrol type="git" url="git://github.com/srv/viso2.git"/>
 
   <export>
     <cpp cflags="-msse3 -I${prefix}/libviso2/src/" lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2"/>

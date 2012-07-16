@@ -1,13 +1,14 @@
 <stack>
-  <description brief="srv_vision">Computer Vision algorithms, 
-    developed and/or maintained by the Systems, Robotics and Vision group of the 
+  <description brief="viso2">
+    A ROS-Wrapper for libviso2, a library for visual odometry, 
+    maintained by the Systems, Robotics and Vision group of the 
     University of the Balearic Islands, Spain. http://srv.uib.es </description>
   <author>Maintained by Stephan Wirth</author>
-  <license>GPL, LGPL, BSD</license>  
+  <license>GPL</license>  
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/srv_vision</url>
+  <url>http://ros.org/wiki/viso2</url>
 
-  <versioncontrol type="git" url="git://github.com/srv/srv_vision.git"/>
+  <versioncontrol type="git" url="git://github.com/srv/viso2.git"/>
 
   <depend stack="ros" />
 
