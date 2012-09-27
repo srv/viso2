@@ -4,6 +4,7 @@
 
 #include <ros/ros.h>
 #include <nav_msgs/Odometry.h>
+#include <std_srvs/Empty.h>
 
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
@@ -24,6 +25,8 @@ private:
   // publisher
   ros::Publisher odom_pub_;
   ros::Publisher pose_pub_;
+
+  ros::ServiceServer reset_service_;
 
   // tf related
   std::string sensor_frame_id_;
@@ -62,6 +65,8 @@ public:
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
     pose_pub_ = local_nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
+
+    reset_service_ = local_nh.advertiseService("reset_pose", &OdometerBase::resetPose, this);
 
     integrated_pose_.setIdentity();
 
@@ -167,6 +172,13 @@ protected:
     }
 
     last_update_time_ = timestamp;
+  }
+
+
+  bool resetPose(std_srvs::Empty::Request&, std_srvs::Empty::Response&)
+  {
+    integrated_pose_.setIdentity();
+    return true;
   }
 
 };
