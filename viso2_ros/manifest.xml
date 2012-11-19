@@ -18,6 +18,7 @@
   <depend package="image_geometry"/>
   <depend package="tf"/>
   <depend package="pcl_ros"/>
+  <depend package="std_srvs"/>
 
 </package>
 
