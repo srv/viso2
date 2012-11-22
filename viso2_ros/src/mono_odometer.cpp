@@ -87,6 +87,9 @@ protected:
     if (first_run)
     {
       visual_odometer_->process(image_data, dims);
+      tf::Transform delta_transform;
+      delta_transform.setIdentity();
+      integrateAndPublish(delta_transform, image_msg->header.stamp);
     }
     else
     {

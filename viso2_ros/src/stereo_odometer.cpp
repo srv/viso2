@@ -136,6 +136,13 @@ protected:
     {
       visual_odometer_->process(l_image_data, r_image_data, dims);
       got_lost_ = false;
+      // on first run publish zero once
+      if (first_run)
+      {
+        tf::Transform delta_transform;
+        delta_transform.setIdentity();
+        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+      }
     }
     else
     {
