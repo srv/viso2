@@ -103,17 +103,23 @@ protected:
       ROS_ERROR("[odometer] update called with unknown sensor frame id!");
       return;
     }
+    if (timestamp < last_update_time_)
+    {
+      ROS_WARN("[odometer] saw negative time change in incoming sensor data, resetting pose.");
+      integrated_pose_.setIdentity();
+      tf_listener_.clear();
+    }
     integrated_pose_ *= delta_transform;
 
     // transform integrated pose to base frame
     tf::StampedTransform base_to_sensor;
     std::string error_msg;
-    if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, ros::Time(0), &error_msg))
+    if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, timestamp, &error_msg))
     {
       tf_listener_.lookupTransform(
           base_link_frame_id_,
           sensor_frame_id_,
-          ros::Time(0), base_to_sensor);
+          timestamp, base_to_sensor);
     }
     else
     {
