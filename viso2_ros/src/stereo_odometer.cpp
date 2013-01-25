@@ -178,11 +178,11 @@ protected:
             << ", marking last motion as " 
             << (last_motion_small_ ? "small." : "normal."));
 
-        btMatrix3x3 rot_mat(
+        tf::Matrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
-        btVector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
+        tf::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
         tf::Transform delta_transform(rot_mat, t);
 
         setPoseCovariance(STANDARD_POSE_COVARIANCE);
