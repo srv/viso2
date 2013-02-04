@@ -7,6 +7,8 @@
 
 #include <viso_stereo.h>
 
+#include <viso2_ros/VisoInfo.h>
+
 #include "stereo_processor.h"
 #include "odometer_base.h"
 #include "odometry_params.h"
@@ -50,6 +52,7 @@ private:
   VisualOdometryStereo::parameters visual_odometer_params_;
 
   ros::Publisher point_cloud_pub_;
+  ros::Publisher info_pub_;
 
   bool got_lost_;
   bool last_motion_small_; // flag for small motion on last iteration
@@ -73,6 +76,7 @@ public:
     local_nh.param("motion_threshold", motion_threshold_, 5.0);
 
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
+    info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
 
     reference_motion_ = Matrix::eye(4);
   }
@@ -206,6 +210,16 @@ protected:
         ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
         ROS_WARN_THROTTLE(1.0, "Visual Odometer got lost!");
         got_lost_ = true;
+      }
+
+      {
+        // create and publish fovis info msg
+        VisoInfo info_msg;
+        info_msg.header.stamp = l_image_msg->header.stamp;
+        info_msg.got_lost = !success;
+        info_msg.num_matches = visual_odometer_->getNumberOfMatches();
+        info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+        info_pub_.publish(info_msg);
       }
     }
   }
