@@ -13,3 +13,6 @@ bool got_lost
 bool motion_estimate_valid
 int32 num_matches
 int32 num_inliers
+
+# runtime of last iteration in seconds
+float64 runtime
