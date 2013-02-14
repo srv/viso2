@@ -1,0 +1,249 @@
+<<PackageHeader(viso2_ros)>>
+<<TOC(4)>>
+
+== Overview ==
+This package contains two nodes that talk to [[http://www.cvlibs.net/software/libviso2.html|libviso2]] (which is included in the [[libviso2]] package): `mono_odometer` and `stereo_odometer`. Both estimate camera motion based on incoming rectified images from calibrated cameras. To estimate the scale of the motion, the mono odometer uses the ground plane and therefore needs information about the camera's z-coordinate and its pitch. The stereo odometer needs no additional parameters and works - if provided with images of good quality - out of the box.
+
+The video below shows an online 3D reconstruction of a 3D scene shot by a Micro AUV using dense stereo point clouds coming from [[stereo_image_proc]] concatenated in [[rviz]] using the stereo odometer of this package.
+
+<<Youtube(4Ze99YStmPo&rel=0)>>
+
+== Used tfs ==
+Please read [[http://www.ros.org/reps/rep-0105.html|REP 105]] for an explanation of odometry frame ids.
+
+The chain of transforms relevant for visual odometry is as follows:
+ `world` &rarr; `odom` &rarr; `base_link` &rarr; `camera`
+
+Visual odometry algorithms generally calculate ''camera motion''. To be able to calculate ''robot motion'' based on ''camera motion'', the transformation from the camera frame to the robot frame has to be known.
+Therefore this implementation needs to know the tf `base_link` &rarr; `camera` to be able to publish `odom` &rarr; `base_link`.
+
+The name of the camera frame is taken from the incoming images, so be sure your camera driver publishes it correctly. If your camera driver does not set frame ids, you can use the fallback parameter `sensor_frame_id` (see below).
+
+''NOTE'': The coordinate frame of the camera is expected to be the ''optical'' frame, which means `x` is pointing right, `y` downwards and `z` from the camera into the scene. The origin is where the camera's principle axis hits the image plane (as given in <<MsgLink(sensor_msgs/CameraInfo)>>).
+
+To learn how to publish the required tf `base_link` &rarr; `camera`, please refer to the [[tf/Tutorials|tf tutorials]].
+If the required tf is not available, the odometer assumes it as the identity matrix which means the robot frame and the camera frame are identical.
+
+== Limitations ==
+libviso2 was designed to estimate the motion of a car using wide angle cameras. Cameras with large focal lengths have less overlap between consecutive images, especially on rotations and are therefore not recommended.
+
+=== Monocular Odometry ===
+Monocular odometry and SLAM systems cannot estimate motion or position on a metric scale. All estimates are relative to some unknown scaling factor. libviso2 overcomes this by assuming a fixed transformation from the ground plane to the camera (parameters `camera_height` and `camera_pitch`). To introduce these values in each iteration the ground plane has to be estimated. That is why features on the ground are mandatory for the mono odometer to work.
+
+
+Roughly the steps are the following:
+
+ 1. Find F matrix from point correspondences using RANSAC and 8-point algorithm
+ 2. Compute E matrix using the camera calibration
+ 3. Compute 3D points and R|t up to scale
+ 4. Estimate the ground plane in the 3D points
+ 5. Use `camera_height` and `camera_pitch` to scale points and R|t
+Unfortunately libviso2 does not provide sufficient introspection to signal if one of these steps fails.
+
+Another problem occurs when the camera performs just pure rotation: even if there are enough features, the linear system to calculate the F matrix degenerates.
+
+=== Stereo Odometry ===
+In a properly calibrated stereo system 3D points can be calculated from a single image pair. The linear system to calculate camera motion is therefore based on 3D-3D point correspondences. There are no limitations for the camera movement or the feature distribution.
+
+== Nodes ==
+{{{
+#!clearsilver CS/NodeAPI
+name = Common for mono_odometer and stereo_odometer
+pub {
+  0.name = ~pose
+  0.type = geometry_msgs/PoseStamped
+  0.desc = The robot's current pose according to the odometer.
+  1.name = ~odometry
+  1.type = nav_msgs/Odometry
+  1.desc = Odometry information that was calculated, contains pose, twist and covariances. ''NOTE:'' pose and twist covariance is not published yet.
+  2.name = ~info
+  2.type = viso2_ros/VisoInfo
+  2.desc = Message containing internal information on the libviso2 process regarding the current iteration.
+}
+param {
+  group.0 {
+    name = tf related
+    0.name = ~odom_frame_id
+    0.type = string
+    0.desc = Name of the world-fixed frame where the odometer lives.
+    0.default = `/odom`
+    1.name = ~base_link_frame_id
+    1.type = string
+    1.desc = Name of the moving frame whose pose the odometer should report.
+    1.default = `/base_link`
+    2.name = ~publish_tf
+    2.type = bool
+    2.desc = If true, the odometer publishes tf's (see above).
+    2.default = true
+    3.name = ~sensor_frame_id
+    3.type = string
+    3.desc = Fallback sensor frame id. If the incoming camera info topic does not carry a frame id, this frame id will be used.
+    3.default = "/camera"
+  }
+  group.1 {
+    name = Bucketing parameters
+    0.name = ~max_features
+    0.type = int
+    0.desc = Maximum number of features per bucket.
+    0.default = 2
+    1.name = ~bucket_width
+    1.type = double
+    1.desc = Width of the bucket.
+    1.default = 50.0
+    2.name = ~bucket_height
+    2.type = double
+    2.desc = Height of the bucket.
+    2.default = 50.0
+  }
+  group.2 {
+    name = Matcher parameters
+    0.name = ~nms_n
+    0.type = int
+    0.desc = Minimum distance between maxima in pixels for non-maxima-suppression.
+    0.default = 3
+    1.name = ~nms_tau
+    1.type = int
+    1.desc = Interest point peakiness threshold.
+    1.default = 50
+    2.name = ~match_binsize
+    2.type = int
+    2.desc = Matching width/height (affects efficiency only)
+    2.default = 50
+    3.name = ~match_radius
+    3.type = int
+    3.desc = Matching radius (du/dv in pixels)
+    3.default = 200
+    4.name = ~match_disp_tolerance
+    4.type = int
+    4.desc = dv tolerance for stereo matches (in pixels).
+    4.default = 2
+    5.name = ~outlier_disp_tolerance
+    5.type = int
+    5.desc = Disparity tolerance for outlier removal (in pixels).
+    5.default = 5
+    6.name = ~outlier_flow_tolerance
+    6.type = int
+    6.desc = Flow tolerance for outlier removal (in pixels).
+    6.default = 5
+    7.name = ~multi_stage
+    7.type = int
+    7.desc = 0=disabled, 1=multistage matching (denser and faster).
+    7.default = 1
+    8.name = ~half_resolution
+    8.type = int
+    8.desc = 0=disabled, 1=match at half resolution, refine at full resolution.
+    8.default = 1
+    9.name = ~refinement
+    9.type = int
+    9.desc = 0=none, 1=pixel, 2=subpixel.
+    9.default = 1
+  }
+}
+req_tf {
+  0.from = ~base_link_frame_id
+  0.to   = <frame_id attached to image messages>
+  0.desc = Transformation from the robot's reference point (`base_link` in most cases) to the camera's optical frame.
+}
+prov_tf {
+  0.from = ~odom_frame_id
+  0.to   = ~base_link_frame_id
+  0.desc = Transformation from the odometry's origin (e.g. `odom`) to the robot's reference point (e.g. `base_link`)
+}
+}}}
+
+{{{
+#!clearsilver CS/NodeAPI
+name = mono_odometer
+sub {
+  0.name = image
+  0.type = sensor_msgs/Image
+  0.desc = The rectified input image. There must be a corresponding `camera_info` topic as well. Internally, `image_transport::CameraSubscriber` is used to synchronize between both.
+}
+param {
+  0.name = ~camera_height
+  0.type = double
+  0.desc = Height of the camera above the ground in meters.
+  0.default = 1.0
+  1.name = ~camera_pitch
+  1.type = double
+  1.desc = Pitch of the camera in radiants, negative pitch means looking downwards.
+  1.default = 0.0
+  2.name = ~ransac_iters
+  2.type = int
+  2.desc = Number of RANSAC iterations.
+  2.default = 2000
+  3.name = ~inlier_threshold
+  3.type = double
+  3.desc = Fundamental matrix inlier threshold.
+  3.default = 0.00001
+  4.name = ~motion_threshold
+  4.type = double
+  4.desc = Threshold for stable fundamental matrix estimation.
+  4.default = 100.0
+}
+}}}
+
+{{{
+#!clearsilver CS/NodeAPI
+name = stereo_odometer
+sub {
+  0.name = <stereo>/left/<image>
+  0.type = sensor_msgs/Image
+  0.desc = Left rectified input image.
+  1.name = <stereo>/right/<image>
+  1.type = sensor_msgs/Image
+  1.desc = Right rectified input image.
+  2.name = <stereo>/left/camera_info
+  2.type = sensor_msgs/CameraInfo
+  2.desc = Camera info for left image.
+  3.name = <stereo>/right/camera_info
+  3.type = sensor_msgs/CameraInfo
+  3.desc = Camera info for right image.
+}
+pub {
+  0.name = ~point_cloud
+  0.type = sensor_msgs/PointCloud2
+  0.desc = Point cloud formed by the matched features.
+}
+param {
+  0.name = ~queue_size
+  0.type = int
+  0.desc = Length of the input queues for left and right camera synchronization.
+  0.default = 5
+  1.name = ~approximate_sync
+  1.type = bool
+  1.desc = Approximate synchronization of incoming messages, set to true if cameras do not have synchronized timestamps.
+  1.default = false
+  2.name = ~ransac_iters
+  2.type = int
+  2.desc = Number of RANSAC iterations.
+  2.default = 200
+  3.name = ~inlier_threshold
+  3.type = double
+  3.desc = Fundamental matrix inlier threshold.
+  3.default = 1.5
+  4.name = ~reweighting
+  4.type = bool
+  4.desc = Lower border weights (more robust to calibration errors).
+  4.default = true
+  5.name = ~motion_threshold
+  5.type = double
+  5.desc = Threshold for drift compensation. If the mean movement in pixels of all features lies below this threshold, the reference image inside the odometer will not be changed.
+  5.default = 5.0
+}
+}}}
+
+== Troubleshoting ==
+If you have a problem, please look if it is stated here or on ROS Answers (FAQ link above) and you can solve it on your own.
+=== I run mono_odometer but I get no messages on the output topics ===
+ * Check if incoming image and camera_info messages are synchronized.
+ * Move the camera. To estimate motion the mono odometer actually needs some motion (else the estimation of the F-matrix is degenerating). The system needs the camera to perform a translation, pure rotation will not work.
+ * Set the log level of mono_odometer to DEBUG (e.g. using [[rxconsole]]) and look if you can find something.
+
+== Feedback ==
+Please use the stack's issue tracker at Github to submit bug reports and feature requests regarding the ROS wrapper of libviso2: https://github.com/srv/viso2/issues/new.
+
+
+## AUTOGENERATED DON'T DELETE
+## CategoryPackage
+
