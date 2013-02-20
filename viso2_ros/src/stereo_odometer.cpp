@@ -109,7 +109,7 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
-    ros::Time start_time = ros::Time::now();
+    ros::Time start_time = ros::WallTime::now();
     bool first_run = false;
     // create odometer if not exists
     if (!visual_odometer_)
@@ -219,7 +219,7 @@ protected:
         info_msg.got_lost = !success;
         info_msg.num_matches = visual_odometer_->getNumberOfMatches();
         info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
-        ros::Duration time_elapsed = ros::Time::now() - start_time;
+        ros::Duration time_elapsed = ros::WallTime::now() - start_time;
         info_msg.runtime = time_elapsed.toSec();
         info_pub_.publish(info_msg);
       }
