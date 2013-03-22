@@ -55,10 +55,12 @@ private:
   ros::Publisher info_pub_;
 
   bool got_lost_;
-  bool last_motion_small_; // flag for small motion on last iteration
 
-  double motion_threshold_;
-
+  // change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below
+  int ref_frame_change_method_;
+  bool change_reference_frame_;
+  double ref_frame_motion_threshold_; // method 1. Change the reference frame if last motion is small
+  int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low
   Matrix reference_motion_;
 
 public:
@@ -67,13 +69,15 @@ public:
 
   StereoOdometer(const std::string& transport) : 
     StereoProcessor(transport), OdometerBase(), 
-    got_lost_(false), last_motion_small_(false)
+    got_lost_(false), change_reference_frame_(false)
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
     odometry_params::loadParams(local_nh, visual_odometer_params_);
 
-    local_nh.param("motion_threshold", motion_threshold_, 5.0);
+    local_nh.param("ref_frame_change_method", ref_frame_change_method_, 0);
+    local_nh.param("ref_frame_motion_threshold", ref_frame_motion_threshold_, 5.0);
+    local_nh.param("ref_frame_inlier_threshold", ref_frame_inlier_threshold_, 150);
 
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
@@ -100,7 +104,9 @@ protected:
     ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
                     "with the following parameters:" << std::endl << 
                     visual_odometer_params_ << 
-                    "  motion_threshold = " << motion_threshold_);
+                    "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl << 
+                    "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl << 
+                    "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_);
   }
  
   void imageCallback(
@@ -151,7 +157,7 @@ protected:
     else
     {
       bool success = visual_odometer_->process(
-          l_image_data, r_image_data, dims, last_motion_small_);
+          l_image_data, r_image_data, dims, change_reference_frame_);
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());
@@ -162,7 +168,7 @@ protected:
         Matrix camera_motion;
         // if image was replaced due to small motion we have to subtract the 
         // last motion to get the increment
-        if (last_motion_small_)
+        if (change_reference_frame_)
         {
           camera_motion = Matrix::inv(reference_motion_) * motion;
         }
@@ -172,15 +178,6 @@ protected:
           camera_motion = motion;
         }
         reference_motion_ = motion; // store last motion as reference
-
-        // calculate current feature flow
-        std::vector<Matcher::p_match> matches = visual_odometer_->getMatches();
-        std::vector<int> inlier_indices = visual_odometer_->getInlierIndices();
-        double feature_flow = computeFeatureFlow(matches);
-        last_motion_small_ = (feature_flow < motion_threshold_);
-        ROS_DEBUG_STREAM("Feature flow is " << feature_flow 
-            << ", marking last motion as " 
-            << (last_motion_small_ ? "small." : "normal."));
 
         tf::Matrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
@@ -196,7 +193,9 @@ protected:
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
         {
-          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg, matches, inlier_indices);
+          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg, 
+                                      visual_odometer_->getMatches(), 
+                                      visual_odometer_->getInlierIndices());
         }
       }
       else
@@ -212,17 +211,48 @@ protected:
         got_lost_ = true;
       }
 
+      if(success)
       {
-        // create and publish viso2 info msg
-        VisoInfo info_msg;
-        info_msg.header.stamp = l_image_msg->header.stamp;
-        info_msg.got_lost = !success;
-        info_msg.num_matches = visual_odometer_->getNumberOfMatches();
-        info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
-        ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
-        info_msg.runtime = time_elapsed.toSec();
-        info_pub_.publish(info_msg);
+
+        // Proceed depending on the reference frame change method
+        switch ( ref_frame_change_method_ )
+        {
+          case 1:
+          {
+            // calculate current feature flow
+            double feature_flow = computeFeatureFlow(visual_odometer_->getMatches());
+            change_reference_frame_ = (feature_flow < ref_frame_motion_threshold_);
+            ROS_DEBUG_STREAM("Feature flow is " << feature_flow 
+                << ", marking last motion as " 
+                << (change_reference_frame_ ? "small." : "normal."));
+            break;
+          }
+          case 2:
+          {
+            change_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
+            break;
+          }            
+          default:
+            change_reference_frame_ = false;
+        }
+        
       }
+      else
+        change_reference_frame_ = false;
+
+      if(!change_reference_frame_)
+        ROS_DEBUG_STREAM("Changing reference frame");
+
+      // create and publish viso2 info msg
+      VisoInfo info_msg;
+      info_msg.header.stamp = l_image_msg->header.stamp;
+      info_msg.got_lost = !success;
+      info_msg.change_reference_frame = !change_reference_frame_;
+      info_msg.num_matches = visual_odometer_->getNumberOfMatches();
+      info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+      ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
+      info_msg.runtime = time_elapsed.toSec();
+      info_pub_.publish(info_msg);
     }
   }
 

@@ -32,9 +32,9 @@ private:
   std::string sensor_frame_id_;
   std::string odom_frame_id_;
   std::string base_link_frame_id_;
-  bool publish_tf_;
   tf::TransformListener tf_listener_;
   tf::TransformBroadcaster tf_broadcaster_;
+  bool publish_tf_;
 
   // the current integrated camera pose
   tf::Transform integrated_pose_;
