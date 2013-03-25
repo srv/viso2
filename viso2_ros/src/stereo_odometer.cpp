@@ -217,7 +217,7 @@ protected:
         // Proceed depending on the reference frame change method
         switch ( ref_frame_change_method_ )
         {
-          case 1:
+          case REF_FRAME_CHANGE_MOTION:
           {
             // calculate current feature flow
             double feature_flow = computeFeatureFlow(visual_odometer_->getMatches());
@@ -227,7 +227,7 @@ protected:
                 << (change_reference_frame_ ? "small." : "normal."));
             break;
           }
-          case 2:
+          case REF_FRAME_CHANGE_INLIERS:
           {
             change_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
             break;
