@@ -13,14 +13,11 @@
 	<!-- Run the ROS package stereo_image_proc -->
 	<group ns="$(arg camera)" >
 		<node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
-	    	<rosparam file="$(arg disparity_params)"/>
+			<rosparam file="$(arg disparity_params)"/>
 		</node>
 	</group>
 
 	<!-- Run the viso2_ros package -->
-	<node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" output="screen">
-		<remap from="stereo" to="$(arg camera)"/>
-		<remap from="image" to="image_rect"/>
-	</node>
-	
+	<node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" output="screen" ns="$(arg camera)" />
+
 </launch>
