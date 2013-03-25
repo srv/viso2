@@ -103,20 +103,13 @@ protected:
     // Read local parameters
     ros::NodeHandle local_nh("~");
 
-    // Resolve topic names
-    ros::NodeHandle nh;
-    std::string stereo_ns = nh.resolveName("stereo");
-    std::string left_topic = ros::names::clean(stereo_ns + "/left/" + nh.resolveName("image"));
-    std::string right_topic = ros::names::clean(stereo_ns + "/right/" + nh.resolveName("image"));
-
-    std::string left_info_topic = stereo_ns + "/left/camera_info";
-    std::string right_info_topic = stereo_ns + "/right/camera_info";
-
     // Subscribe to four input topics.
-    ROS_INFO("Subscribing to:\n\t* %s\n\t* %s\n\t* %s\n\t* %s", 
-        left_topic.c_str(), right_topic.c_str(),
-        left_info_topic.c_str(), right_info_topic.c_str());
+    std::string left_topic = "left/image_rect";
+    std::string right_topic = "right/image_rect";
+    std::string left_info_topic = "left/camera_info";
+    std::string right_info_topic = "right/camera_info";
 
+    ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
     left_sub_.subscribe(it, left_topic, 1, transport);
     right_sub_.subscribe(it, right_topic, 1, transport);
@@ -148,6 +141,8 @@ protected:
       exact_sync_->registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4));
     }
   }
+
+  virtual ~StereoProcessor() { }
 
   /**
    * Implement this method in sub-classes 

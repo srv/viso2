@@ -40,6 +40,8 @@ private:
   tf::Transform integrated_pose_;
   // timestamp of the last update
   ros::Time last_update_time_;
+  // the last obtained base to sensor transform
+  tf::StampedTransform base_to_sensor_;
 
   // covariances
   boost::array<double, 36> pose_covariance_;
@@ -69,6 +71,7 @@ public:
     reset_service_ = local_nh.advertiseService("reset_pose", &OdometerBase::resetPose, this);
 
     integrated_pose_.setIdentity();
+    base_to_sensor_.setIdentity();
 
     pose_covariance_.assign(0.0);
     twist_covariance_.assign(0.0);
@@ -112,26 +115,8 @@ protected:
     integrated_pose_ *= delta_transform;
 
     // transform integrated pose to base frame
-    tf::StampedTransform base_to_sensor;
-    std::string error_msg;
-    if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, timestamp, &error_msg))
-    {
-      tf_listener_.lookupTransform(
-          base_link_frame_id_,
-          sensor_frame_id_,
-          timestamp, base_to_sensor);
-    }
-    else
-    {
-      ROS_WARN_THROTTLE(10.0, "The tf from '%s' to '%s' does not seem to be available, "
-                              "will assume it as identity!", 
-                              base_link_frame_id_.c_str(),
-                              sensor_frame_id_.c_str());
-      ROS_DEBUG("Transform error: %s", error_msg.c_str());
-      base_to_sensor.setIdentity();
-    }
-
-    tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
+    updateBaseToSensorTf(timestamp);
+    tf::Transform base_transform = base_to_sensor_ * integrated_pose_ * base_to_sensor_.inverse();
 
     nav_msgs::Odometry odometry_msg;
     odometry_msg.header.stamp = timestamp;
@@ -140,7 +125,7 @@ protected:
     tf::poseTFToMsg(base_transform, odometry_msg.pose.pose);
 
     // calculate twist (not possible for first run as no delta_t can be computed)
-    tf::Transform delta_base_transform = base_to_sensor * delta_transform * base_to_sensor.inverse();
+    tf::Transform delta_base_transform = base_to_sensor_ * delta_transform * base_to_sensor_.inverse();
     if (!last_update_time_.isZero())
     {
       double delta_t = (timestamp - last_update_time_).toSec();
@@ -187,6 +172,34 @@ protected:
     return true;
   }
 
+private:
+  void updateBaseToSensorTf(const ros::Time& timestamp)
+  {
+    std::string error_msg;
+    if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, timestamp, &error_msg))
+    {
+      tf_listener_.lookupTransform(base_link_frame_id_,
+          sensor_frame_id_,
+          timestamp,
+          base_to_sensor_);
+    }
+    else if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, ros::Time(0), &error_msg))
+    {
+      ROS_WARN_THROTTLE(10.0, "Using the outdated transform from '%s' to '%s'",
+                        base_link_frame_id_.c_str(), sensor_frame_id_.c_str());
+      ROS_DEBUG("Transform error: %s", error_msg.c_str());
+      tf_listener_.lookupTransform(base_link_frame_id_,
+          sensor_frame_id_,
+          ros::Time(0),
+          base_to_sensor_);
+    }
+    else
+    {
+      ROS_WARN_THROTTLE(10.0, "The tf from '%s' to '%s' does not seem to be available",
+                        base_link_frame_id_.c_str(), sensor_frame_id_.c_str());
+      ROS_DEBUG("Transform error: %s", error_msg.c_str());
+    }
+  }
 };
 
 } // end of namespace
