@@ -1,0 +1,30 @@
+<package>
+  <name>libviso2</name>
+  <version>0.0.1</version>
+  <description>This is a ROS-Package for libviso2, a library for visual odometry created by Andeas Geiger
+    from the Institute of Measurement and Control Systems at Karlsruhe Institute of Technology.
+
+    Apart from the original libviso2 sources, this package contains
+    a CMakeFile for easier integration into the ROS build system.
+
+    Please note that this code is licensed under GPL. For a commercial usage, please
+    contact Andreas Geiger directly (see 
+    <a href="http://www.cvlibs.net/software/libviso2.html">http://www.cvlibs.net/software/libviso2.html</a>).
+  </description>
+
+  <maintainer email="stephan.wirth@uib.es">maintained by: Stephan Wirth</maintainer>
+
+  <license>GPL</license>
+
+  <url type="website">http://ros.org/wiki/libviso2</url>
+  <url type="bugtracker">https://github.com/srv/viso2/issues</url>
+
+  <author email="geiger@kit.edu">Andreas Geiger</author>
+  <author email="stephan.wirth@uib.es">Stephan Wirth</author>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+    <cpp lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2" cflags="-msse3 -I${prefix}/libviso2/src/"/>
+  </export>
+</package>
