@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   pcl
   pcl_ros 
   std_srvs
+  message_generation
 )
 
 find_package(OpenCV REQUIRED)
