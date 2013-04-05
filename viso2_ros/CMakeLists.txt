@@ -1,39 +1,46 @@
-cmake_minimum_required(VERSION 2.4.6)
-include($ENV{ROS_ROOT}/core/rosbuild/rosbuild.cmake)
+cmake_minimum_required(VERSION 2.8.3)
+project(viso2_ros)
 
-# Set the build type.  Options are:
-#  Coverage       : w/ debug symbols, w/o optimization, w/ code-coverage
-#  Debug          : w/ debug symbols, w/o optimization
-#  Release        : w/o debug symbols, w/ optimization
-#  RelWithDebInfo : w/ debug symbols, w/ optimization
-#  MinSizeRel     : w/o debug symbols, w/ optimization, stripped binaries
-#set(ROS_BUILD_TYPE RelWithDebInfo)
+find_package(catkin REQUIRED COMPONENTS 
+  libviso2 
+  roscpp 
+  sensor_msgs 
+  nav_msgs 
+  message_filters 
+  image_transport 
+  cv_bridge 
+  image_geometry 
+  tf 
+  pcl
+  pcl_ros 
+  std_srvs
+  message_generation
+)
 
-rosbuild_init()
-rosbuild_add_boost_directories()
+find_package(OpenCV REQUIRED)
 
-find_package(OpenCV)
+add_message_files( DIRECTORY msg FILES VisoInfo.msg)
 
-#set the default path for built executables to the "bin" directory
-set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
-#set the default path for built libraries to the "lib" directory
-set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
+generate_messages(
+  DEPENDENCIES 
+    std_msgs
+)
 
-#uncomment if you have defined messages
-rosbuild_genmsg()
-#uncomment if you have defined services
-#rosbuild_gensrv()
+catkin_package()
 
-rosbuild_add_executable(stereo_odometer
+include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+
+add_executable(stereo_odometer
   src/stereo_odometer.cpp)
 
-rosbuild_add_executable(mono_odometer
+add_executable(mono_odometer
   src/mono_odometer.cpp)
 
-target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES})
-rosbuild_link_boost(stereo_odometer signals)
-target_link_libraries(mono_odometer ${OpenCV_LIBRARIES})
-#rosbuild_add_boost_directories()
-#rosbuild_link_boost(${PROJECT_NAME} thread)
-#rosbuild_add_executable(example examples/example.cpp)
-#target_link_libraries(example ${PROJECT_NAME})
+target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+find_package(Boost REQUIRED COMPONENTS signals thread)
+include_directories(${Boost_INCLUDE_DIRS})
+target_link_libraries(stereo_odometer ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+
+
+
