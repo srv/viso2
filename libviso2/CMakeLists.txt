@@ -20,5 +20,6 @@ include_directories(libviso2/src
 )
 
 catkin_package(
+  INCLUDE_DIRS libviso2/src
   LIBRARIES viso2
 )
