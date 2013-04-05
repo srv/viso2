@@ -28,6 +28,8 @@ generate_messages(
 
 catkin_package()
 
+add_definitions(-msse3)
+
 include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_executable(stereo_odometer
