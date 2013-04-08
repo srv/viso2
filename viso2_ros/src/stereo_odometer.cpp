@@ -19,7 +19,7 @@
 namespace viso2_ros
 {
 
-// some arbitrary values (0.1m linear cov. 10deg. angular cov.)
+// some arbitrary values (0.1m^2 linear cov. 10deg^2. angular cov.)
 static const boost::array<double, 36> STANDARD_POSE_COVARIANCE =
 { { 0.1, 0, 0, 0, 0, 0,
     0, 0.1, 0, 0, 0, 0,
