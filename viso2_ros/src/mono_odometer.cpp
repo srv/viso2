@@ -7,6 +7,8 @@
 
 #include <viso_mono.h>
 
+#include <viso2_ros/VisoInfo.h>
+
 #include "odometer_base.h"
 #include "odometry_params.h"
 
@@ -23,6 +25,8 @@ private:
 
   image_transport::CameraSubscriber camera_sub_;
 
+  ros::Publisher info_pub_;
+
   bool replace_;
 
 public:
@@ -36,6 +40,8 @@ public:
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
     camera_sub_ = it.subscribeCamera("image", 1, &MonoOdometer::imageCallback, this, transport);
+
+    info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
   }
 
 protected:
@@ -44,6 +50,7 @@ protected:
       const sensor_msgs::ImageConstPtr& image_msg,
       const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
+    ros::WallTime start_time = ros::WallTime::now();
  
     bool first_run = false;
     // create odometer if not exists
@@ -93,7 +100,8 @@ protected:
     }
     else
     {
-      if(visual_odometer_->process(image_data, dims))
+      bool success = visual_odometer_->process(image_data, dims);
+      if(success)
       {
         replace_ = false;
         Matrix camera_motion = Matrix::inv(visual_odometer_->getMotion());
@@ -119,6 +127,17 @@ protected:
         delta_transform.setIdentity();
         integrateAndPublish(delta_transform, image_msg->header.stamp);
       }
+
+      // create and publish viso2 info msg
+      VisoInfo info_msg;
+      info_msg.header.stamp = image_msg->header.stamp;
+      info_msg.got_lost = !success;
+      info_msg.change_reference_frame = false;
+      info_msg.num_matches = visual_odometer_->getNumberOfMatches();
+      info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+      ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
+      info_msg.runtime = time_elapsed.toSec();
+      info_pub_.publish(info_msg);
     }
   }
 };
