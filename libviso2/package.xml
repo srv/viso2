@@ -19,7 +19,7 @@
   <url type="website">http://ros.org/wiki/libviso2</url>
   <url type="bugtracker">https://github.com/srv/viso2/issues</url>
 
-  <author email="geiger@kit.edu">Andreas Geiger</author>
+  <author>Andreas Geiger</author>
   <author email="stephan.wirth@uib.es">Stephan Wirth</author>
 
   <buildtool_depend>catkin</buildtool_depend>
