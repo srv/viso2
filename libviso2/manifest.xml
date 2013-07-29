@@ -12,7 +12,7 @@
     <a href="http://www.cvlibs.net/software/libviso2.html">http://www.cvlibs.net/software/libviso2.html</a>).
 
   </description>
-  <author>Andreas Geiger/geiger@kit.edu, maintained by: Stephan Wirth/stephan.wirth@uib.es</author>
+  <author>Andreas Geiger, maintained by: Stephan Wirth/stephan.wirth@uib.es</author>
   <license>GPL</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/libviso2</url>
