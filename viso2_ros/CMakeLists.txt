@@ -11,13 +11,13 @@ find_package(catkin REQUIRED COMPONENTS
   cv_bridge 
   image_geometry 
   tf 
-  pcl
   pcl_ros 
   std_srvs
   message_generation
 )
 
 find_package(OpenCV REQUIRED)
+find_package(PCL REQUIRED)
 
 add_message_files( DIRECTORY msg FILES VisoInfo.msg)
 
