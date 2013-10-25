@@ -1,0 +1,46 @@
+<launch>
+
+	<!-- Arguments -->
+	<arg name="bagfile" default="bagfile.bag"/> <!-- Your bagfile here -->
+	<arg name="camera" default="/camera" /> <!-- The namespace where images are published -->
+
+	<param name="/use_sim_time" value="true"/>
+
+	<!-- Run the rosbag -->
+	<node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)"/>
+
+	<!-- Run the ROS package stereo_image_proc -->
+	<group ns="$(arg camera)" >
+		<node pkg="image_proc" type="image_proc" name="image_proc"/>
+	</group>
+
+	<!-- Run the viso2_ros package -->
+	<node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" output="screen">
+		<remap from="image" to="$(arg camera)/image_rect"/>
+
+		<!-- Matcher params -->
+		<param name="nms_n" value="3" />
+		<param name="nms_tau" value="50" />
+		<param name="match_binsize" value="50" />
+		<param name="match_radius" value="200" />
+		<param name="match_disp_tolerance" value="2" />
+		<param name="outlier_disp_tolerance" value="5" />
+		<param name="outlier_flow_tolerance" value="5" />
+		<param name="multi_stage" value="1" />
+		<param name="half_resolution" value="1" />
+		<param name="refinement" value="1" />
+
+		<!-- Bucketing params -->
+		<param name="max_features" value="2" />
+		<param name="bucket_width" value="50" />
+		<param name="bucket_height" value="50" />
+
+		<!-- Mono params -->
+		<param name="camera_height" value="1.0" />
+		<param name="camera_pitch" value="0.0" />
+		<param name="ransac_iters" value="2000" />
+		<param name="inlier_threshold" value="1e-5" />
+		<param name="motion_threshold" value="100" />
+	</node>
+	
+</launch>
