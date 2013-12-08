@@ -35,10 +35,12 @@ include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 add_executable(stereo_odometer
   src/stereo_odometer.cpp)
 add_dependencies(stereo_odometer ${catkin_EXPORTED_TARGETS})
+add_dependencies(stereo_odometer ${PROJECT_NAME}_gencpp)
 
 add_executable(mono_odometer
   src/mono_odometer.cpp)
 add_dependencies(mono_odometer ${catkin_EXPORTED_TARGETS})
+add_dependencies(mono_odometer ${PROJECT_NAME}_gencpp)
 
 target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 find_package(Boost REQUIRED COMPONENTS signals thread)
