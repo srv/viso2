@@ -37,6 +37,7 @@ add_executable(stereo_odometer
 
 add_executable(mono_odometer
   src/mono_odometer.cpp)
+add_dependencies(mono_odometer viso2_ros_gencpp)
 
 target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 find_package(Boost REQUIRED COMPONENTS signals thread)
