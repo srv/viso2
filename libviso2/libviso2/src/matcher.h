@@ -50,6 +50,7 @@ public:
     int32_t multi_stage;            // 0=disabled,1=multistage matching (denser and faster)
     int32_t half_resolution;        // 0=disabled,1=match at half resolution, refine at full resolution
     int32_t refinement;             // refinement (0=none,1=pixel,2=subpixel)
+    double  f,cu,cv,base;           // calibration (only for match prediction)
     
     // default settings
     parameters () {
@@ -71,6 +72,14 @@ public:
 
   // deconstructor
   ~Matcher();
+  
+  // intrinsics
+  void setIntrinsics(double f,double cu,double cv,double base) {
+    param.f = f;
+    param.cu = cu;
+    param.cv = cv;
+    param.base = base;
+  }
 
   // structure for storing matches
   struct p_match {
@@ -109,7 +118,9 @@ public:
 
   // match features currently stored in ring buffer (current and previous frame)
   // input: method ... 0 = flow, 1 = stereo, 2 = quad matching
-  void matchFeatures(int32_t method);
+  //        Tr_delta: uses motion from previous frame to better search for
+  //                  matches, if specified
+  void matchFeatures(int32_t method, Matrix *Tr_delta = 0);
 
   // feature bucketing: keeps only max_features per bucket, where the domain
   // is split into buckets of size (bucket_width,bucket_height)
@@ -188,10 +199,10 @@ private:
   void createIndexVector (int32_t* m,int32_t n,std::vector<int32_t> *k,const int32_t &u_bin_num,const int32_t &v_bin_num);
   inline void findMatch (int32_t* m1,const int32_t &i1,int32_t* m2,const int32_t &step_size,
                          std::vector<int32_t> *k2,const int32_t &u_bin_num,const int32_t &v_bin_num,const int32_t &stat_bin,
-                         int32_t& min_ind,int32_t stage,bool flow,bool use_prior);
+                         int32_t& min_ind,int32_t stage,bool flow,bool use_prior,double u_=-1,double v_=-1);
   void matching (int32_t *m1p,int32_t *m2p,int32_t *m1c,int32_t *m2c,
                  int32_t n1p,int32_t n2p,int32_t n1c,int32_t n2c,
-                 std::vector<Matcher::p_match> &p_matched,int32_t method,bool use_prior);
+                 std::vector<Matcher::p_match> &p_matched,int32_t method,bool use_prior,Matrix *Tr_delta = 0);
 
   // outlier removal
   void removeOutliers (std::vector<Matcher::p_match> &p_matched,int32_t method);

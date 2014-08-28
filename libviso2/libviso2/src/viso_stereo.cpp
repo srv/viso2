@@ -24,6 +24,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 using namespace std;
 
 VisualOdometryStereo::VisualOdometryStereo (parameters param) : param(param), VisualOdometry(param) {
+  matcher->setIntrinsics(param.calib.f,param.calib.cu,param.calib.cv,param.base);
 }
 
 VisualOdometryStereo::~VisualOdometryStereo() {
@@ -31,7 +32,8 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 
 bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace) {
   matcher->pushBack(I1,I2,dims,replace);
-  matcher->matchFeatures(2);
+  if (Tr_valid) matcher->matchFeatures(2,&Tr_delta);
+  else          matcher->matchFeatures(2);
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();
   return updateMotion();
@@ -66,7 +68,7 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
 
   // project matches of previous image into 3d
   for (int32_t i=0; i<N; i++) {
-    double d = max(p_matched[i].u1p - p_matched[i].u2p,1.0f);
+    double d = max(p_matched[i].u1p - p_matched[i].u2p,0.0001f);
     X[i] = (p_matched[i].u1p-param.calib.cu)*param.base/d;
     Y[i] = (p_matched[i].v1p-param.calib.cv)*param.base/d;
     Z[i] = param.calib.f*param.base/d;
@@ -129,13 +131,13 @@ vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_
   }
 
   // release dynamic memory
-  delete X;
-  delete Y;
-  delete Z;
-  delete J;
-  delete p_predict;
-  delete p_observe;
-  delete p_residual;
+  delete[] X;
+  delete[] Y;
+  delete[] Z;
+  delete[] J;
+  delete[] p_predict;
+  delete[] p_observe;
+  delete[] p_residual;
   
   // parameter estimate succeeded?
   if (success) return tr_delta;
@@ -234,7 +236,7 @@ void VisualOdometryStereo::computeResidualsAndJacobian(vector<double> &tr,vector
   double r00    = +cy*cz;          double r01    = -cy*sz;          double r02    = +sy;
   double r10    = +sx*sy*cz+cx*sz; double r11    = -sx*sy*sz+cx*cz; double r12    = -sx*cy;
   double r20    = -cx*sy*cz+sx*sz; double r21    = +cx*sy*sz+sx*cz; double r22    = +cx*cy;
-  double rdrx10 = +cx*sy*cz-sx*sz; double rdrx11 = -cx*sy*sz-sx*sz; double rdrx12 = -cx*cy;
+  double rdrx10 = +cx*sy*cz-sx*sz; double rdrx11 = -cx*sy*sz-sx*cz; double rdrx12 = -cx*cy;
   double rdrx20 = +sx*sy*cz+cx*sz; double rdrx21 = -sx*sy*sz+cx*cz; double rdrx22 = -sx*cy;
   double rdry00 = -sy*cz;          double rdry01 = +sy*sz;          double rdry02 = +cy;
   double rdry10 = +sx*cy*cz;       double rdry11 = -sx*cy*sz;       double rdry12 = +sx*sy;

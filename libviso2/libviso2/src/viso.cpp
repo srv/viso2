@@ -31,6 +31,7 @@ VisualOdometry::VisualOdometry (parameters param) : param(param) {
   p_predict = 0;
   matcher   = new Matcher(param.match);
   Tr_delta  = Matrix::eye(4);
+  Tr_valid  = false;
   srand(0);
 }
 
@@ -49,6 +50,7 @@ bool VisualOdometry::updateMotion () {
   
   // set transformation matrix (previous to current frame)
   Tr_delta = transformationVectorToMatrix(tr_delta);
+  Tr_valid = true;
   
   // success
   return true;

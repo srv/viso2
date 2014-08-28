@@ -28,22 +28,15 @@ for i=1:size(i_matched{end},2)
   end
   
   track_length = length(p_matched)-j;
-  if track_length<3
+  if track_length<2
     continue;
   end
   
   % plot track (if long enough)
   v1 = p(:,1)-p(:,end);
-  %v2 = p(:,1)-p(:,2);
   v2 = p(:,1)-p(:,end);
   if norm(v1) >= 8
     col = hsv2rgb([atan2(v2(2),v2(1))/(2*pi)+0.5 1 0.9]);
-    %if v1(1)>0
-    %  col = [1 0 0];
-    %else
-    %  col = [0 1 0];
-    %end
     plot(p(1,:),p(2,:),'-s','Color',col,'LineWidth',1,'MarkerSize',2);
-    %plot(p(1,1),p(2,1),'s','Color',col,'LineWidth',1,'MarkerSize',2);
   end
 end

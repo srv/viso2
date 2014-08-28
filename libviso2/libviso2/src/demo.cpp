@@ -53,7 +53,7 @@ int main (int argc, char** argv) {
   
   // calibration parameters for sequence 2010_03_09_drive_0019 
   param.calib.f  = 645.24; // focal length in pixels
-  param.calib.cu = 661.96; // principal point (u-coordinate) in pixels
+  param.calib.cu = 635.96; // principal point (u-coordinate) in pixels
   param.calib.cv = 194.13; // principal point (v-coordinate) in pixels
   param.base     = 0.5707; // baseline in meters
   

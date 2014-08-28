@@ -5,6 +5,8 @@ clear all; dbstop error; close all;
 % read images from file
 I1p = imread('../img/I1p.png');
 I1c = imread('../img/I1c.png');
+%I1p = rgb2gray(imread('/home/geiger/test_data/2013_04_29_drive_0018_extract/image_03/data/0000000336.png'));
+%I1c = rgb2gray(imread('/home/geiger/test_data/2013_04_29_drive_0018_extract/image_03/data/0000000337.png'));
 
 % matching parameters
 param.nms_n                  = 4;   % non-max-suppression: min. distance between maxima (in pixels)
@@ -16,7 +18,7 @@ param.outlier_disp_tolerance = 5;   % outlier removal: disparity tolerance (in p
 param.outlier_flow_tolerance = 5;   % outlier removal: flow tolerance (in pixels)
 param.multi_stage            = 1;   % 0=disabled,1=multistage matching (denser and faster)
 param.half_resolution        = 0;   % 0=disabled,1=match at half resolution, refine at full resolution
-param.refinement             = 1;   % refinement (0=none,1=pixel,2=subpixel)
+param.refinement             = 2;   % refinement (0=none,1=pixel,2=subpixel)
 
 % init matcher
 matcherMex('init',param);

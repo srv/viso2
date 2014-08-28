@@ -93,9 +93,14 @@ public:
   
   // returns the number of inliers: num_inliers <= num_matched
   int32_t getNumberOfInliers () { return inliers.size(); }
-  
+    
   // returns the indices of all inliers
   std::vector<int32_t> getInlierIndices () { return inliers; }
+  
+  // given a vector of inliers computes gain factor between the current and
+  // the previous frame. this function is useful if you want to reconstruct 3d
+  // and you want to cancel the change of (unknown) camera gain.
+  float getGain (std::vector<int32_t> inliers_) { return matcher->getGain(inliers_); }
 
   // streams out the current transformation matrix Tr_delta 
   friend std::ostream& operator<< (std::ostream &os,VisualOdometry &viso) {
@@ -122,6 +127,7 @@ protected:
   std::vector<int32_t> getRandomSample (int32_t N,int32_t num);
 
   Matrix                         Tr_delta;   // transformation (previous -> current frame)  
+  bool                           Tr_valid;   // motion estimate exists?
   Matcher                       *matcher;    // feature matcher
   std::vector<int32_t>           inliers;    // inlier set
   double                        *J;          // jacobian

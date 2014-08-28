@@ -146,13 +146,7 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
     const int dims[] = {1,1};
     plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
     *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfMatches();
-    
-  // query number of inliers
-  } else if (!strcmp(command,"num_inliers")) {
-    const int dims[] = {1,1};
-    plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
-    *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfInliers();
-    
+        
   // get matches
   } else if (!strcmp(command,"get_matches")) {
     
@@ -182,6 +176,22 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
       *(p_matched_mex+k++) = it->u2c+1;
       *(p_matched_mex+k++) = it->v2c+1;
     }
+    
+  // query number of inliers
+  } else if (!strcmp(command,"num_inliers")) {
+    const int dims[] = {1,1};
+    plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
+    *((double*)mxGetPr(plhs[0])) = (double)viso->getNumberOfInliers();
+    
+  // query number of inliers
+  } else if (!strcmp(command,"get_inliers")) {
+    
+    vector<int32_t> inliers = viso->getInlierIndices();
+    const int dims[] = {1,inliers.size()};
+    plhs[0] = mxCreateNumericArray(2,dims,mxDOUBLE_CLASS,mxREAL);
+    double* inliers_mex = (double*)mxGetPr(plhs[0]);
+    for (int32_t i=0; i<inliers.size(); i++)
+      inliers_mex[i] = inliers[i]+1;
     
   // get matching indices
   } else if (!strcmp(command,"get_indices")) {

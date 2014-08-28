@@ -37,7 +37,7 @@ public:
     parameters () {
       base             = 1.0;
       ransac_iters     = 200;
-      inlier_threshold = 1.5;
+      inlier_threshold = 2.0;
       reweighting      = true;
     }
   };
@@ -61,6 +61,10 @@ public:
   //                     an older coordinate system / time step than the previous one.
   // output: returns false if an error occured
   bool process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace=false);
+
+  using VisualOdometry::process;
+
+
 
 private:
 

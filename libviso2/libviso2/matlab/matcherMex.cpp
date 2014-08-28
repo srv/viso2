@@ -210,10 +210,10 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
       // copy matches to mex array (convert indices: C++ => MATLAB)
       int32_t k=0;
       for (vector<Matcher::p_match>::iterator it=matches.begin(); it!=matches.end(); it++) {
-        *(p_matched_mex+k++) = it->u1p+1;
-        *(p_matched_mex+k++) = it->v1p+1;
-        *(p_matched_mex+k++) = it->u1c+1;
-        *(p_matched_mex+k++) = it->v1c+1;
+        *(p_matched_mex+k++) = it->u1p+1.0;
+        *(p_matched_mex+k++) = it->v1p+1.0;
+        *(p_matched_mex+k++) = it->u1c+1.0;
+        *(p_matched_mex+k++) = it->v1c+1.0;
       }
 
     // method: stereo
@@ -227,10 +227,10 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
       // copy matches to mex array (convert indices: C++ => MATLAB)
       int32_t k=0;
       for (vector<Matcher::p_match>::iterator it=matches.begin(); it!=matches.end(); it++) {
-        *(p_matched_mex+k++) = it->u1c+1;
-        *(p_matched_mex+k++) = it->v1c+1;
-        *(p_matched_mex+k++) = it->u2c+1;
-        *(p_matched_mex+k++) = it->v2c+1;
+        *(p_matched_mex+k++) = it->u1c+1.0;
+        *(p_matched_mex+k++) = it->v1c+1.0;
+        *(p_matched_mex+k++) = it->u2c+1.0;
+        *(p_matched_mex+k++) = it->v2c+1.0;
       }
 
     // method: quad matching
@@ -244,14 +244,14 @@ void mexFunction (int nlhs,mxArray *plhs[],int nrhs,const mxArray *prhs[]) {
       // copy matches to mex array (convert indices: C++ => MATLAB)
       int32_t k=0;
       for (vector<Matcher::p_match>::iterator it=matches.begin(); it!=matches.end(); it++) {
-        *(p_matched_mex+k++) = it->u1p+1;
-        *(p_matched_mex+k++) = it->v1p+1;
-        *(p_matched_mex+k++) = it->u2p+1;
-        *(p_matched_mex+k++) = it->v2p+1;
-        *(p_matched_mex+k++) = it->u1c+1;
-        *(p_matched_mex+k++) = it->v1c+1;
-        *(p_matched_mex+k++) = it->u2c+1;
-        *(p_matched_mex+k++) = it->v2c+1;
+        *(p_matched_mex+k++) = it->u1p+1.0;
+        *(p_matched_mex+k++) = it->v1p+1.0;
+        *(p_matched_mex+k++) = it->u2p+1.0;
+        *(p_matched_mex+k++) = it->v2p+1.0;
+        *(p_matched_mex+k++) = it->u1c+1.0;
+        *(p_matched_mex+k++) = it->v1c+1.0;
+        *(p_matched_mex+k++) = it->u2c+1.0;
+        *(p_matched_mex+k++) = it->v2c+1.0;
       }
     }
     

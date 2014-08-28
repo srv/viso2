@@ -180,7 +180,7 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
     computeFeatures(I2c,dims_c,m2c1,n2c1,m2c2,n2c2,I2c_du,I2c_dv,I2c_du_full,I2c_dv_full);
 }
 
-void Matcher::matchFeatures(int32_t method) {
+void Matcher::matchFeatures(int32_t method, Matrix *Tr_delta) {
   
   //////////////////
   // sanity check //
@@ -219,21 +219,21 @@ void Matcher::matchFeatures(int32_t method) {
   if (param.multi_stage) {
 
     // 1st pass (sparse matches)
-    matching(m1p1,m2p1,m1c1,m2c1,n1p1,n2p1,n1c1,n2c1,p_matched_1,method,false);
+    matching(m1p1,m2p1,m1c1,m2c1,n1p1,n2p1,n1c1,n2c1,p_matched_1,method,false,Tr_delta);
     removeOutliers(p_matched_1,method);
     
     // compute search range prior statistics (used for speeding up 2nd pass)
     computePriorStatistics(p_matched_1,method);      
 
     // 2nd pass (dense matches)
-    matching(m1p2,m2p2,m1c2,m2c2,n1p2,n2p2,n1c2,n2c2,p_matched_2,method,true);
+    matching(m1p2,m2p2,m1c2,m2c2,n1p2,n2p2,n1c2,n2c2,p_matched_2,method,true,Tr_delta);
     if (param.refinement>0)
       refinement(p_matched_2,method);
     removeOutliers(p_matched_2,method);
 
   // single pass matching
   } else {
-    matching(m1p2,m2p2,m1c2,m2c2,n1p2,n2p2,n1c2,n2c2,p_matched_2,method,false);
+    matching(m1p2,m2p2,m1c2,m2c2,n1p2,n2p2,n1c2,n2c2,p_matched_2,method,false,Tr_delta);
     if (param.refinement>0)
       refinement(p_matched_2,method);
     removeOutliers(p_matched_2,method);
@@ -766,6 +766,7 @@ void Matcher::computePriorStatistics (vector<Matcher::p_match> &p_matched,int32_
       
     // method quad matching: compute position delta
     } else {
+      /*
       delta_curr.val[0] = it->u1p - it->u1c;
       delta_curr.val[1] = it->v1p - it->v1c;
       delta_curr.val[2] = it->u2p - it->u1p;
@@ -773,14 +774,34 @@ void Matcher::computePriorStatistics (vector<Matcher::p_match> &p_matched,int32_
       delta_curr.val[4] = it->u2c - it->u2p;
       delta_curr.val[5] = it->v2c - it->v2p;
       delta_curr.val[6] = it->u1c - it->u2c;
-      delta_curr.val[7] = 0;
+      delta_curr.val[7] = 0;*/
+      delta_curr.val[0] = it->u2p - it->u1p;
+      delta_curr.val[1] = 0;
+      delta_curr.val[2] = it->u2c - it->u2p;
+      delta_curr.val[3] = it->v2c - it->v2p;
+      delta_curr.val[4] = it->u1c - it->u2c;
+      delta_curr.val[5] = 0;
+      delta_curr.val[6] = it->u1p - it->u1c;
+      delta_curr.val[7] = it->v1p - it->v1c;
     }
     
     // compute row and column of bin to which this observation belongs
-    int32_t u_bin_min = min(max((int32_t)floor(it->u1c/(float)param.match_binsize)-1,0),u_bin_num-1);
-    int32_t u_bin_max = min(max((int32_t)floor(it->u1c/(float)param.match_binsize)+1,0),u_bin_num-1);
-    int32_t v_bin_min = min(max((int32_t)floor(it->v1c/(float)param.match_binsize)-1,0),v_bin_num-1);
-    int32_t v_bin_max = min(max((int32_t)floor(it->v1c/(float)param.match_binsize)+1,0),v_bin_num-1);
+    int32_t u_bin_min,u_bin_max,v_bin_min,v_bin_max;
+
+    // flow + stereo: use current left image as reference
+    if (method<2) {
+      u_bin_min = min(max((int32_t)floor(it->u1c/(float)param.match_binsize)-1,0),u_bin_num-1);
+      u_bin_max = min(max((int32_t)floor(it->u1c/(float)param.match_binsize)+1,0),u_bin_num-1);
+      v_bin_min = min(max((int32_t)floor(it->v1c/(float)param.match_binsize)-1,0),v_bin_num-1);
+      v_bin_max = min(max((int32_t)floor(it->v1c/(float)param.match_binsize)+1,0),v_bin_num-1);
+      
+    // quad matching: use current previous image as reference
+    } else {
+      u_bin_min = min(max((int32_t)floor(it->u1p/(float)param.match_binsize)-1,0),u_bin_num-1);
+      u_bin_max = min(max((int32_t)floor(it->u1p/(float)param.match_binsize)+1,0),u_bin_num-1);
+      v_bin_min = min(max((int32_t)floor(it->v1p/(float)param.match_binsize)-1,0),v_bin_num-1);
+      v_bin_max = min(max((int32_t)floor(it->v1p/(float)param.match_binsize)+1,0),v_bin_num-1);
+    }
     
     // add to accumulator
     for (int32_t v_bin=v_bin_min; v_bin<=v_bin_max; v_bin++)
@@ -870,11 +891,11 @@ void Matcher::createIndexVector (int32_t* m,int32_t n,vector<int32_t> *k,const i
 
 inline void Matcher::findMatch (int32_t* m1,const int32_t &i1,int32_t* m2,const int32_t &step_size,vector<int32_t> *k2,
                                 const int32_t &u_bin_num,const int32_t &v_bin_num,const int32_t &stat_bin,
-                                int32_t& min_ind,int32_t stage,bool flow,bool use_prior) {
+                                int32_t& min_ind,int32_t stage,bool flow,bool use_prior,double u_,double v_) {
   
   // init and load image coordinates + feature
   min_ind          = 0;
-  int32_t min_cost = 10000000;
+  double  min_cost = 10000000;
   int32_t u1       = *(m1+step_size*i1+0);
   int32_t v1       = *(m1+step_size*i1+1);
   int32_t c        = *(m1+step_size*i1+3);
@@ -923,7 +944,15 @@ inline void Matcher::findMatch (int32_t* m1,const int32_t &i1,int32_t* m2,const 
           xmm3 = _mm_sad_epu8 (xmm1,xmm3);
           xmm4 = _mm_sad_epu8 (xmm2,xmm4);
           xmm4 = _mm_add_epi16(xmm3,xmm4);
-          int32_t cost = _mm_extract_epi16(xmm4,0)+_mm_extract_epi16(xmm4,4);
+          double cost = (double)(_mm_extract_epi16(xmm4,0)+_mm_extract_epi16(xmm4,4));
+          
+          if (u_>=0 && v_>=0) {
+            double du = (double)u2-u_;
+            double dv = (double)v2-v_;
+            double dist = sqrt(du*du+dv*dv);
+            cost += 4*dist;
+          }
+          
           if (cost<min_cost) {
             min_ind  = *i2_it;
             min_cost = cost;
@@ -936,7 +965,7 @@ inline void Matcher::findMatch (int32_t* m1,const int32_t &i1,int32_t* m2,const 
 
 void Matcher::matching (int32_t *m1p,int32_t *m2p,int32_t *m1c,int32_t *m2c,
                         int32_t n1p,int32_t n2p,int32_t n1c,int32_t n2c,
-                        vector<Matcher::p_match> &p_matched,int32_t method,bool use_prior) {
+                        vector<Matcher::p_match> &p_matched,int32_t method,bool use_prior,Matrix *Tr_delta) {
 
   // descriptor step size (number of int32_t elements in struct)
   int32_t step_size = sizeof(Matcher::maximum)/sizeof(int32_t);
@@ -954,8 +983,24 @@ void Matcher::matching (int32_t *m1p,int32_t *m2p,int32_t *m1c,int32_t *m2c,
   
   // loop variables
   int32_t* M = (int32_t*)calloc(dims_c[0]*dims_c[1],sizeof(int32_t));
-  int32_t i1p,i2p,i1c,i2c,i1c2;
+  int32_t i1p,i2p,i1c,i2c,i1c2,i1p2;
   int32_t u1p,v1p,u2p,v2p,u1c,v1c,u2c,v2c;
+  
+  double t00,t01,t02,t03,t10,t11,t12,t13,t20,t21,t22,t23;
+  if (Tr_delta) {
+    t00 = Tr_delta->val[0][0];
+    t01 = Tr_delta->val[0][1];
+    t02 = Tr_delta->val[0][2];
+    t03 = Tr_delta->val[0][3];
+    t10 = Tr_delta->val[1][0];
+    t11 = Tr_delta->val[1][1];
+    t12 = Tr_delta->val[1][2];
+    t13 = Tr_delta->val[1][3];
+    t20 = Tr_delta->val[2][0];
+    t21 = Tr_delta->val[2][1];
+    t22 = Tr_delta->val[2][2];
+    t23 = Tr_delta->val[2][3];
+  }
 
   /////////////////////////////////////////////////////
   // method: flow
@@ -1050,6 +1095,67 @@ void Matcher::matching (int32_t *m1p,int32_t *m2p,int32_t *m1c,int32_t *m2c,
     createIndexVector(m2c,n2c,k2c,u_bin_num,v_bin_num);
     
     // for all points do
+    for (i1p=0; i1p<n1p; i1p++) {
+
+      // coordinates
+      u1p = *(m1p+step_size*i1p+0);
+      v1p = *(m1p+step_size*i1p+1);
+
+      // compute row and column of statistics bin to which this observation belongs
+      int32_t u_bin = min((int32_t)floor((float)u1p/(float)param.match_binsize),u_bin_num-1);
+      int32_t v_bin = min((int32_t)floor((float)v1p/(float)param.match_binsize),v_bin_num-1);
+      int32_t stat_bin = v_bin*u_bin_num+u_bin;
+
+      // match in circle
+      findMatch(m1p,i1p,m2p,step_size,k2p,u_bin_num,v_bin_num,stat_bin,i2p, 0,false,use_prior);
+
+      u2p = *(m2p+step_size*i2p+0);
+      v2p = *(m2p+step_size*i2p+1);
+
+      if (Tr_delta) {
+      
+        double d = max((double)u1p-(double)u2p,1.0);
+        double x1p = ((double)u1p-param.cu)*param.base/d;
+        double y1p = ((double)v1p-param.cv)*param.base/d;
+        double z1p = param.f*param.base/d;
+
+        double x2c = t00*x1p + t01*y1p + t02*z1p + t03 - param.base;
+        double y2c = t10*x1p + t11*y1p + t12*z1p + t13;
+        double z2c = t20*x1p + t21*y1p + t22*z1p + t23;
+
+        double u2c_ = param.f*x2c/z2c+param.cu;
+        double v2c_ = param.f*y2c/z2c+param.cv;
+
+        findMatch(m2p,i2p,m2c,step_size,k2c,u_bin_num,v_bin_num,stat_bin,i2c, 1,true ,use_prior,u2c_,v2c_);
+      } else {
+        findMatch(m2p,i2p,m2c,step_size,k2c,u_bin_num,v_bin_num,stat_bin,i2c, 1,true ,use_prior);
+      }
+      findMatch(m2c,i2c,m1c,step_size,k1c,u_bin_num,v_bin_num,stat_bin,i1c, 2,false,use_prior);
+      if (Tr_delta)
+        findMatch(m1c,i1c,m1p,step_size,k1p,u_bin_num,v_bin_num,stat_bin,i1p2,3,true ,use_prior,u1p,v1p);
+      else
+        findMatch(m1c,i1c,m1p,step_size,k1p,u_bin_num,v_bin_num,stat_bin,i1p2,3,true ,use_prior);
+      
+      // circle closure success?
+      if (i1p2==i1p) {
+
+        // extract coordinates
+        u2c = *(m2c+step_size*i2c+0); v2c = *(m2c+step_size*i2c+1);
+        u1c = *(m1c+step_size*i1c+0); v1c = *(m1c+step_size*i1c+1);
+
+        // if disparities are positive
+        if (u1p>=u2p && u1c>=u2c) {
+          
+          // add match
+          p_matched.push_back(Matcher::p_match(u1p,v1p,i1p,u2p,v2p,i2p,
+                                               u1c,v1c,i1c,u2c,v2c,i2c));
+        }
+      }
+    }
+    
+    // old version:
+    /*
+    // for all points do
     for (i1c=0; i1c<n1c; i1c++) {
 
       // coordinates
@@ -1062,10 +1168,10 @@ void Matcher::matching (int32_t *m1p,int32_t *m2p,int32_t *m1c,int32_t *m2c,
       int32_t stat_bin = v_bin*u_bin_num+u_bin;
 
       // match in circle
-      findMatch(m1c,i1c,m1p,step_size,k1p,u_bin_num,v_bin_num,stat_bin,i1p, 0,true ,use_prior);
-      findMatch(m1p,i1p,m2p,step_size,k2p,u_bin_num,v_bin_num,stat_bin,i2p, 1,false,use_prior);
-      findMatch(m2p,i2p,m2c,step_size,k2c,u_bin_num,v_bin_num,stat_bin,i2c, 2,true ,use_prior);
-      findMatch(m2c,i2c,m1c,step_size,k1c,u_bin_num,v_bin_num,stat_bin,i1c2,3,false,use_prior);
+      findMatch(m1c,i1c,m1p,step_size,k1p,u_bin_num,v_bin_num,stat_bin,i1p, 0,true ,use_prior,Tr_delta);
+      findMatch(m1p,i1p,m2p,step_size,k2p,u_bin_num,v_bin_num,stat_bin,i2p, 1,false,use_prior,Tr_delta);
+      findMatch(m2p,i2p,m2c,step_size,k2c,u_bin_num,v_bin_num,stat_bin,i2c, 2,true ,use_prior,Tr_delta);
+      findMatch(m2c,i2c,m1c,step_size,k1c,u_bin_num,v_bin_num,stat_bin,i1c2,3,false,use_prior,Tr_delta);
       
       // circle closure success?
       if (i1c2==i1c) {
@@ -1088,6 +1194,7 @@ void Matcher::matching (int32_t *m1p,int32_t *m2p,int32_t *m1c,int32_t *m2c,
         }
       }
     }
+    */
   }
 
   // free memory
@@ -1317,9 +1424,14 @@ bool Matcher::parabolicFitting(const uint8_t* I1_du,const uint8_t* I1_dv,const i
   
   // solve least squares system
   Matrix c(9,1);
-  for (int32_t i=-1; i<=+1; i++)
-    for (int32_t j=-1; j<=+1; j++)
-      c.val[(i+1)*3+(j+1)][0] = cost[(dv+i)*7+(du+j)];
+  for (int32_t i=-1; i<=+1; i++) {
+    for (int32_t j=-1; j<=+1; j++) {
+      int32_t cost_curr = cost[(dv+i)*7+(du+j)];
+      // if (i!=0 && j!=0 && cost_curr<=min_cost+150)
+        // return false;
+      c.val[(i+1)*3+(j+1)][0] = cost_curr;
+    }
+  }
   Matrix b = At*c;
   if (!b.solve(AtA))
     return false;
@@ -1472,10 +1584,11 @@ void Matcher::refinement (vector<Matcher::p_match> &p_matched,int32_t method) {
 }
 
 float Matcher::mean(const uint8_t* I,const int32_t &bpl,const int32_t &u_min,const int32_t &u_max,const int32_t &v_min,const int32_t &v_max) {
-  float mean;
+  float mean = 0;
   for (int32_t v=v_min; v<=v_max; v++)
     for (int32_t u=u_min; u<=u_max; u++)
       mean += (float)*(I+getAddressOffsetImage(u,v,bpl));
   return
     mean /= (float)((u_max-u_min+1)*(v_max-v_min+1));
 }
+

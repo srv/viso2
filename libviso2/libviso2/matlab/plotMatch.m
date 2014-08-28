@@ -24,12 +24,15 @@ if method==0
     line([p_matched(i,1) p_matched(i,3)], ...
          [p_matched(i,2) p_matched(i,4)], 'Color', col,'LineWidth',1);
     plot(p_matched(i,3),p_matched(i,4),'s', 'Color', col,'LineWidth',1,'MarkerSize',2);
+    %text(p_matched(i,3),p_matched(i,4),sprintf('%d',i));
   end
   
 elseif method==1
   
   disp      = p_matched(:,1)-p_matched(:,3);
+  disp = min(disp,50);
   max_disp  = max(disp(inliers));
+  %max_disp  = min(max_disp,50);
 
   for i=1:size(p_matched,1)
     c = abs(disp(i)/max_disp);
@@ -55,8 +58,8 @@ else
       col = [0 0 1];
     end
     line([p_matched(i,1) p_matched(i,5)], ...
-         [p_matched(i,2) p_matched(i,6)], 'Color', col,'LineWidth',3);
-    plot(p_matched(i,5),p_matched(i,6),'s', 'Color', col,'LineWidth',3,'MarkerSize',3);
+         [p_matched(i,2) p_matched(i,6)], 'Color', col,'LineWidth',2);
+    plot(p_matched(i,5),p_matched(i,6),'s', 'Color', col,'LineWidth',2,'MarkerSize',3);
   end
   
 end
