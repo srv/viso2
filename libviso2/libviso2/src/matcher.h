@@ -17,6 +17,8 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 You should have received a copy of the GNU General Public License along with
 libviso2; if not, write to the Free Software Foundation, Inc., 51 Franklin
 Street, Fifth Floor, Boston, MA 02110-1301, USA 
+
+Modified by Samuel Charreyron
 */
 
 #ifndef __MATCHER_H__
@@ -97,6 +99,17 @@ public:
             u1p(u1p),v1p(v1p),i1p(i1p),u2p(u2p),v2p(v2p),i2p(i2p),
             u1c(u1c),v1c(v1c),i1c(i1c),u2c(u2c),v2c(v2c),i2c(i2c) {}
   };
+  
+  // structure for storing interest points
+  struct maximum {
+    int32_t u;   // u-coordinate
+    int32_t v;   // v-coordinate
+    int32_t val; // value
+    int32_t c;   // class
+    int32_t d1,d2,d3,d4,d5,d6,d7,d8; // descriptor
+    maximum() {}
+    maximum(int32_t u,int32_t v,int32_t val,int32_t c):u(u),v(v),val(val),c(c) {}
+  };
 
   // computes features from left/right images and pushes them back to a ringbuffer,
   // which interally stores the features of the current and previous image pair
@@ -133,20 +146,15 @@ public:
   // the previous frame. this function is useful if you want to reconstruct 3d
   // and you want to cancel the change of (unknown) camera gain.
   float getGain (std::vector<int32_t> inliers);
+  
+  // Added by samuelch
+  // return vector of features for left and right camera
+  // can return either sparse or dense features
+  void getFeatures(std::vector<Matcher::maximum>& features_left,
+                    std::vector<Matcher::maximum>& features_right, const bool sparse=true);
 
 private:
 
-  // structure for storing interest points
-  struct maximum {
-    int32_t u;   // u-coordinate
-    int32_t v;   // v-coordinate
-    int32_t val; // value
-    int32_t c;   // class
-    int32_t d1,d2,d3,d4,d5,d6,d7,d8; // descriptor
-    maximum() {}
-    maximum(int32_t u,int32_t v,int32_t val,int32_t c):u(u),v(v),val(val),c(c) {}
-  };
-  
   // u/v ranges for matching stage 0-3
   struct range {
     float u_min[4];

@@ -1592,3 +1592,60 @@ float Matcher::mean(const uint8_t* I,const int32_t &bpl,const int32_t &u_min,con
     mean /= (float)((u_max-u_min+1)*(v_max-v_min+1));
 }
 
+void Matcher::getFeatures(std::vector<Matcher::maximum>& features_left,
+                          std::vector<Matcher::maximum>& features_right, const bool sparse)
+{
+   if (features_left.size() > 0)
+   {
+      features_left.clear();
+   }
+   
+   if (features_right.size() > 0)
+   {
+      features_right.clear();
+   }
+   
+   // descriptor step size (number of int32_t elements in struct)
+   int32_t step_size = sizeof(Matcher::maximum)/sizeof(int32_t);
+   
+   if (sparse)
+   {
+       for (int i=0; i < n1c1; i++)
+       {
+          int u1c1 = *(m1c1+step_size*i+0);
+          int v1c1 = *(m1c1+step_size*i+1);
+          int val = *(m1c1+step_size*i+2);
+          int c = *(m1c1+step_size*i+3);
+          features_left.push_back(Matcher::maximum(u1c1, v1c1, val, c));
+       }
+
+       for (int i=0; i < n2c1; i++)
+       {
+          int u2c1 = *(m2c1+step_size*i+0);
+          int v2c1 = *(m2c1+step_size*i+1);
+          int val = *(m2c1+step_size*i+2);
+          int c = *(m2c1+step_size*i+3);
+          features_right.push_back(Matcher::maximum(u2c1, v2c1, val, c));
+       }
+   }
+   else
+   {
+      for (int i=0; i < n1c1; i++)
+      {
+         int u1c2 = *(m1c2+step_size*i+0);
+         int v1c2 = *(m1c2+step_size*i+1);
+         int val = *(m1c2+step_size*i+2);
+         int c = *(m1c2+step_size*i+3);
+         features_left.push_back(Matcher::maximum(u1c2, v1c2, val, c));
+      }
+
+      for (int i=0; i < n2c1; i++)
+      {
+         int u2c2 = *(m2c2+step_size*i+0);
+         int v2c2 = *(m2c2+step_size*i+1);
+         int val = *(m2c2+step_size*i+2);
+         int c = *(m2c2+step_size*i+3);
+         features_right.push_back(Matcher::maximum(u2c2, v2c2, val, c));
+      }
+   }
+}

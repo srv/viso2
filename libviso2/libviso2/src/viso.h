@@ -87,6 +87,10 @@ public:
 
   // returns previous to current feature matches from internal matcher
   std::vector<Matcher::p_match> getMatches () { return matcher->getMatches(); }
+
+  void getFeatures(std::vector<Matcher::maximum>& features_left, std::vector<Matcher::maximum>& features_right) {
+      matcher->getFeatures(features_left, features_right);
+  }
   
   // returns the number of successfully matched points, after bucketing
   int32_t getNumberOfMatches () { return p_matched.size(); }
