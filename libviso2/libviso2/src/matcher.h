@@ -151,7 +151,7 @@ public:
   // return vector of features for left and right camera
   // can return either sparse or dense features
   void getFeatures(std::vector<Matcher::maximum>& features_left,
-                    std::vector<Matcher::maximum>& features_right, const bool sparse=true);
+                    std::vector<Matcher::maximum>& features_right, const bool sparse=false);
 
 private:
 

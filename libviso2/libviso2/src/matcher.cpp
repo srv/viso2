@@ -1630,7 +1630,7 @@ void Matcher::getFeatures(std::vector<Matcher::maximum>& features_left,
    }
    else
    {
-      for (int i=0; i < n1c1; i++)
+      for (int i=0; i < n1c2; i++)
       {
          int u1c2 = *(m1c2+step_size*i+0);
          int v1c2 = *(m1c2+step_size*i+1);
@@ -1639,7 +1639,7 @@ void Matcher::getFeatures(std::vector<Matcher::maximum>& features_left,
          features_left.push_back(Matcher::maximum(u1c2, v1c2, val, c));
       }
 
-      for (int i=0; i < n2c1; i++)
+      for (int i=0; i < n2c2; i++)
       {
          int u2c2 = *(m2c2+step_size*i+0);
          int v2c2 = *(m2c2+step_size*i+1);

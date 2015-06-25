@@ -89,7 +89,7 @@ public:
   std::vector<Matcher::p_match> getMatches () { return matcher->getMatches(); }
 
   void getFeatures(std::vector<Matcher::maximum>& features_left, std::vector<Matcher::maximum>& features_right) {
-      matcher->getFeatures(features_left, features_right);
+      matcher->getFeatures(features_left, features_right, false);
   }
   
   // returns the number of successfully matched points, after bucketing
