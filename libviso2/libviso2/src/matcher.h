@@ -53,6 +53,9 @@ public:
     int32_t half_resolution;        // 0=disabled,1=match at half resolution, refine at full resolution
     int32_t refinement;             // refinement (0=none,1=pixel,2=subpixel)
     double  f,cu,cv,base;           // calibration (only for match prediction)
+    int32_t kp_min_u;               // do not extract keypoints kp_min_u away from horizontal borders
+    int32_t kp_min_v;               // do not extract keypoints kp_min_v away from vertical borders
+
     
     // default settings
     parameters () {
@@ -66,6 +69,8 @@ public:
       multi_stage            = 1;
       half_resolution        = 1;
       refinement             = 1;
+      kp_min_u               = 30;
+      kp_min_v               = 30;
     }
   };
 

@@ -692,7 +692,17 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   // extract dense maxima (2nd pass) via non-maximum suppression
   vector<Matcher::maximum> maxima2;
   nonMaximumSuppression(I_f1,I_f2,dims_matching,maxima2,param.nms_n);
-  computeDescriptors(I_du,I_dv,dims_matching[2],maxima2);
+
+  // Filter out maxima which are too close to the border
+  vector<Matcher::maximum> maxima2_filtered;
+  vector<Matcher::maximum>::const_iterator it;
+  for (it = maxima2.begin(); it != maxima2.end(); it++) {
+      if (it->u > param.kp_min_u && it->u < dims[0] - param.kp_min_u
+              && it->v > param.kp_min_v && it->v < dims[1] - param.kp_min_v)
+          maxima2_filtered.push_back(*it);
+  }
+
+  computeDescriptors(I_du,I_dv,dims_matching[2],maxima2_filtered);
 
   // release filter images
   _mm_free(I_f1);
@@ -700,7 +710,7 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   
   // get number of interest points and init maxima pointer to NULL
   num1 = maxima1.size();
-  num2 = maxima2.size();
+  num2 = maxima2_filtered.size();
   max1 = 0;
   max2 = 0;
   
@@ -723,7 +733,7 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   if (num2!=0) {
     max2 = (int32_t*)_mm_malloc(sizeof(Matcher::maximum)*num2,16);
     int32_t k=0;
-    for (vector<Matcher::maximum>::iterator it=maxima2.begin(); it!=maxima2.end(); it++) {
+    for (vector<Matcher::maximum>::iterator it=maxima2_filtered.begin(); it!=maxima2_filtered.end(); it++) {
       *(max2+k++) = it->u*s;  *(max2+k++) = it->v*s;  *(max2+k++) = 0;        *(max2+k++) = it->c;
       *(max2+k++) = it->d1;   *(max2+k++) = it->d2;   *(max2+k++) = it->d3;   *(max2+k++) = it->d4;
       *(max2+k++) = it->d5;   *(max2+k++) = it->d6;   *(max2+k++) = it->d7;   *(max2+k++) = it->d8;
