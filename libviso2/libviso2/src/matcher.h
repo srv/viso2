@@ -69,8 +69,8 @@ public:
       multi_stage            = 1;
       half_resolution        = 1;
       refinement             = 1;
-      kp_min_u               = 50;
-      kp_min_v               = 50;
+      kp_min_u               = 30;
+      kp_min_v               = 30;
     }
   };
 

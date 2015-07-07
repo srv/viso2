@@ -698,7 +698,7 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   vector<Matcher::maximum>::const_iterator it;
   for (it = maxima2.begin(); it != maxima2.end(); it++) {
       if (it->u*s > param.kp_min_u && it->u*s < (dims[0] - param.kp_min_u)
-              && it->v *s > param.kp_min_v && it->v *s < (dims[1] - param.kp_min_v))
+              && it->v*s > param.kp_min_v && it->v*s < (dims[1] - param.kp_min_v))
           maxima2_filtered.push_back(*it);
   }
 
