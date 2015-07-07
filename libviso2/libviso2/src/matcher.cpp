@@ -693,6 +693,10 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   vector<Matcher::maximum> maxima2;
   nonMaximumSuppression(I_f1,I_f2,dims_matching,maxima2,param.nms_n);
 
+  int32_t s = 1;
+  if (param.half_resolution)
+    s = 2;
+
   // Filter out maxima which are too close to the border
   vector<Matcher::maximum> maxima2_filtered;
   vector<Matcher::maximum>::const_iterator it;
@@ -713,10 +717,6 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   num2 = maxima2_filtered.size();
   max1 = 0;
   max2 = 0;
-  
-  int32_t s = 1;
-  if (param.half_resolution)
-    s = 2;
 
   // return sparse maxima as 16-bytes aligned memory
   if (num1!=0) {
