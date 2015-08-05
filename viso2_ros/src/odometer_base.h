@@ -35,6 +35,7 @@ private:
   tf::TransformListener tf_listener_;
   tf::TransformBroadcaster tf_broadcaster_;
   bool publish_tf_;
+  bool invert_tf_;
 
   // the current integrated camera pose
   tf::Transform integrated_pose_;
@@ -56,11 +57,13 @@ public:
     local_nh.param("base_link_frame_id", base_link_frame_id_, std::string("/base_link"));
     local_nh.param("sensor_frame_id", sensor_frame_id_, std::string("/camera"));
     local_nh.param("publish_tf", publish_tf_, true);
+    local_nh.param("invert_tf", invert_tf_, false);
 
     ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
                     "  odom_frame_id      = " << odom_frame_id_ << std::endl <<
                     "  base_link_frame_id = " << base_link_frame_id_ << std::endl <<
-                    "  publish_tf         = " << (publish_tf_?"true":"false"));
+                    "  publish_tf         = " << (publish_tf_?"true":"false") << std::endl <<
+                    "  invert_tf          = " << (invert_tf_?"true":"false"));
     
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
@@ -172,9 +175,18 @@ protected:
 
     if (publish_tf_)
     {
-      tf_broadcaster_.sendTransform(
-          tf::StampedTransform(base_transform, timestamp,
-          odom_frame_id_, base_link_frame_id_));
+      if (invert_tf_)
+      {
+        tf_broadcaster_.sendTransform(
+            tf::StampedTransform(base_transform.inverse(), timestamp,
+	    base_link_frame_id_, odom_frame_id_));
+      }
+      else
+      {
+        tf_broadcaster_.sendTransform(
+            tf::StampedTransform(base_transform, timestamp,
+            odom_frame_id_, base_link_frame_id_));
+      }
     }
 
     last_update_time_ = timestamp;
