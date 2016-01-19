@@ -61,7 +61,7 @@ public:
                     "  odom_frame_id      = " << odom_frame_id_ << std::endl <<
                     "  base_link_frame_id = " << base_link_frame_id_ << std::endl <<
                     "  publish_tf         = " << (publish_tf_?"true":"false"));
-    
+
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
     pose_pub_ = local_nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
@@ -124,7 +124,7 @@ protected:
     else
     {
       ROS_WARN_THROTTLE(10.0, "The tf from '%s' to '%s' does not seem to be available, "
-                              "will assume it as identity!", 
+                              "will assume it as identity!",
                               base_link_frame_id_.c_str(),
                               sensor_frame_id_.c_str());
       ROS_DEBUG("Transform error: %s", error_msg.c_str());
@@ -162,7 +162,7 @@ protected:
     odometry_msg.pose.covariance = pose_covariance_;
     odometry_msg.twist.covariance = twist_covariance_;
     odom_pub_.publish(odometry_msg);
-    
+
     geometry_msgs::PoseStamped pose_msg;
     pose_msg.header.stamp = odometry_msg.header.stamp;
     pose_msg.header.frame_id = odometry_msg.header.frame_id;

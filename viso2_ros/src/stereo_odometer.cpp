@@ -101,10 +101,11 @@ protected:
     // to fill remaining parameters
     image_geometry::StereoCameraModel model;
     model.fromCameraInfo(*l_info_msg, *r_info_msg);
-    visual_odometer_params_.base = model.baseline();
-    visual_odometer_params_.calib.f = model.left().fx();
-    visual_odometer_params_.calib.cu = model.left().cx();
-    visual_odometer_params_.calib.cv = model.left().cy();
+    visual_odometer_params_.base      = model.baseline();
+    visual_odometer_params_.calib.cu  = model.left().cx();
+    visual_odometer_params_.calib.cv  = model.left().cy();
+    visual_odometer_params_.calib.f   = model.left().fx();
+
     visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
     if (l_info_msg->header.frame_id != "") setSensorFrameId(l_info_msg->header.frame_id);
     ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
