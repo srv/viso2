@@ -6,6 +6,15 @@ find_package(catkin REQUIRED )
 #set(CMAKE_CXX_FLAGS "-msse3")
 add_definitions(-msse3)
 
+catkin_package(
+  INCLUDE_DIRS libviso2/src
+  LIBRARIES viso2
+)
+
+include_directories(libviso2/src
+  ${catkin_INCLUDE_DIRS}
+)
+
 add_library(viso2
   libviso2/src/filter.cpp
   libviso2/src/matcher.cpp
@@ -16,11 +25,3 @@ add_library(viso2
   libviso2/src/viso_mono.cpp
   libviso2/src/viso_stereo.cpp)
 
-include_directories(libviso2/src
-  ${catkin_INCLUDE_DIRS}
-)
-
-catkin_package(
-  INCLUDE_DIRS libviso2/src
-  LIBRARIES viso2
-)
