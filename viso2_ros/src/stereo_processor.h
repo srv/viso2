@@ -51,9 +51,9 @@ private:
               const sensor_msgs::CameraInfoConstPtr& l_info_msg,
               const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
- 
+
     // For sync error checking
-    ++all_received_; 
+    ++all_received_;
 
     // call implementation
     imageCallback(l_image_msg, r_image_msg, l_info_msg, r_info_msg);
@@ -62,7 +62,7 @@ private:
   void checkInputsSynchronized()
   {
     int threshold = 3 * all_received_;
-    if (left_received_ >= threshold || right_received_ >= threshold || 
+    if (left_received_ >= threshold || right_received_ >= threshold ||
         left_info_received_ >= threshold || right_info_received_ >= threshold) {
       ROS_WARN("[stereo_processor] Low number of synchronized left/right/left_info/right_info tuples received.\n"
                "Left images received:       %d (topic '%s')\n"
@@ -109,15 +109,15 @@ protected:
     std::string right_info_topic = stereo_ns + "/right/camera_info";
 
     // Subscribe to four input topics.
-    ROS_INFO("Subscribing to:\n\t* %s\n\t* %s\n\t* %s\n\t* %s", 
+    ROS_INFO("Subscribing to:\n\t* %s\n\t* %s\n\t* %s\n\t* %s",
         left_topic.c_str(), right_topic.c_str(),
         left_info_topic.c_str(), right_info_topic.c_str());
 
     image_transport::ImageTransport it(nh);
-    left_sub_.subscribe(it, left_topic, 1, transport);
-    right_sub_.subscribe(it, right_topic, 1, transport);
-    left_info_sub_.subscribe(nh, left_info_topic, 1);
-    right_info_sub_.subscribe(nh, right_info_topic, 1);
+    left_sub_.subscribe(it, left_topic, 3, transport);
+    right_sub_.subscribe(it, right_topic, 3, transport);
+    left_info_sub_.subscribe(nh, left_info_topic, 3);
+    right_info_sub_.subscribe(nh, right_info_topic, 3);
 
     // Complain every 15s if the topics appear unsynchronized
     left_sub_.registerCallback(boost::bind(StereoProcessor::increment, &left_received_));
@@ -146,7 +146,7 @@ protected:
   }
 
   /**
-   * Implement this method in sub-classes 
+   * Implement this method in sub-classes
    */
   virtual void imageCallback(const sensor_msgs::ImageConstPtr& l_image_msg,
                              const sensor_msgs::ImageConstPtr& r_image_msg,

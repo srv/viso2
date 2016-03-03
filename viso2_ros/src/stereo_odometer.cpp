@@ -28,8 +28,8 @@ static const boost::array<double, 36> STANDARD_POSE_COVARIANCE =
     0, 0, 0, 0, 0.17, 0,
     0, 0, 0, 0, 0, 0.17 } };
 static const boost::array<double, 36> STANDARD_TWIST_COVARIANCE =
-{ { 0.05, 0, 0, 0, 0, 0,
-    0, 0.05, 0, 0, 0, 0,
+{ { 0.002, 0, 0, 0, 0, 0,
+    0, 0.002, 0, 0, 0, 0,
     0, 0, 0.05, 0, 0, 0,
     0, 0, 0, 0.09, 0, 0,
     0, 0, 0, 0, 0.09, 0,
@@ -67,8 +67,8 @@ public:
 
   typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
 
-  StereoOdometer(const std::string& transport) : 
-    StereoProcessor(transport), OdometerBase(), 
+  StereoOdometer(const std::string& transport) :
+    StereoProcessor(transport), OdometerBase(),
     got_lost_(false), change_reference_frame_(false)
   {
     // Read local parameters
@@ -91,24 +91,33 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
+    int queue_size;
+    bool approximate_sync;
+    ros::NodeHandle local_nh("~");
+    local_nh.param("queue_size", queue_size, 5);
+    local_nh.param("approximate_sync", approximate_sync, false);
+
     // read calibration info from camera info message
     // to fill remaining parameters
     image_geometry::StereoCameraModel model;
     model.fromCameraInfo(*l_info_msg, *r_info_msg);
-    visual_odometer_params_.base = model.baseline();
-    visual_odometer_params_.calib.f = model.left().fx();
-    visual_odometer_params_.calib.cu = model.left().cx();
-    visual_odometer_params_.calib.cv = model.left().cy();
+    visual_odometer_params_.base      = model.baseline();
+    visual_odometer_params_.calib.cu  = model.left().cx();
+    visual_odometer_params_.calib.cv  = model.left().cy();
+    visual_odometer_params_.calib.f   = model.left().fx();
+
     visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
     if (l_info_msg->header.frame_id != "") setSensorFrameId(l_info_msg->header.frame_id);
     ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
-                    "with the following parameters:" << std::endl << 
-                    visual_odometer_params_ << 
-                    "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl << 
-                    "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl << 
+                    "with the following parameters:" << std::endl <<
+                    visual_odometer_params_ <<
+                    "  queue_size = " << queue_size << std::endl <<
+                    "  approximate_sync = " << approximate_sync << std::endl <<
+                    "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<
+                    "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl <<
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_);
   }
- 
+
   void imageCallback(
       const sensor_msgs::ImageConstPtr& l_image_msg,
       const sensor_msgs::ImageConstPtr& r_image_msg,
@@ -140,7 +149,7 @@ protected:
     ROS_ASSERT(l_image_msg->height == r_image_msg->height);
 
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
-    // on first run or when odometer got lost, only feed the odometer with 
+    // on first run or when odometer got lost, only feed the odometer with
     // images without retrieving data
     if (first_run || got_lost_)
     {
@@ -161,12 +170,12 @@ protected:
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());
-        ROS_DEBUG("Found %i matches with %i inliers.", 
+        ROS_DEBUG("Found %i matches with %i inliers.",
                   visual_odometer_->getNumberOfMatches(),
                   visual_odometer_->getNumberOfInliers());
         ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << motion);
         Matrix camera_motion;
-        // if image was replaced due to small motion we have to subtract the 
+        // if image was replaced due to small motion we have to subtract the
         // last motion to get the increment
         if (change_reference_frame_)
         {
@@ -193,8 +202,8 @@ protected:
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
         {
-          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg, 
-                                      visual_odometer_->getMatches(), 
+          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg,
+                                      visual_odometer_->getMatches(),
                                       visual_odometer_->getInlierIndices());
         }
       }
@@ -207,7 +216,7 @@ protected:
         integrateAndPublish(delta_transform, l_image_msg->header.stamp);
 
         ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
-        ROS_WARN_THROTTLE(1.0, "Visual Odometer got lost!");
+        ROS_WARN_THROTTLE(10.0, "Visual Odometer got lost!");
         got_lost_ = true;
       }
 
@@ -222,8 +231,8 @@ protected:
             // calculate current feature flow
             double feature_flow = computeFeatureFlow(visual_odometer_->getMatches());
             change_reference_frame_ = (feature_flow < ref_frame_motion_threshold_);
-            ROS_DEBUG_STREAM("Feature flow is " << feature_flow 
-                << ", marking last motion as " 
+            ROS_DEBUG_STREAM("Feature flow is " << feature_flow
+                << ", marking last motion as "
                 << (change_reference_frame_ ? "small." : "normal."));
             break;
           }
@@ -231,11 +240,11 @@ protected:
           {
             change_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
             break;
-          }            
+          }
           default:
             change_reference_frame_ = false;
         }
-        
+
       }
       else
         change_reference_frame_ = false;
@@ -272,7 +281,7 @@ protected:
   void computeAndPublishPointCloud(
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::ImageConstPtr& l_image_msg,
-      const sensor_msgs::CameraInfoConstPtr& r_info_msg, 
+      const sensor_msgs::CameraInfoConstPtr& r_info_msg,
       const std::vector<Matcher::p_match>& matches,
       const std::vector<int32_t>& inlier_indices)
   {
@@ -335,7 +344,7 @@ int main(int argc, char **argv)
 
   std::string transport = argc > 1 ? argv[1] : "raw";
   viso2_ros::StereoOdometer odometer(transport);
-  
+
   ros::spin();
   return 0;
 }
