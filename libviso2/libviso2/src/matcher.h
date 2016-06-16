@@ -16,7 +16,7 @@ PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License along with
 libviso2; if not, write to the Free Software Foundation, Inc., 51 Franklin
-Street, Fifth Floor, Boston, MA 02110-1301, USA 
+Street, Fifth Floor, Boston, MA 02110-1301, USA
 */
 
 #ifndef __MATCHER_H__
@@ -27,7 +27,11 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 #include <string.h>
 #include <iostream>
 #include <math.h>
+#if defined(__ARM_NEON__)
+#include "sse_to_neon.hpp"
+#else
 #include <emmintrin.h>
+#endif
 #include <algorithm>
 #include <vector>
 
@@ -39,7 +43,7 @@ public:
 
   // parameter settings
   struct parameters {
-  
+
     int32_t nms_n;                  // non-max-suppression: min. distance between maxima (in pixels)
     int32_t nms_tau;                // non-max-suppression: interest point peakiness threshold
     int32_t match_binsize;          // matching bin width/height (affects efficiency only)
@@ -51,7 +55,7 @@ public:
     int32_t half_resolution;        // 0=disabled,1=match at half resolution, refine at full resolution
     int32_t refinement;             // refinement (0=none,1=pixel,2=subpixel)
     double  f,cu,cv,base;           // calibration (only for match prediction)
-    
+
     // default settings
     parameters () {
       nms_n                  = 3;
@@ -72,7 +76,7 @@ public:
 
   // deconstructor
   ~Matcher();
-  
+
   // intrinsics
   void setIntrinsics(double f,double cu,double cv,double base) {
     param.f = f;
@@ -107,9 +111,9 @@ public:
   //        replace ........ if this flag is set, the current image is overwritten with
   //                         the input images, otherwise the current image is first copied
   //                         to the previous image (ring buffer functionality, descriptors need
-  //                         to be computed only once)    
+  //                         to be computed only once)
   void pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace);
-  
+
   // computes features from a single image and pushes it back to a ringbuffer,
   // which interally stores the features of the current and previous image pair
   // use this function for flow computation
@@ -146,7 +150,7 @@ private:
     maximum() {}
     maximum(int32_t u,int32_t v,int32_t val,int32_t c):u(u),v(v),val(val),c(c) {}
   };
-  
+
   // u/v ranges for matching stage 0-3
   struct range {
     float u_min[4];
@@ -154,7 +158,7 @@ private:
     float v_min[4];
     float v_max[4];
   };
-  
+
   struct delta {
     float val[8];
     delta () {}
@@ -163,7 +167,7 @@ private:
         val[i] = v;
     }
   };
-  
+
   // computes the address offset for coordinates u,v of an image of given width
   inline int32_t getAddressOffsetImage (const int32_t& u,const int32_t& v,const int32_t& width) {
     return v*width+u;
@@ -179,7 +183,7 @@ private:
   inline void computeDescriptor (const uint8_t* I_du,const uint8_t* I_dv,const int32_t &bpl,const int32_t &u,const int32_t &v,uint8_t *desc_addr);
   inline void computeSmallDescriptor (const uint8_t* I_du,const uint8_t* I_dv,const int32_t &bpl,const int32_t &u,const int32_t &v,uint8_t *desc_addr);
   void computeDescriptors (uint8_t* I_du,uint8_t* I_dv,const int32_t bpl,std::vector<Matcher::maximum> &maxima);
-  
+
   void getHalfResolutionDimensions(const int32_t *dims,int32_t *dims_half);
   uint8_t* createHalfResolutionImage(uint8_t *I,const int32_t* dims);
 
@@ -227,7 +231,7 @@ private:
   // parameters
   parameters param;
   int32_t    margin;
-  
+
   int32_t *m1p1,*m2p1,*m1c1,*m2c1;
   int32_t *m1p2,*m2p2,*m1c2,*m2c2;
   int32_t n1p1,n2p1,n1c1,n2c1;
