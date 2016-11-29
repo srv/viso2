@@ -692,7 +692,21 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   // extract dense maxima (2nd pass) via non-maximum suppression
   vector<Matcher::maximum> maxima2;
   nonMaximumSuppression(I_f1,I_f2,dims_matching,maxima2,param.nms_n);
-  computeDescriptors(I_du,I_dv,dims_matching[2],maxima2);
+
+  int32_t s = 1;
+  if (param.half_resolution)
+    s = 2;
+
+  // Filter out maxima which are too close to the border
+  vector<Matcher::maximum> maxima2_filtered;
+  vector<Matcher::maximum>::const_iterator it;
+  for (it = maxima2.begin(); it != maxima2.end(); it++) {
+      if (it->u*s > param.kp_min_u && it->u*s < (dims[0] - param.kp_min_u)
+              && it->v*s > param.kp_min_v && it->v*s < (dims[1] - param.kp_min_v))
+          maxima2_filtered.push_back(*it);
+  }
+
+  computeDescriptors(I_du,I_dv,dims_matching[2],maxima2_filtered);
 
   // release filter images
   _mm_free(I_f1);
@@ -700,13 +714,9 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   
   // get number of interest points and init maxima pointer to NULL
   num1 = maxima1.size();
-  num2 = maxima2.size();
+  num2 = maxima2_filtered.size();
   max1 = 0;
   max2 = 0;
-  
-  int32_t s = 1;
-  if (param.half_resolution)
-    s = 2;
 
   // return sparse maxima as 16-bytes aligned memory
   if (num1!=0) {
@@ -723,7 +733,7 @@ void Matcher::computeFeatures (uint8_t *I,const int32_t* dims,int32_t* &max1,int
   if (num2!=0) {
     max2 = (int32_t*)_mm_malloc(sizeof(Matcher::maximum)*num2,16);
     int32_t k=0;
-    for (vector<Matcher::maximum>::iterator it=maxima2.begin(); it!=maxima2.end(); it++) {
+    for (vector<Matcher::maximum>::iterator it=maxima2_filtered.begin(); it!=maxima2_filtered.end(); it++) {
       *(max2+k++) = it->u*s;  *(max2+k++) = it->v*s;  *(max2+k++) = 0;        *(max2+k++) = it->c;
       *(max2+k++) = it->d1;   *(max2+k++) = it->d2;   *(max2+k++) = it->d3;   *(max2+k++) = it->d4;
       *(max2+k++) = it->d5;   *(max2+k++) = it->d6;   *(max2+k++) = it->d7;   *(max2+k++) = it->d8;
@@ -1592,3 +1602,60 @@ float Matcher::mean(const uint8_t* I,const int32_t &bpl,const int32_t &u_min,con
     mean /= (float)((u_max-u_min+1)*(v_max-v_min+1));
 }
 
+void Matcher::getFeatures(std::vector<Matcher::maximum>& features_left,
+                          std::vector<Matcher::maximum>& features_right, const bool sparse)
+{
+   if (features_left.size() > 0)
+   {
+      features_left.clear();
+   }
+   
+   if (features_right.size() > 0)
+   {
+      features_right.clear();
+   }
+   
+   // descriptor step size (number of int32_t elements in struct)
+   int32_t step_size = sizeof(Matcher::maximum)/sizeof(int32_t);
+   
+   if (sparse)
+   {
+       for (int i=0; i < n1c1; i++)
+       {
+          int u1c1 = *(m1c1+step_size*i+0);
+          int v1c1 = *(m1c1+step_size*i+1);
+          int val = *(m1c1+step_size*i+2);
+          int c = *(m1c1+step_size*i+3);
+          features_left.push_back(Matcher::maximum(u1c1, v1c1, val, c));
+       }
+
+       for (int i=0; i < n2c1; i++)
+       {
+          int u2c1 = *(m2c1+step_size*i+0);
+          int v2c1 = *(m2c1+step_size*i+1);
+          int val = *(m2c1+step_size*i+2);
+          int c = *(m2c1+step_size*i+3);
+          features_right.push_back(Matcher::maximum(u2c1, v2c1, val, c));
+       }
+   }
+   else
+   {
+      for (int i=0; i < n1c2; i++)
+      {
+         int u1c2 = *(m1c2+step_size*i+0);
+         int v1c2 = *(m1c2+step_size*i+1);
+         int val = *(m1c2+step_size*i+2);
+         int c = *(m1c2+step_size*i+3);
+         features_left.push_back(Matcher::maximum(u1c2, v1c2, val, c));
+      }
+
+      for (int i=0; i < n2c2; i++)
+      {
+         int u2c2 = *(m2c2+step_size*i+0);
+         int v2c2 = *(m2c2+step_size*i+1);
+         int val = *(m2c2+step_size*i+2);
+         int c = *(m2c2+step_size*i+3);
+         features_right.push_back(Matcher::maximum(u2c2, v2c2, val, c));
+      }
+   }
+}
