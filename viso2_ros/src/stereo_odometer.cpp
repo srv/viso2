@@ -285,7 +285,7 @@ protected:
       model.fromCameraInfo(*l_info_msg, *r_info_msg);
       PointCloud::Ptr point_cloud(new PointCloud());
       point_cloud->header.frame_id = getSensorFrameId();
-      point_cloud->header.stamp = l_info_msg->header.stamp;
+      point_cloud->header.stamp = pcl_conversions::toPCL(l_info_msg->header).stamp;
       point_cloud->width = 1;
       point_cloud->height = inlier_indices.size();
       point_cloud->points.resize(inlier_indices.size());
