@@ -58,7 +58,7 @@ private:
 
   // change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below
   int ref_frame_change_method_;
-  bool change_reference_frame_;
+  bool keep_reference_frame_;
   double ref_frame_motion_threshold_; // method 1. Change the reference frame if last motion is small
   int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low
   Matrix reference_motion_;
@@ -69,7 +69,7 @@ public:
 
   StereoOdometer(const std::string& transport) : 
     StereoProcessor(transport), OdometerBase(), 
-    got_lost_(false), change_reference_frame_(false)
+    got_lost_(false), keep_reference_frame_(false)
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
@@ -101,6 +101,7 @@ protected:
     visual_odometer_params_.calib.cv = model.left().cy();
     visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
     if (l_info_msg->header.frame_id != "") setSensorFrameId(l_info_msg->header.frame_id);
+    updateInitialBaseToSensorTransform();
     ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
                     "with the following parameters:" << std::endl << 
                     visual_odometer_params_ << 
@@ -157,7 +158,7 @@ protected:
     else
     {
       bool success = visual_odometer_->process(
-          l_image_data, r_image_data, dims, change_reference_frame_);
+          l_image_data, r_image_data, dims, keep_reference_frame_);
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());
@@ -168,7 +169,7 @@ protected:
         Matrix camera_motion;
         // if image was replaced due to small motion we have to subtract the 
         // last motion to get the increment
-        if (change_reference_frame_)
+        if (keep_reference_frame_)
         {
           camera_motion = Matrix::inv(reference_motion_) * motion;
         }
@@ -217,37 +218,37 @@ protected:
         // Proceed depending on the reference frame change method
         switch ( ref_frame_change_method_ )
         {
-          case 1:
+          case REF_FRAME_CHANGE_MOTION:
           {
             // calculate current feature flow
             double feature_flow = computeFeatureFlow(visual_odometer_->getMatches());
-            change_reference_frame_ = (feature_flow < ref_frame_motion_threshold_);
+            keep_reference_frame_ = (feature_flow < ref_frame_motion_threshold_);
             ROS_DEBUG_STREAM("Feature flow is " << feature_flow 
                 << ", marking last motion as " 
-                << (change_reference_frame_ ? "small." : "normal."));
+                << (keep_reference_frame_ ? "small." : "normal."));
             break;
           }
-          case 2:
+          case REF_FRAME_CHANGE_INLIERS:
           {
-            change_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
+            keep_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
             break;
           }            
           default:
-            change_reference_frame_ = false;
+            keep_reference_frame_ = false;
         }
         
       }
       else
-        change_reference_frame_ = false;
+        keep_reference_frame_ = false;
 
-      if(!change_reference_frame_)
+      if(!keep_reference_frame_)
         ROS_DEBUG_STREAM("Changing reference frame");
 
       // create and publish viso2 info msg
       VisoInfo info_msg;
       info_msg.header.stamp = l_image_msg->header.stamp;
       info_msg.got_lost = !success;
-      info_msg.change_reference_frame = !change_reference_frame_;
+      info_msg.change_reference_frame = !keep_reference_frame_;
       info_msg.num_matches = visual_odometer_->getNumberOfMatches();
       info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
       ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;

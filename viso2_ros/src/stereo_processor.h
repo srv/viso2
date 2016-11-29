@@ -11,6 +11,10 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <image_transport/subscriber_filter.h>
 
+// Ref frame change methods
+#define REF_FRAME_CHANGE_MOTION 1
+#define REF_FRAME_CHANGE_INLIERS 2
+
 namespace viso2_ros
 {
 
