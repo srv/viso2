@@ -33,7 +33,7 @@ catkin_package()
 if(ARM_CROSS_COMPILATION)
   SET(CMAKE_SYSTEM_PROCESSOR arm)
   SET(CMAKE_CXX_FLAGS -mfpu=neon)
-else
+else(ARM_CROSS_COMPILATION)
   add_definitions(-msse3)
 endif(ARM_CROSS_COMPILATION)
 
