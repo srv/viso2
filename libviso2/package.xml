@@ -25,6 +25,6 @@
   <buildtool_depend>catkin</buildtool_depend>
 
   <export>
-    <cpp lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2" cflags="-msse3 -I${prefix}/libviso2/src/"/>
+    <cpp lflags="-L${prefix}/lib -Wl,-rpath,${prefix}/lib -lviso2" cflags="-I${prefix}/libviso2/src/"/>
   </export>
 </package>

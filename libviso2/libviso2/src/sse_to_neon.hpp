@@ -11,7 +11,7 @@
 
 #include <arm_neon.h>
 
-#if defined(__MM_MALLOC_H)
+#if !defined(__MM_MALLOC_H)
 // copied from mm_malloc.h {
 #include <stdlib.h>
 

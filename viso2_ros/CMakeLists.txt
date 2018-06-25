@@ -30,10 +30,11 @@ generate_messages(
 
 catkin_package()
 
-add_definitions(-msse3)
 if(ARM_CROSS_COMPILATION)
   SET(CMAKE_SYSTEM_PROCESSOR arm)
   SET(CMAKE_CXX_FLAGS -mfpu=neon)
+else(ARM_CROSS_COMPILATION)
+  add_definitions(-msse3)
 endif(ARM_CROSS_COMPILATION)
 
 include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})

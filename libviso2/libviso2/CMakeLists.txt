@@ -9,7 +9,12 @@ set (LIBVISO2_SRC_DIR src)
 include_directories("${LIBVISO2_SRC_DIR}")
 
 # use sse3 instruction set
-SET(CMAKE_CXX_FLAGS "-msse3")
+if(ARM_CROSS_COMPILATION)
+  SET(CMAKE_SYSTEM_PROCESSOR arm)
+  SET(CMAKE_CXX_FLAGS -mfpu=neon)
+else(ARM_CROSS_COMPILATION)
+  add_definitions(-msse3)
+endif
 
 # sources
 FILE(GLOB LIBVISO2_SRC_FILES "src/*.cpp")
