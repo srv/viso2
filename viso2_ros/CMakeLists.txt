@@ -1,17 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(viso2_ros)
 
-find_package(catkin REQUIRED COMPONENTS 
-  libviso2 
-  roscpp 
-  sensor_msgs 
-  nav_msgs 
-  message_filters 
-  image_transport 
-  cv_bridge 
-  image_geometry 
-  tf 
-  pcl_ros 
+find_package(catkin REQUIRED COMPONENTS
+  libviso2
+  roscpp
+  sensor_msgs
+  nav_msgs
+  message_filters
+  image_transport
+  cv_bridge
+  image_geometry
+  tf
+  pcl_ros
   std_srvs
   message_generation
 )
@@ -19,16 +19,23 @@ find_package(catkin REQUIRED COMPONENTS
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
+option(ARM_CROSS_COMPILATION "ARM Cross Compilation" OFF)
+
 add_message_files( DIRECTORY msg FILES VisoInfo.msg)
 
 generate_messages(
-  DEPENDENCIES 
+  DEPENDENCIES
     std_msgs
 )
 
 catkin_package()
 
-add_definitions(-msse3)
+if(ARM_CROSS_COMPILATION)
+  SET(CMAKE_SYSTEM_PROCESSOR arm)
+  SET(CMAKE_CXX_FLAGS -mfpu=neon)
+else(ARM_CROSS_COMPILATION)
+  add_definitions(-msse3)
+endif(ARM_CROSS_COMPILATION)
 
 include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
