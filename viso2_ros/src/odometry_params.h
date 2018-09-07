@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 
-#include <viso_stereo.h>
-#include <viso_mono.h>
+#include <libviso2/viso_stereo.h>
+#include <libviso2/viso_mono.h>
 
 namespace viso2_ros
 {

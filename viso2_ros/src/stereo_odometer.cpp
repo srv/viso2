@@ -5,7 +5,7 @@
 #include <pcl_ros/point_cloud.h>
 #include <pcl/point_types.h>
 
-#include <viso_stereo.h>
+#include <libviso2/viso_stereo.h>
 
 #include <viso2_ros/VisoInfo.h>
 

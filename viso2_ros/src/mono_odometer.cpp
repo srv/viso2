@@ -5,7 +5,7 @@
 #include <image_transport/image_transport.h>
 #include <image_geometry/pinhole_camera_model.h>
 
-#include <viso_mono.h>
+#include <libviso2/viso_mono.h>
 
 #include <viso2_ros/VisoInfo.h>
 
