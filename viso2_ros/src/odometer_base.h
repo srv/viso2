@@ -9,6 +9,12 @@
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 
+#include <fstream>
+#include <iostream>
+#include <std_msgs/Float32.h>
+
+#define pi 3.14159265359
+
 namespace viso2_ros
 {
 
@@ -46,6 +52,8 @@ private:
   boost::array<double, 36> pose_covariance_;
   boost::array<double, 36> twist_covariance_;
 
+  tf::StampedTransform last_tf;
+
 public:
 
   OdometerBase()
@@ -72,6 +80,7 @@ public:
     reset_service_ = local_nh.advertiseService("reset_pose", &OdometerBase::resetPose, this);
 
     integrated_pose_.setIdentity();
+    last_tf.setIdentity();
 
     pose_covariance_.assign(0.0);
     twist_covariance_.assign(0.0);
@@ -99,7 +108,9 @@ protected:
     twist_covariance_ = twist_covariance;
   }
 
-  void integrateAndPublish(const tf::Transform& delta_transform, const ros::Time& timestamp)
+  // status => (gyro, visual odometry)
+  // edited by: André Aguiar
+  void integrateAndPublish(const tf::Transform& delta_transform, const ros::Time& timestamp, int status)
   {
     if (sensor_frame_id_.empty())
     {
@@ -127,11 +138,11 @@ protected:
     else
     {
       ROS_WARN_THROTTLE(10.0, "The tf from '%s' to '%s' does not seem to be available, "
-                              "will assume it as identity!",
+                              "will assume it as the last transform!",
                               base_link_frame_id_.c_str(),
                               sensor_frame_id_.c_str());
       ROS_DEBUG("Transform error: %s", error_msg.c_str());
-      base_to_sensor.setIdentity();
+      base_to_sensor = last_tf;
     }
 
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
@@ -140,7 +151,7 @@ protected:
     odometry_msg.header.stamp = timestamp;
     odometry_msg.header.frame_id = odom_frame_id_;
     odometry_msg.child_frame_id = base_link_frame_id_;
-    tf::poseTFToMsg(base_transform, odometry_msg.pose.pose);
+    tf::poseTFToMsg(base_transform, odometry_msg.pose.pose);    
 
     // calculate twist (not possible for first run as no delta_t can be computed)
     tf::Transform delta_base_transform = base_to_sensor * delta_transform * base_to_sensor.inverse();
@@ -190,6 +201,7 @@ protected:
     }
 
     last_update_time_ = timestamp;
+    last_tf = base_to_sensor;
   }
 
 

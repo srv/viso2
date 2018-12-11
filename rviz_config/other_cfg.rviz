@@ -1,0 +1,280 @@
+Panels:
+  - Class: rviz/Displays
+    Help Height: 78
+    Name: Displays
+    Property Tree Widget:
+      Expanded:
+        - /Global Options1
+        - /Status1
+        - /RightRectified1
+        - /Left optical1
+        - /TF1/Frames1
+      Splitter Ratio: 0.604701
+    Tree Height: 701
+  - Class: rviz/Selection
+    Name: Selection
+  - Class: rviz/Tool Properties
+    Expanded:
+      - /2D Pose Estimate1
+      - /2D Nav Goal1
+      - /Publish Point1
+    Name: Tool Properties
+    Splitter Ratio: 0.588679
+  - Class: rviz/Views
+    Expanded:
+      - /Current View1
+    Name: Views
+    Splitter Ratio: 0.5
+  - Class: rviz/Time
+    Experimental: false
+    Name: Time
+    SyncMode: 0
+    SyncSource: LeftRectified
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /stereo/left/image_raw
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: LeftRectified
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Image
+      Enabled: true
+      Image Topic: /stereo/left/image_color
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: RightRectified
+      Normalize Range: true
+      Queue Size: 2
+      Transport Hint: raw
+      Unreliable: false
+      Value: true
+    - Class: rviz/Axes
+      Enabled: true
+      Length: 3
+      Name: Axes
+      Radius: 0.1
+      Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz/Axes
+      Enabled: true
+      Length: 2
+      Name: Left optical
+      Radius: 0.1
+      Reference Frame: left_optical
+      Value: true
+    - Alpha: 0.02
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 170; 0
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: PointCloud2
+      Position Transformer: XYZ
+      Queue Size: 10
+      Selectable: true
+      Size (Pixels): 3
+      Size (m): 0.01
+      Style: Points
+      Topic: /stereo/points2
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Angle Tolerance: 0.1
+      Class: rviz/Odometry
+      Color: 255; 25; 0
+      Enabled: true
+      Keep: 100
+      Length: 4
+      Name: Odometry
+      Position Tolerance: 0.1
+      Topic: /stereo_odometer/odometry
+      Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_link:
+          Value: true
+        gps:
+          Value: false
+        imu_frame:
+          Value: true
+        left_optical:
+          Value: true
+        map:
+          Value: true
+        odom:
+          Value: true
+        odom_vehicle:
+          Value: false
+        stereo_camera:
+          Value: false
+      Marker Scale: 20
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          odom_vehicle:
+            odom:
+              base_link:
+                gps:
+                  {}
+                imu_frame:
+                  {}
+                stereo_camera:
+                  left_optical:
+                    {}
+      Update Interval: 0
+      Value: true
+    - Alpha: 1
+      Autocompute Intensity Bounds: true
+      Autocompute Value Bounds:
+        Max Value: 10
+        Min Value: -10
+        Value: true
+      Axis: Z
+      Channel Name: intensity
+      Class: rviz/PointCloud2
+      Color: 255; 0; 0
+      Color Transformer: RGB8
+      Decay Time: 0
+      Enabled: true
+      Invert Rainbow: false
+      Max Color: 255; 255; 255
+      Max Intensity: 4096
+      Min Color: 0; 0; 0
+      Min Intensity: 0
+      Name: AccPointCloud2
+      Position Transformer: XYZ
+      Queue Size: 0
+      Selectable: false
+      Size (Pixels): 3
+      Size (m): 0.01
+      Style: Points
+      Topic: /accumulated_point_cloud
+      Unreliable: false
+      Use Fixed Frame: true
+      Use rainbow: true
+      Value: true
+    - Alpha: 0.7
+      Blocks: 3
+      Class: rviz_plugins/AerialMapDisplay
+      Draw Behind: false
+      Dynamically reload: true
+      Enabled: false
+      Frame Convention: XYZ -> ENU
+      Name: AerialMapDisplay
+      Object URI: http://a.tiles.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}.jpg?access_token=pk.eyJ1IjoibWlndWVscmllbW9saXZlaXJhIiwiYSI6ImNpeGtxNGlieTAwMGMycWxwa25ubXN5NzkifQ.4GoNcBf4Ud3z8ps43JQOCQ
+      Robot frame: map
+      Topic: /mavros/global_position/raw/fix
+      Value: false
+      Zoom: 18
+    - Class: rviz/Axes
+      Enabled: false
+      Length: 5
+      Name: AxesOdom_Vehicle
+      Radius: 1
+      Reference Frame: odom_vehicle
+      Value: false
+    - Class: rviz/Axes
+      Enabled: false
+      Length: 50
+      Name: AxesMap
+      Radius: 0.1
+      Reference Frame: <Fixed Frame>
+      Value: false
+    - Angle Tolerance: 0.1
+      Class: rviz/Odometry
+      Color: 255; 25; 0
+      Enabled: true
+      Keep: 1000
+      Length: 1
+      Name: Odometry
+      Position Tolerance: 0.1
+      Topic: /odometry/filtered
+      Value: true
+  Enabled: true
+  Global Options:
+    Background Color: 140; 140; 140
+    Fixed Frame: map
+    Frame Rate: 30
+  Name: root
+  Tools:
+    - Class: rviz/Interact
+      Hide Inactive Objects: true
+    - Class: rviz/MoveCamera
+    - Class: rviz/Select
+    - Class: rviz/FocusCamera
+    - Class: rviz/Measure
+    - Class: rviz/SetInitialPose
+      Topic: /initialpose
+    - Class: rviz/SetGoal
+      Topic: /move_base_simple/goal
+    - Class: rviz/PublishPoint
+      Single click: true
+      Topic: /clicked_point
+  Value: true
+  Views:
+    Current:
+      Angle: 0
+      Class: rviz/TopDownOrtho
+      Enable Stereo Rendering:
+        Stereo Eye Separation: 0.06
+        Stereo Focal Distance: 1
+        Swap Stereo Eyes: false
+        Value: false
+      Name: Current View
+      Near Clip Distance: 0.01
+      Scale: 11.809
+      Target Frame: base_link
+      Value: TopDownOrtho (rviz)
+      X: 0
+      Y: 0
+    Saved: ~
+Window Geometry:
+  Displays:
+    collapsed: false
+  Height: 1004
+  Hide Left Dock: false
+  Hide Right Dock: false
+  LeftRectified:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000004000000000000016a0000034cfc020000000bfb0000001200530065006c0065006300740069006f006e00000001e10000009b0000006400fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000001ed000001df00000185000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c00610079007301000000410000034c000000dd00fffffffb0000002000730065006c0065006300740069006f006e00200062007500660066006500720200000138000000aa0000023a00000294fb00000014005700690064006500530074006500720065006f02000000e6000000d2000003ee0000030bfb0000000c004b0069006e0065006300740200000186000001060000030c00000261fb000000240041007200750063006f0054007200610063006b006500720052006500730075006c007401000002ba000000cf0000000000000000fb0000000a0049006d00610067006500000002df000000ad0000000000000000fb0000000a0049006d006100670065010000027700000115000000000000000000000001000001590000034cfc0200000005fb0000001a004c00650066007400520065006300740069006600690065006401000000410000011f0000001600fffffffb0000001c005200690067006800740052006500630074006900660069006500640100000166000001070000001600fffffffb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a0056006900650077007301000002730000011a000000b000fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b20000000000000000000000020000054e00000130fc0100000006fb0000000a0049006d00610067006501000000000000016a0000000000000000fb0000000e004c0065006600740052006100770000000000000002670000000000000000fb00000010004c006500660074005200650063007401000000000000077e0000000000000000fb0000001200520069006700680074005200650063007401000004bc000002c20000000000000000fb000000100052006900670068007400520061007700000000000000077e0000000000000000fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000007800000003bfc0100000002fb0000000800540069006d0065010000000000000780000002f600fffffffb0000000800540069006d00650100000000000004500000000000000000000004b10000034c00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  RightRectified:
+    collapsed: false
+  Selection:
+    collapsed: false
+  Time:
+    collapsed: false
+  Tool Properties:
+    collapsed: false
+  Views:
+    collapsed: false
+  Width: 1920
+  X: 0
+Y: 24

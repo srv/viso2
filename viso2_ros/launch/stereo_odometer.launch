@@ -1,0 +1,149 @@
+<launch>
+
+  <!-- *********************************** ARGUMENTS ***************************************** -->
+
+
+  <arg name="bagfile" default="/home/aguias/Desktop/stuff/thesis/ROS/bags/sev_2017-02-20-15-20-50.bag"/>
+  <arg name="frameid_robot" default="base_link"/>
+  <arg name="frameid_camera" default="stereo_camera"/>
+
+  <param name="use_sim_time" type="bool" value="True"/>
+
+
+
+  <!-- *********************************** TRANSFORMATIONS ************************************* -->
+
+
+  <!-- TF: "base_link" to "camera_link" [Rotate the camera frame.] -->
+  <arg name="pi/2" value="1.5707963267948966"/>
+  <arg name="optical_rotate" value="0 0 0 -$(arg pi/2) 0.0 -$(arg pi/2)"/>
+  <node pkg="tf" type="static_transform_publisher" name="camera_to_gimbal" args="$(arg optical_rotate) gimball $(arg frameid_camera) 30"/>
+
+  <!-- Tranformada entre o Gimbal e Base_link -->
+  <arg name="Gimbal_rotate" value="0 0 0 0 0.19 0"/>
+  <node pkg="tf" type="static_transform_publisher" name="Gimbal_baselink" args="$(arg Gimbal_rotate) $(arg frameid_robot) gimball 30"/>
+
+  <!-- Tranformada entre o Camera Frame e Leftoptical -->
+  <node pkg="tf" type="static_transform_publisher" name="left_optical2stereo_camera" args="0 0 0 0 0 0 stereo_camera left_optical 30"/>
+
+  <!-- Tranformada entre GPS e camera -->
+  <node pkg="tf" type="static_transform_publisher" name="gps_to_camera" args="0 0 0 0 0 0 gps_frame odom 30"/>
+
+
+  <!-- *********************************** ROSBAG + CROP ***************************************** -->
+
+
+
+  <!-- Play the bagfile -->
+  <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile) -r 0.7" required="false"/>
+
+  <!-- Republishes the compressed topic so it can be used to image_proc node -->
+  <node name="republish_right" type="republish" pkg="image_transport" output="screen" args="compressed in:=/stereo/left/image_raw raw out:=/stereo/left/image_raw" />
+  <node name="republish_left"  type="republish" pkg="image_transport" output="screen" args="compressed in:=/stereo/right/image_raw raw out:=/stereo/right/image_raw" />
+
+  <!-- Run the ROS package image_proc/image_retify -->
+  <group ns="/stereo" >
+    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc"/>
+  </group>
+
+  <node pkg="nodelet" type="nodelet" args="standalone image_proc/crop_decimate" name="my_decimator_left">
+    <param name="height" value="400" />
+
+    <!-- remap input topics -->
+    <remap from="camera/image_raw" to="/stereo/left/image_rect"/>
+    <remap from="camera/image_info" to="/stereo/left/camera_info"/>
+
+    <!-- remap output topics -->
+    <remap from="camera_out/image_raw" to="/camera_out/left/image_rect"/>
+    <remap from="camera_out/image_info" to="/camera_out/left/camera_info"/>
+  </node>
+
+
+  <node pkg="nodelet" type="nodelet" args="standalone image_proc/crop_decimate" name="my_decimator_right">
+    <param name="height" value="400" />
+
+    <!-- remap input topics -->
+    <remap from="camera/image_raw" to="/stereo/right/image_rect"/>
+    <remap from="camera/image_info" to="/stereo/right/camera_info"/>
+
+    <!-- remap output topics -->
+    <remap from="camera_out/image_raw" to="/camera_out/right/image_rect"/>
+    <remap from="camera_out/image_info" to="/camera_out/right/camera_info"/>
+  </node>
+
+  <!-- *********************************** VISO2 ************************************************ -->
+
+
+
+  <!-- Run the viso2_ros package -->
+  <node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" output="screen">
+      <remap from="image" to="/image_rect"/>
+      <remap from="stereo" to="/camera_out"/>
+
+      <!--
+      <param name="max_features" value="$(arg max_features)"/>
+      <param name="bucket_width" value="$(arg bucket_width)"/>
+      <param name="bucket_height" value="$(arg bucket_height)"/>
+      -->
+      <param name="max_features" value="2"/>
+      <param name="bucket_width" value="50"/>
+      <param name="bucket_height" value="50"/>
+
+      <param name="base_link_frame_id" value="base_link"/>
+      <param name="approximate_sync" value="true"/>
+      <param name="publish_tf" value="true"/>
+      <param name="queue_size" value="5"/>
+      <param name="ref_frame_change_method" value="1"/>
+      <param name="inlier_threshold" value="5.5"/>
+      <param name="odom_frame_id" value="odom"/>
+      <param name="base_link_frame_id" value="base_link"/>
+  </node>
+
+
+
+  <!-- *********************************** DATA PROCESS ****************************************** -->
+
+
+
+  <!-- Run the data_process node -->
+  <node pkg="viso2_ros" type="data_process" name="data_process">
+    <!--
+    <param name="max_features" value="$(arg max_features)"/>
+    <param name="bucket_width" value="$(arg bucket_width)"/>
+    <param name="bucket_height" value="$(arg bucket_height)"/>
+    -->
+    <param name="max_features" value="2"/>
+    <param name="bucket_width" value="50"/>
+    <param name="bucket_height" value="50"/>
+  </node>
+
+
+
+  <!-- *********************************** RVIZ + RQT_PLOT *************************************** -->
+
+
+
+  <!-- Plot w_imu w_viso2 -->
+  <node pkg="rqt_plot" type="rqt_plot" name="rqt_plot" args="/mono_odometer/odometry/twist/twist/angular/z mavros/imu/data/angular_velocity/z"/>
+
+  <!-- Run rviz with the proper configuration -->
+  <node type="rviz" name="rviz" pkg="rviz" args="-d /home/aguias/Desktop/stuff/thesis/ROS/code/viso_ws/src/viso2/rviz_config/cfg.rviz" />
+
+
+
+  <!-- *********************************** GPS **************************************************** -->
+
+  <node pkg="geodetic_utils" type="set_gps_reference_node" name="set_gps_reference_node" output="screen">
+    <remap from="/gps" to="/mavros/global_position/raw/fix"/>
+    <param name="gps_ref_is_init" value="1"/>
+  </node>
+
+  <node pkg="geodetic_utils" type="gps_to_pose_conversion_node" name="gps_to_pose_conversion_node" output="screen">
+    <remap from="/gps" to="/mavros/global_position/raw/fix"/>
+    <remap from="/imu" to="/mavros/imu/data"/>
+    <param name="is_sim" value="false"/>
+    <param name="frame_id" value="/gps_frame"/>
+  </node>
+
+
+</launch>

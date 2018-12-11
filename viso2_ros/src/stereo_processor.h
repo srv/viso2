@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
+#include <sensor_msgs/Imu.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/synchronizer.h>
@@ -28,8 +29,9 @@ private:
   // subscriber
   image_transport::SubscriberFilter left_sub_, right_sub_;
   message_filters::Subscriber<sensor_msgs::CameraInfo> left_info_sub_, right_info_sub_;
-  typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ExactPolicy;
-  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo> ApproximatePolicy;
+  message_filters::Subscriber<sensor_msgs::Imu> imu_sub;
+  typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo, sensor_msgs::Imu> ExactPolicy;
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image, sensor_msgs::CameraInfo, sensor_msgs::CameraInfo, sensor_msgs::Imu> ApproximatePolicy;
   typedef message_filters::Synchronizer<ExactPolicy> ExactSync;
   typedef message_filters::Synchronizer<ApproximatePolicy> ApproximateSync;
   boost::shared_ptr<ExactSync> exact_sync_;
@@ -38,7 +40,7 @@ private:
 
   // for sync checking
   ros::WallTimer check_synced_timer_;
-  int left_received_, right_received_, left_info_received_, right_info_received_, all_received_;
+  int left_received_, right_received_, left_info_received_, right_info_received_, all_received_, imu_receiver;
 
   // for sync checking
   static void increment(int* value)
@@ -49,14 +51,15 @@ private:
   void dataCb(const sensor_msgs::ImageConstPtr& l_image_msg,
               const sensor_msgs::ImageConstPtr& r_image_msg,
               const sensor_msgs::CameraInfoConstPtr& l_info_msg,
-              const sensor_msgs::CameraInfoConstPtr& r_info_msg)
+              const sensor_msgs::CameraInfoConstPtr& r_info_msg,
+              const sensor_msgs::ImuConstPtr& imu_msg)
   {
 
     // For sync error checking
     ++all_received_;
 
     // call implementation
-    imageCallback(l_image_msg, r_image_msg, l_info_msg, r_info_msg);
+    imageCallback(l_image_msg, r_image_msg, l_info_msg, r_info_msg, imu_msg);
   }
 
   void checkInputsSynchronized()
@@ -118,12 +121,14 @@ protected:
     right_sub_.subscribe(it, right_topic, 3, transport);
     left_info_sub_.subscribe(nh, left_info_topic, 3);
     right_info_sub_.subscribe(nh, right_info_topic, 3);
+    imu_sub.subscribe(nh, "mavros/imu/data", 3);
 
     // Complain every 15s if the topics appear unsynchronized
     left_sub_.registerCallback(boost::bind(StereoProcessor::increment, &left_received_));
     right_sub_.registerCallback(boost::bind(StereoProcessor::increment, &right_received_));
     left_info_sub_.registerCallback(boost::bind(StereoProcessor::increment, &left_info_received_));
     right_info_sub_.registerCallback(boost::bind(StereoProcessor::increment, &right_info_received_));
+    imu_sub.registerCallback(boost::bind(StereoProcessor::increment, &imu_receiver));
     check_synced_timer_ = nh.createWallTimer(ros::WallDuration(15.0),
                                              boost::bind(&StereoProcessor::checkInputsSynchronized, this));
 
@@ -134,14 +139,14 @@ protected:
     if (approx)
     {
       approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(queue_size_),
-                                                  left_sub_, right_sub_, left_info_sub_, right_info_sub_) );
-      approximate_sync_->registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4));
+                                                  left_sub_, right_sub_, left_info_sub_, right_info_sub_, imu_sub) );
+      approximate_sync_->registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4, _5));
     }
     else
     {
       exact_sync_.reset(new ExactSync(ExactPolicy(queue_size_),
-                                      left_sub_, right_sub_, left_info_sub_, right_info_sub_) );
-      exact_sync_->registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4));
+                                      left_sub_, right_sub_, left_info_sub_, right_info_sub_, imu_sub) );
+      exact_sync_->registerCallback(boost::bind(&StereoProcessor::dataCb, this, _1, _2, _3, _4, _5));
     }
   }
 
@@ -151,7 +156,8 @@ protected:
   virtual void imageCallback(const sensor_msgs::ImageConstPtr& l_image_msg,
                              const sensor_msgs::ImageConstPtr& r_image_msg,
                              const sensor_msgs::CameraInfoConstPtr& l_info_msg,
-                             const sensor_msgs::CameraInfoConstPtr& r_info_msg) = 0;
+                             const sensor_msgs::CameraInfoConstPtr& r_info_msg,
+                             const sensor_msgs::ImuConstPtr& imu_msg) = 0;
 
 };
 

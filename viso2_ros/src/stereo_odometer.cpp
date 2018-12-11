@@ -16,6 +16,11 @@
 // to remove after debugging
 #include <opencv2/highgui/highgui.hpp>
 
+// author: André Aguiar
+#define gyro        0
+#define viso      1
+#define error_    3
+
 namespace viso2_ros
 {
 
@@ -62,6 +67,8 @@ private:
   double ref_frame_motion_threshold_; // method 1. Change the reference frame if last motion is small
   int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low
   Matrix reference_motion_;
+  ros::Time previous_time;
+  tf::Vector3 trans;
 
 public:
 
@@ -122,7 +129,8 @@ protected:
       const sensor_msgs::ImageConstPtr& l_image_msg,
       const sensor_msgs::ImageConstPtr& r_image_msg,
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
-      const sensor_msgs::CameraInfoConstPtr& r_info_msg)
+      const sensor_msgs::CameraInfoConstPtr& r_info_msg,
+      const sensor_msgs::ImuConstPtr& imu_msg)
   {
     ros::WallTime start_time = ros::WallTime::now();
     bool first_run = false;
@@ -160,7 +168,7 @@ protected:
       {
         tf::Transform delta_transform;
         delta_transform.setIdentity();
-        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+        integrateAndPublish(delta_transform, l_image_msg->header.stamp, viso);
       }
     }
     else
@@ -193,12 +201,23 @@ protected:
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
         tf::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
-        tf::Transform delta_transform(rot_mat, t);
 
         setPoseCovariance(STANDARD_POSE_COVARIANCE);
         setTwistCovariance(STANDARD_TWIST_COVARIANCE);
 
-        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+        if(abs(t.x() - trans.x()) > 3) t.setX((t.x() - trans.x() > 0) ? 3 : -3);
+        if(abs(t.y() - trans.y()) > 3) t.setY((t.y() - trans.y() > 0) ? 3 : -3);
+        if(abs(t.z() - trans.z()) > 3) t.setZ((t.z() - trans.z() > 0) ? 3 : -3);
+        if(abs(t.w() - trans.w()) > 3) t.setW((t.w() - trans.w() > 0) ? 3 : -3);
+
+        tf::Transform delta_transform(rot_mat, t);
+
+        trans.setX(t.x());
+        trans.setY(t.y());
+        trans.setZ(t.z());
+        trans.setW(t.w());
+
+        integrateAndPublish(delta_transform, l_image_msg->header.stamp, viso);
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
         {
@@ -209,15 +228,22 @@ protected:
       }
       else
       {
-        setPoseCovariance(BAD_COVARIANCE);
-        setTwistCovariance(BAD_COVARIANCE);
-        tf::Transform delta_transform;
-        delta_transform.setIdentity();
-        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+        tf::Vector3 w = tf::Vector3(imu_msg->angular_velocity.x, -imu_msg->angular_velocity.z, imu_msg->angular_velocity.y);
 
-        ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
-        ROS_WARN_THROTTLE(10.0, "Visual Odometer got lost!");
-        got_lost_ = true;
+        if(!previous_time.isZero()) {
+          double dt = (imu_msg->header.stamp - previous_time).toSec();
+
+          tfScalar roll, pitch, yaw;
+          roll  = w.x()*dt;
+          pitch = w.y()*dt;
+          yaw   = w.z()*dt;
+
+          tf::Matrix3x3 rot_mat;
+          rot_mat.setRPY(roll, pitch, yaw);
+
+          tf::Transform delta_transform(rot_mat, trans);
+          integrateAndPublish(delta_transform, imu_msg->header.stamp, gyro);
+        }
       }
 
       if(success)

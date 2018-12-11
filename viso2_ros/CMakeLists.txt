@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(viso2_ros)
 
+add_compile_options(-std=c++11)
+
 find_package(catkin REQUIRED COMPONENTS
   libviso2
+  kf
   roscpp
   sensor_msgs
   nav_msgs
@@ -14,14 +17,19 @@ find_package(catkin REQUIRED COMPONENTS
   pcl_ros
   std_srvs
   message_generation
+  std_msgs
 )
+
+if(MAKEDEBUG STREQUAL "true")
+  add_definitions(-DDEBUG)
+endif(MAKEDEBUG STREQUAL "true")
 
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
 option(ARM_CROSS_COMPILATION "ARM Cross Compilation" OFF)
 
-add_message_files( DIRECTORY msg FILES VisoInfo.msg)
+add_message_files(DIRECTORY msg FILES VisoInfo.msg RPY.msg angVel.msg rot.msg XYZ.msg)
 
 generate_messages(
   DEPENDENCIES
@@ -38,6 +46,7 @@ else(ARM_CROSS_COMPILATION)
 endif(ARM_CROSS_COMPILATION)
 
 include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(src ${kf_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
 add_executable(stereo_odometer
   src/stereo_odometer.cpp)
@@ -54,6 +63,5 @@ find_package(Boost REQUIRED COMPONENTS signals thread)
 include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(stereo_odometer ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-
 
 
