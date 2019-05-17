@@ -102,6 +102,17 @@ public:
             u1c(u1c),v1c(v1c),i1c(i1c),u2c(u2c),v2c(v2c),i2c(i2c) {}
   };
 
+  // structure for storing 3d matches
+  struct p_match_3d
+  {
+    float xp, yp, zp;
+    float xc, yc, zc;
+    p_match_3d() {}
+    p_match_3d(float xp, float yp, float zp, float xc, float yc, float zc) :
+	       xp(xp), yp(yp), zp(zp),
+	       xc(xc), yc(yc), zc(zc) {}
+  };
+
   // computes features from left/right images and pushes them back to a ringbuffer,
   // which interally stores the features of the current and previous image pair
   // use this function for stereo or quad matching

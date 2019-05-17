@@ -2,6 +2,7 @@
 
 #include <viso_stereo.h>
 #include <viso_mono.h>
+#include <viso_mono_omnidirectional.h>
 
 namespace viso2_ros
 {
@@ -65,6 +66,88 @@ void loadParams(const ros::NodeHandle& local_nh, VisualOdometryMono::parameters&
   local_nh.getParam("motion_threshold", params.motion_threshold);
 }
 
+/// loads common & omnidirectional mono specific params
+void loadParams(const ros::NodeHandle& local_nh, VisualOdometryMonoOmnidirectional::parameters& params)
+{
+  loadCommonParams(local_nh, params);
+  local_nh.getParam("ransac_iters",     params.ransac_iters);
+  local_nh.getParam("inlier_threshold", params.inlier_threshold);
+  local_nh.getParam("motion_threshold", params.motion_threshold);
+
+  std::string path;
+  FILE *f;
+  if(local_nh.getParam("calib_path", path) && (f = fopen(path.c_str(),"r")))
+  {
+    int i;
+    const int CMV_MAX_BUF = 1024;
+    char buf[CMV_MAX_BUF];
+    //Read polynomial coefficients
+    fgets(buf,CMV_MAX_BUF,f);
+    fscanf(f,"\n");
+    fscanf(f,"%d", &params.omnidirectional_calib.length_pol);
+    for (i = 0; i < params.omnidirectional_calib.length_pol; i++)
+    {
+        fscanf(f," %lf",&params.omnidirectional_calib.pol[i]);
+    }
+
+    //Read inverse polynomial coefficients
+    fscanf(f,"\n");
+    fgets(buf,CMV_MAX_BUF,f);
+    fscanf(f,"\n");
+    fscanf(f,"%d", &params.omnidirectional_calib.length_invpol);
+    for (i = 0; i < params.omnidirectional_calib.length_invpol; i++)
+    {
+        fscanf(f," %lf",&params.omnidirectional_calib.invpol[i]);
+    }
+   
+    //Read center coordinates
+    fscanf(f,"\n");
+    fgets(buf,CMV_MAX_BUF,f);
+    fscanf(f,"\n");
+    fscanf(f,"%lf %lf\n", &params.omnidirectional_calib.xc, &params.omnidirectional_calib.yc);
+   
+    //Read affine coefficients
+    fgets(buf,CMV_MAX_BUF,f);
+    fscanf(f,"\n");
+    fscanf(f,"%lf %lf %lf\n", &params.omnidirectional_calib.c,&params.omnidirectional_calib.d,&params.omnidirectional_calib.e);
+   
+    //Read image size
+    fgets(buf,CMV_MAX_BUF,f);
+    fscanf(f,"\n");
+    fscanf(f,"%d %d\n", &params.omnidirectional_calib.height, &params.omnidirectional_calib.width);
+
+    //Read camera intrinsics
+    fgets(buf, CMV_MAX_BUF, f);
+    fscanf(f,"\n");
+    fscanf(f,"%lf %lf %lf %lf\n", &params.omnidirectional_calib.fx, &params.omnidirectional_calib.fy, &params.omnidirectional_calib.cx, &params.omnidirectional_calib.cy);
+   
+    fclose(f);
+  }
+  else
+  {
+    std::cout << "File not found or path not provided" << std::endl;
+    std::cout << "Using default parameters" << std::endl;
+    params.omnidirectional_calib.fx = 1;
+    params.omnidirectional_calib.fy = 1;
+    params.omnidirectional_calib.cx = 0;
+    params.omnidirectional_calib.cy = 0;
+    params.omnidirectional_calib.xc = 1;
+    params.omnidirectional_calib.yc = 1;
+    params.omnidirectional_calib.c  = 1;
+    params.omnidirectional_calib.d  = 1;
+    params.omnidirectional_calib.e  = 1;
+
+    params.omnidirectional_calib.length_pol    = 1;
+    params.omnidirectional_calib.length_invpol = 1;
+    params.omnidirectional_calib.width         = 2;
+    params.omnidirectional_calib.height        = 2;
+
+    params.omnidirectional_calib.pol[0]    = 1;
+    params.omnidirectional_calib.invpol[0] = 1;
+  }
+
+}
+
 } // end of namespace
 
 std::ostream& operator<<(std::ostream& out, const Matcher::parameters& params)
@@ -90,6 +173,30 @@ std::ostream& operator<<(std::ostream& out, const VisualOdometry::calibration& c
   return out;
 }
 
+std::ostream& operator<<(std::ostream& out, const VisualOdometry::omnidirectional_calibration& params)
+{
+  out << "  poly         = ";
+  for (int i = 0; i < params.length_pol; i++) {
+    out << params.pol[i] << " ; ";
+  }
+  out << std::endl;
+
+  out << "  inverse poly = ";
+  for (int i = 0; i < params.length_invpol; i++) {
+    out << params.invpol[i] << " ; ";
+  }
+  out << std::endl;
+
+  out << "  xc           = " << params.xc << std::endl;
+  out << "  yc           = " << params.yc << std::endl;
+  out << "  width        = " << params.width << std::endl;
+  out << "  height       = " << params.height << std::endl;
+  out << "  fx           = " << params.fx << std::endl;
+  out << "  fy           = " << params.fy << std::endl;
+  out << "  cx           = " << params.cx << std::endl;
+  out << "  cy           = " << params.cy << std::endl;
+}
+
 std::ostream& operator<<(std::ostream& out, const VisualOdometry::bucketing& bucketing)
 {
   out << "  max_features  = " << bucketing.max_features << std::endl;
@@ -101,6 +208,7 @@ std::ostream& operator<<(std::ostream& out, const VisualOdometry::bucketing& buc
 std::ostream& operator<<(std::ostream& out, const VisualOdometry::parameters& params)
 {
   out << "Calibration parameters:" << std::endl << params.calib;
+  out << "omnidirectional Calibration parameters:" << std::endl << params.omnidirectional_calib;
   out << "Matcher parameters:" << std::endl << params.match;
   out << "Bucketing parameters:" << std::endl << params.bucket;
   return out;
@@ -128,7 +236,6 @@ std::ostream& operator<<(std::ostream& out, const VisualOdometryMono::parameters
   out << "  motion_threshold = " << params.motion_threshold << std::endl;
   return out;
 }
-
 
 
 } // end of namespace
