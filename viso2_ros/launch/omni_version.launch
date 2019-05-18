@@ -1,0 +1,20 @@
+<launch>
+
+  <arg name="bagfile" default="fisheye_cam.bag"/>
+  <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)" required="false"/>
+
+  <!-- Run the viso2_ros package -->
+  <node pkg="viso2_ros" type="mono_odometer_omnidirectional" name="mono_odometer" output="screen">
+      <param name="image" value="/fisheye_cam/image"/>
+
+      <param name="camera_height" value="1.20" />
+      <param name="camera_pitch"  value="0.00" />
+
+      <param name="base_link_frame_id" value="base_link"/>
+      <param name="publish_tf" value="true"/>
+      <param name="odom_frame_id" value="odom"/>
+
+      <param name="calib_path" value="/calib.txt" />
+  </node>
+
+</launch>

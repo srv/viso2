@@ -2,7 +2,6 @@
 Copyright 2019. All rights reserved.
 Faculty of Engineering of the University of Porto, Portugal
 
-This file is part of libviso2.
 Authors: André Aguiar
 
 libviso2 is free software; you can redistribute it and/or modify it under the
