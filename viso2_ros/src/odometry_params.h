@@ -208,7 +208,6 @@ std::ostream& operator<<(std::ostream& out, const VisualOdometry::bucketing& buc
 std::ostream& operator<<(std::ostream& out, const VisualOdometry::parameters& params)
 {
   out << "Calibration parameters:" << std::endl << params.calib;
-  out << "omnidirectional Calibration parameters:" << std::endl << params.omnidirectional_calib;
   out << "Matcher parameters:" << std::endl << params.match;
   out << "Bucketing parameters:" << std::endl << params.bucket;
   return out;

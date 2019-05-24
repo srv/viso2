@@ -100,7 +100,7 @@ std::vector<double> VisualOdometryMonoOmnidirectional::estimateMotion (std::vect
   // return error on large median (litte motion)
   if (median>param.motion_threshold)
     return vector<double>();
-
+  
   // project features to 2d
   Matrix x_plane(2,X_plane.n);
   x_plane.setMat(X_plane.getMat(1,0,2,-1),0,0);

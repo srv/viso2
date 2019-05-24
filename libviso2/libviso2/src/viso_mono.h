@@ -40,7 +40,7 @@ public:
       pitch            = 0.0;
       ransac_iters     = 2000;
       inlier_threshold = 0.00001;
-      motion_threshold = 100.0;
+      motion_threshold = 50.0;
     }
   };
 
