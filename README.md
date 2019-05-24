@@ -40,7 +40,7 @@ roslaunch viso2_ros demo.launch
 
 ##### Running the test sequences
 
-* To run both test sequences you can execute the following commands.
+* To run both test sequences you can execute the following commands after setting the proper paths for the bag file and the calibration file.
 ```
 roslaunch viso2_ros perspective.launch
 roslaunch viso2_ros fisheye.launch
