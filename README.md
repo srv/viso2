@@ -47,3 +47,7 @@ roslaunch viso2_ros fisheye.launch
 ```
 **NOTE:** We provide the **camera calibration file** for the fisheye camera ('data/calib_results.txt'). You have to set the correct path to the rosbag file in both launch files and the calibration text file in the fisheye.launch. 
 We also provide a **rviz configuration file** to easy visualization of the results.
+
+## Acknowledges
+
+This work is co-financed by the ERDF – European Regional Development Fund through the Operational Programme for Competitiveness and Internationalisation - COMPETE 2020 under the PORTUGAL 2020 Partnership Agreement, and through the Portuguese National Innovation Agency (ANI) as a part of project «ROMOVI: POCI-01-0247-FEDER-017945»".
