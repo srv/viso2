@@ -2,7 +2,7 @@
 
   <arg name="camera" default="/fisheye_cam/image"/>
   <arg name="calib" default="/home/aguias/Desktop/stuff/thesis/ros/code/viso_omni/src/viso2/data/calib_results.txt"/>
-  <arg name="bagfile" default="/performance_test.bag"/>
+  <arg name="bagfile" default="/home/aguias/Desktop/laser_test/performance_test.bag"/>
 
   <param name="/use_sim_time" value="true"/>
   <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)"/>
