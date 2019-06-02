@@ -20,6 +20,7 @@
     <param name="base_link_frame_id" value="$(arg camera)"/>
     <param name="odom_frame_id" value="visual_odom"/>
 
+    <param name="max_features" value="10" />
     <param name="motion_threshold" value="350" />
     <param name="camera_height" value="1.12" />
     <param name="camera_pitch"  value="0.00" />

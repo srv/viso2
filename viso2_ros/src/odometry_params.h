@@ -75,53 +75,53 @@ void loadParams(const ros::NodeHandle& local_nh, VisualOdometryMonoOmnidirection
   local_nh.getParam("motion_threshold", params.motion_threshold);
 
   std::string path;
-  FILE *f;
-  if(local_nh.getParam("calib_path", path) && (f = fopen(path.c_str(),"r")))
+  local_nh.getParam("calib_path", path);
+  std::ifstream file(path.c_str());
+  if(file.is_open())
   {
-    int i;
-    const int CMV_MAX_BUF = 1024;
-    char buf[CMV_MAX_BUF];
+    std::string s;
+
     //Read polynomial coefficients
-    fgets(buf,CMV_MAX_BUF,f);
-    fscanf(f,"\n");
-    fscanf(f,"%d", &params.omnidirectional_calib.length_pol);
-    for (i = 0; i < params.omnidirectional_calib.length_pol; i++)
+    std::getline(file, s);
+    file >> params.omnidirectional_calib.length_pol;
+    for (int i = 0; i < params.omnidirectional_calib.length_pol; i++)
     {
-        fscanf(f," %lf",&params.omnidirectional_calib.pol[i]);
+      file >> params.omnidirectional_calib.pol[i];
     }
 
     //Read inverse polynomial coefficients
-    fscanf(f,"\n");
-    fgets(buf,CMV_MAX_BUF,f);
-    fscanf(f,"\n");
-    fscanf(f,"%d", &params.omnidirectional_calib.length_invpol);
-    for (i = 0; i < params.omnidirectional_calib.length_invpol; i++)
+    std::getline(file, s);
+    std::getline(file, s);
+    std::getline(file, s);
+    file >> params.omnidirectional_calib.length_invpol;
+    for (int i = 0; i < params.omnidirectional_calib.length_invpol; i++)
     {
-        fscanf(f," %lf",&params.omnidirectional_calib.invpol[i]);
+      file >> params.omnidirectional_calib.invpol[i];
     }
-   
-    //Read center coordinates
-    fscanf(f,"\n");
-    fgets(buf,CMV_MAX_BUF,f);
-    fscanf(f,"\n");
-    fscanf(f,"%lf %lf\n", &params.omnidirectional_calib.xc, &params.omnidirectional_calib.yc);
-   
-    //Read affine coefficients
-    fgets(buf,CMV_MAX_BUF,f);
-    fscanf(f,"\n");
-    fscanf(f,"%lf %lf %lf\n", &params.omnidirectional_calib.c,&params.omnidirectional_calib.d,&params.omnidirectional_calib.e);
-   
-    //Read image size
-    fgets(buf,CMV_MAX_BUF,f);
-    fscanf(f,"\n");
-    fscanf(f,"%d %d\n", &params.omnidirectional_calib.height, &params.omnidirectional_calib.width);
 
-    //Read camera intrinsics
-    fgets(buf, CMV_MAX_BUF, f);
-    fscanf(f,"\n");
-    fscanf(f,"%lf %lf %lf %lf\n", &params.omnidirectional_calib.fx, &params.omnidirectional_calib.fy, &params.omnidirectional_calib.cx, &params.omnidirectional_calib.cy);
-   
-    fclose(f);
+    //Read center coordinates
+    std::getline(file, s);
+    std::getline(file, s);
+    std::getline(file, s);
+    file >> params.omnidirectional_calib.xc >> 
+            params.omnidirectional_calib.yc;
+    
+    //Read affine coefficients
+    std::getline(file, s);
+    std::getline(file, s);
+    std::getline(file, s);
+    file >> params.omnidirectional_calib.c >> 
+            params.omnidirectional_calib.d >>
+            params.omnidirectional_calib.e;
+    
+    //Read image size
+    std::getline(file, s);
+    std::getline(file, s);
+    std::getline(file, s);
+    file >> params.omnidirectional_calib.height >> 
+            params.omnidirectional_calib.width;
+
+    file.close();
   }
   else
   {

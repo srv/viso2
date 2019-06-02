@@ -16,6 +16,7 @@
   <node pkg="viso2_ros" type="mono_odometer_omnidirectional" name="mono_odometer" output="screen">
       <param name="image" value="$(arg camera)"/>
 
+      <param name="max_features" value="10" />
       <param name="motion_threshold" value="100" />
       <param name="camera_height" value="1.12" />
       <param name="camera_pitch"  value="0.00" />
