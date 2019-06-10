@@ -29,6 +29,7 @@ add_library(viso2
   libviso2/src/triangle.cpp
   libviso2/src/viso.cpp
   libviso2/src/viso_mono.cpp
+  libviso2/src/viso_mono_omnidirectional.cpp
   libviso2/src/viso_stereo.cpp)
 
 install(TARGETS viso2

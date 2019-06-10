@@ -26,6 +26,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 #include <stdlib.h>
 #include <string.h>
 #include <iostream>
+#include <fstream>
 #include <math.h>
 #if defined(__ARM_NEON__)
 #include "sse_to_neon.hpp"
@@ -100,6 +101,17 @@ public:
             float u1c,float v1c,int32_t i1c,float u2c,float v2c,int32_t i2c):
             u1p(u1p),v1p(v1p),i1p(i1p),u2p(u2p),v2p(v2p),i2p(i2p),
             u1c(u1c),v1c(v1c),i1c(i1c),u2c(u2c),v2c(v2c),i2c(i2c) {}
+  };
+
+  // structure for storing 3d matches
+  struct p_match_3d
+  {
+    float xp, yp, zp;
+    float xc, yc, zc;
+    p_match_3d() {}
+    p_match_3d(float xp, float yp, float zp, float xc, float yc, float zc) :
+	       xp(xp), yp(yp), zp(zp),
+	       xc(xc), yc(yc), zc(zc) {}
   };
 
   // computes features from left/right images and pushes them back to a ringbuffer,

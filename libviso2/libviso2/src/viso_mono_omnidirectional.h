@@ -1,31 +1,11 @@
-/*
-Copyright 2011. All rights reserved.
-Institute of Measurement and Control Systems
-Karlsruhe Institute of Technology, Germany
 
-This file is part of libviso2.
-Authors: Andreas Geiger
-
-libviso2 is free software; you can redistribute it and/or modify it under the
-terms of the GNU General Public License as published by the Free Software
-Foundation; either version 2 of the License, or any later version.
-
-libviso2 is distributed in the hope that it will be useful, but WITHOUT ANY
-WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
-PARTICULAR PURPOSE. See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with
-libviso2; if not, write to the Free Software Foundation, Inc., 51 Franklin
-Street, Fifth Floor, Boston, MA 02110-1301, USA 
-*/
-
-#ifndef VISO_MONO_H
-#define VISO_MONO_H
+#ifndef VISO_MONO_omnidirectional_H
+#define VISO_MONO_omnidirectional_H
 
 #include "viso.h"
 
-class VisualOdometryMono : public VisualOdometry {
-
+class VisualOdometryMonoOmnidirectional : public VisualOdometry
+{
 public:
 
   // monocular-specific parameters (mandatory: height,pitch)
@@ -40,16 +20,16 @@ public:
       pitch            = 0.0;
       ransac_iters     = 2000;
       inlier_threshold = 0.00001;
-      motion_threshold = 50.0;
+      motion_threshold = 100.0;
     }
   };
 
-  // constructor, takes as inpute a parameter structure
-  VisualOdometryMono (parameters param);
-  
+  // constructor, takes as input a parameter structure
+  VisualOdometryMonoOmnidirectional (parameters param);
+
   // deconstructor
-  ~VisualOdometryMono ();
-  
+  ~VisualOdometryMonoOmnidirectional ();
+
   // process a new image, pushs the image back to an internal ring buffer.
   // valid motion estimates are available after calling process for two times.
   // inputs: I ......... pointer to rectified image (uint8, row-aligned)
@@ -61,10 +41,10 @@ public:
   //                     when small/no motions are observed to obtain Tr_delta wrt
   //                     an older coordinate system / time step than the previous one.
   // output: returns false if motion too small or an error occured
-  bool process (uint8_t *I,int32_t* dims,bool replace=false);
+  bool process (uint8_t *I, int32_t* dims, bool replace = false);
+
 
 private:
-
   template<class T> struct idx_cmp {
     idx_cmp(const T arr) : arr(arr) {}
     bool operator()(const size_t a, const size_t b) const { return arr[a] < arr[b]; }
@@ -73,15 +53,23 @@ private:
 
   std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched);  
   Matrix               smallerThanMedian (Matrix &X,double &median);
-  bool                 normalizeFeaturePoints (std::vector<Matcher::p_match> &p_matched,Matrix &Tp,Matrix &Tc);
-  void                 fundamentalMatrix (const std::vector<Matcher::p_match> &p_matched,const std::vector<int32_t> &active,Matrix &F);
-  void                 EtoRt(Matrix &E,Matrix &K,std::vector<Matcher::p_match> &p_matched,Matrix &X,Matrix &R,Matrix &t);
-  int32_t              triangulateChieral (std::vector<Matcher::p_match> &p_matched,Matrix &K,Matrix &R,Matrix &t,Matrix &X);
-  std::vector<int32_t> getInlier (std::vector<Matcher::p_match> &p_matched,Matrix &F);
-  
+  void                 fundamentalMatrix (const std::vector<Matcher::p_match_3d> &p_matched_3d,const std::vector<int32_t> &active,Matrix &F);
+  void                 EtoRt(Matrix &E,std::vector<Matcher::p_match_3d> &p_matched_3d,Matrix &X,Matrix &R,Matrix &t);
+  int32_t              triangulateChieral (std::vector<Matcher::p_match_3d> &p_matched_3d,Matrix &R,Matrix &t,Matrix &X);
+  std::vector<int32_t> getInlier (std::vector<Matcher::p_match_3d> &p_matched_3d,Matrix &F);
+
+  // functions that project a pixel point into a 3D unit sphere point
+  // and a 3D world point into a pixel point  
+  void                 world2cam(double point2D[2], double point3D[3]);
+  void                 cam2world(double point3D[3], double point2D[2]);
+  Matcher::p_match_3d  projectIntoUnitSphere(Matcher::p_match);
+  Matcher::p_match     projectIntoImage(Matrix X, Matrix P1, Matrix P2);
+  std::vector<Matcher::p_match_3d> projectMatches(std::vector<Matcher::p_match> matches);
+  std::vector<Matcher::p_match> reprojectMatches(Matrix X, Matrix P1, Matrix P2);
+
   // parameters
   parameters param;  
 };
 
-#endif // VISO_MONO_H
+#endif
 

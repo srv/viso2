@@ -1,21 +1,17 @@
 <launch>
 
-	<!-- Arguments -->
-	<arg name="bagfile" default="test.bag"/> <!-- Find it on http://srv.uib.es/public/viso2_ros/sample_bagfiles/  -->
-  <arg name="camera" default="/stereo_forward"/>
-  <param name="/use_sim_time" value="true"/>
-
-  <!-- Play the bagfile -->
-  <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)" />
+  <arg name="camera" default="/image"/>
 
   <!-- Run the stereo image proc -->
-  <node ns="$(arg camera)" pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" />
+  <node ns="$(arg camera)" pkg="image_proc" type="image_proc" name="image_proc" />
 
   <!-- Viso2 -->
-  <node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer">
-    <remap from="stereo" to="$(arg camera)"/>
-    <remap from="image" to="image_rect"/>
+  <node pkg="viso2_ros" type="mono_odometer" name="mono_odometer">
+    <remap from="image" to="$(arg camera)/image_rect"/>
     <param name="base_link_frame_id" value="$(arg camera)"/>
+
+    <param name="camera_height" value="1.00" />
+    <param name="camera_pitch"  value="0.00" />
   </node>
 
 </launch>

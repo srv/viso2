@@ -17,4 +17,10 @@ libviso2/libviso2/build
 */src/*/_*_.py
 */src/*/_*_.pyc
 */src/*/srv
-
+*~
+*.swp
+*.swo
+*.swk
+*.swj
+*.swh
+*.swg
