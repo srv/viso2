@@ -42,8 +42,8 @@ roslaunch viso2_ros demo.launch
 
 * To run both test sequences you can execute the following commands after setting the proper paths for the bag file and the calibration file.
 ```
-roslaunch viso2_ros perspective.launch
-roslaunch viso2_ros fisheye.launch
+roslaunch viso2_ros perspective_version.launch
+roslaunch viso2_ros omni_version.launch
 ```
 **NOTE:** We provide the **camera calibration file** for the fisheye camera ('data/calib_results.txt'). You have to set the correct path to the rosbag file in both launch files and the calibration text file in the fisheye.launch. 
 We also provide a **rviz configuration file** to easy visualization of the results.
