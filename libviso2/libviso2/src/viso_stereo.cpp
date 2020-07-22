@@ -36,11 +36,11 @@ bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool r
   else          matcher->matchFeatures(2);
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();
-  return updateMotion();
+  return updateMotion(0.0,false);
 }
 
-vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_matched) {
-  
+vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_matched,double cameraHeight, bool mono_odometry) {
+  // camera height and mono_odometry are not used here
   // return value
   bool success = true;
   

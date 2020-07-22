@@ -61,7 +61,7 @@ public:
   //                     when small/no motions are observed to obtain Tr_delta wrt
   //                     an older coordinate system / time step than the previous one.
   // output: returns false if motion too small or an error occured
-  bool process (uint8_t *I,int32_t* dims,bool replace=false);
+  bool process (uint8_t *I,int32_t* dims,bool replace=false, double cameraHeight=2.0, bool mono_odometry=true);
 
 private:
 
@@ -71,7 +71,7 @@ private:
     const T arr;
   };  
 
-  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched);  
+  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched, double cameraHeight, bool mono_odometry);  
   Matrix               smallerThanMedian (Matrix &X,double &median);
   bool                 normalizeFeaturePoints (std::vector<Matcher::p_match> &p_matched,Matrix &Tp,Matrix &Tc);
   void                 fundamentalMatrix (const std::vector<Matcher::p_match> &p_matched,const std::vector<int32_t> &active,Matrix &F);

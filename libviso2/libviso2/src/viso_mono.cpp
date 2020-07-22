@@ -28,22 +28,22 @@ VisualOdometryMono::VisualOdometryMono (parameters param) : param(param), Visual
 
 VisualOdometryMono::~VisualOdometryMono () {
 }
-
-bool VisualOdometryMono::process (uint8_t *I,int32_t* dims,bool replace) {
+// fbf 22/07/2020 added the parameter cameraHeight to update it at each processing
+bool VisualOdometryMono::process (uint8_t *I,int32_t* dims,bool replace, double cameraHeight, bool mono_odometry) {
   matcher->pushBack(I,dims,replace);
   matcher->matchFeatures(0);
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();
-  return updateMotion();
+  return updateMotion(cameraHeight,mono_odometry); //simply runs estimateMotion
 }
 
-vector<double> VisualOdometryMono::estimateMotion (vector<Matcher::p_match> p_matched) {
+vector<double> VisualOdometryMono::estimateMotion (vector<Matcher::p_match> p_matched, double cameraHeight, bool mono_odometry) {
 
   // get number of matches
   int32_t N = p_matched.size();
   if (N<10)
     return vector<double>();
-   
+   cout << "cameraHeight in estimateMotion: " << cameraHeight ; 
   // create calibration matrix
   double K_data[9] = {param.calib.f,0,param.calib.cu,0,param.calib.f,param.calib.cv,0,0,1};
   Matrix K(3,3,K_data);
@@ -139,7 +139,13 @@ vector<double> VisualOdometryMono::estimateMotion (vector<Matcher::p_match> p_ma
       }
     }
   }
-  t = t*param.height/d.val[0][best_idx];
+  if (mono_odometry){
+    t = t*cameraHeight/d.val[0][best_idx];
+    cout << "viso_mono --> Estimate motion" << cameraHeight;}
+  else 
+    t = t*param.height/d.val[0][best_idx];
+  //fbf 22/07/2020 changed fixed value of camera height by the cameraHeight received from the vehicle altitude continuously obtained
+  
   
   // compute rotation angles
   double ry = asin(R.val[0][2]);

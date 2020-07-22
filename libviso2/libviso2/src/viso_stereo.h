@@ -68,7 +68,7 @@ public:
 
 private:
 
-  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched);
+  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched,double cameraHeight, bool mono_odometry);
   enum                 result { UPDATED, FAILED, CONVERGED };  
   result               updateParameters(std::vector<Matcher::p_match> &p_matched,std::vector<int32_t> &active,std::vector<double> &tr,double step_size,double eps);
   void                 computeObservations(std::vector<Matcher::p_match> &p_matched,std::vector<int32_t> &active);

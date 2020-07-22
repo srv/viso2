@@ -39,11 +39,13 @@ VisualOdometry::~VisualOdometry () {
   delete matcher;
 }
 
-bool VisualOdometry::updateMotion () {
+bool VisualOdometry::updateMotion (double cameraHeight, bool mono_odometry) {
   
   // estimate motion
-  vector<double> tr_delta = estimateMotion(p_matched);
   
+  vector<double> tr_delta = estimateMotion(p_matched, cameraHeight, mono_odometry);
+  
+
   // on failure
   if (tr_delta.size()!=6)
     return false;
@@ -55,6 +57,7 @@ bool VisualOdometry::updateMotion () {
   // success
   return true;
 }
+
 
 Matrix VisualOdometry::transformationVectorToMatrix (vector<double> tr) {
 

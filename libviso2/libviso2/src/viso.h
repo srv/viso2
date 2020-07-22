@@ -91,9 +91,9 @@ public:
   // call this function instead of the specialized ones, if you already have
   // feature matches, and simply want to compute visual odometry from them, without
   // using the internal matching functions.
-  bool process (std::vector<Matcher::p_match> p_matched_) {
+  bool process (std::vector<Matcher::p_match> p_matched_, double cameraHeight, bool mono_odometry) {
     p_matched = p_matched_;
-    return updateMotion();
+    return updateMotion(cameraHeight, false);
   }
 
   // returns transformation from previous to current coordinates as a 4x4
@@ -134,14 +134,16 @@ public:
 protected:
 
   // calls bucketing and motion estimation
-  bool updateMotion ();
+  bool updateMotion (double cameraHeight, bool mono_odometry);
 
   // compute transformation matrix from transformation vector  
   Matrix transformationVectorToMatrix (std::vector<double> tr);
 
   // compute motion from previous to current coordinate system
   // if motion could not be computed, resulting vector will be of size 0
-  virtual std::vector<double> estimateMotion (std::vector<Matcher::p_match> p_matched) = 0;
+  // virtual method must be equaled to 0. =0 tells the compiler that this method must be replaced by its own impementation in each different class
+  
+  virtual std::vector<double> estimateMotion (std::vector<Matcher::p_match> p_matched,double cameraHeight, bool mono_odometry) = 0;
   
   // get random and unique sample of num numbers from 1:N
   std::vector<int32_t> getRandomSample (int32_t N,int32_t num);

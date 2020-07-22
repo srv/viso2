@@ -51,7 +51,7 @@ private:
     const T arr;
   };  
 
-  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched);  
+  std::vector<double>  estimateMotion (std::vector<Matcher::p_match> p_matched, double cameraHeight, bool mono_odometry);  
   Matrix               smallerThanMedian (Matrix &X,double &median);
   void                 fundamentalMatrix (const std::vector<Matcher::p_match_3d> &p_matched_3d,const std::vector<int32_t> &active,Matrix &F);
   void                 EtoRt(Matrix &E,std::vector<Matcher::p_match_3d> &p_matched_3d,Matrix &X,Matrix &R,Matrix &t);
