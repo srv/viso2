@@ -1,9 +1,11 @@
 <launch>
 
-  <arg name="camera" default="/image"/>
+  <arg name="camera" default="/stereo_down/left"/>
 
   <!-- Run the stereo image proc -->
   <node ns="$(arg camera)" pkg="image_proc" type="image_proc" name="image_proc" />
+
+  <node pkg="tf" type="static_transform_publisher" name="base_link_to_left" args="0.4 0 0.86 0 1.57079632679 0 turbot/base_link turbot/    	stereo_down/left_optical 30"/>
 
   <!-- Viso2 -->
   <node pkg="viso2_ros" type="mono_odometer" name="mono_odometer">

@@ -2,6 +2,7 @@
 #define STEREO_PROCESSOR_H_
 
 #include <ros/ros.h>
+#include <ros/console.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/CameraInfo.h>
 
@@ -61,6 +62,7 @@ private:
 
   void checkInputsSynchronized()
   {
+    ROS_INFO("Sincronitzacio");
     int threshold = 3 * all_received_;
     if (left_received_ >= threshold || right_received_ >= threshold ||
         left_info_received_ >= threshold || right_info_received_ >= threshold) {
@@ -98,7 +100,7 @@ protected:
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
-
+   // ROS_INFO_STREAM("Hola StereoProcessor");
     // Resolve topic names
     ros::NodeHandle nh;
     std::string stereo_ns = nh.resolveName("stereo");
@@ -130,7 +132,7 @@ protected:
     // Synchronize input topics. Optionally do approximate synchronization.
     local_nh.param("queue_size", queue_size_, 5);
     bool approx;
-    local_nh.param("approximate_sync", approx, false);
+    local_nh.param("approximate_sync", approx, true);
     if (approx)
     {
       approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(queue_size_),

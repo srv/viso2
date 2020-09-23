@@ -55,13 +55,14 @@ public:
 
     local_nh.param("odom_frame_id", odom_frame_id_, std::string("/odom"));
     local_nh.param("base_link_frame_id", base_link_frame_id_, std::string("/base_link"));
-    local_nh.param("sensor_frame_id", sensor_frame_id_, std::string("/camera"));
+    local_nh.param("sensor_frame_id", sensor_frame_id_, std::string("/camera")); //BMNF: Això està repetit ??
     local_nh.param("publish_tf", publish_tf_, true);
     local_nh.param("invert_tf", invert_tf_, false);
 
     ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
                     "  odom_frame_id      = " << odom_frame_id_ << std::endl <<
                     "  base_link_frame_id = " << base_link_frame_id_ << std::endl <<
+                    "  sensor_frame_id    = " << sensor_frame_id_ << std::endl <<
                     "  publish_tf         = " << (publish_tf_?"true":"false") << std::endl <<
                     "  invert_tf          = " << (invert_tf_?"true":"false"));
 
@@ -113,8 +114,9 @@ protected:
       tf_listener_.clear();
     }
     integrated_pose_ *= delta_transform;
-
-    // transform integrated pose to base frame
+     
+    /* Transform integrated pose to base frame. The program listen tf topic (?) and obtain the transform between
+    base link and the sensor. If the transfrom doesn't exist the program advise you.  */
     tf::StampedTransform base_to_sensor;
     std::string error_msg;
     if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, timestamp, &error_msg))
@@ -134,15 +136,17 @@ protected:
       base_to_sensor.setIdentity();
     }
 
+    /* Multiplication of tfs. */
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
 
+    /* */
     nav_msgs::Odometry odometry_msg;
     odometry_msg.header.stamp = timestamp;
     odometry_msg.header.frame_id = odom_frame_id_;
     odometry_msg.child_frame_id = base_link_frame_id_;
     tf::poseTFToMsg(base_transform, odometry_msg.pose.pose);
 
-    // calculate twist (not possible for first run as no delta_t can be computed)
+    /* Calculate twist (not possible for first run as no delta_t can be computed). Is not the same multiplication? */
     tf::Transform delta_base_transform = base_to_sensor * delta_transform * base_to_sensor.inverse();
     if (!last_update_time_.isZero())
     {

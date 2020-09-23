@@ -1,0 +1,31 @@
+<launch>
+
+  <!-- Arguments -->
+  <arg name="bagfile" default="/home/uib/bagfiles/andratx/2020_07_03_andratx/17_13_27/images_2020-07-03-17-13-28_0.bag
+				/home/uib/bagfiles/andratx/2020_07_03_andratx/17_13_27/topics_2020-07-03-17-13-28.bag"/> 
+
+  <arg name="camera" default="/stereo_down"/>
+  <param name="/use_sim_time" value="true"/>
+
+  <!-- Play the bagfile -->
+  <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)" />
+
+  <!-- Run the stereo image proc -->
+  <node ns="$(arg camera)" pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" respawn="true" output="screen">
+     <rosparam file="/home/uib/turbot_ws/src/turbot_stack/cola2_turbot/config/avt_manta/disparity_params_x1.yaml"/>
+     <param name="approximate_sync" value="True" />
+     <param name="queue_size" value="100" />
+  </node>
+
+  <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
+
+  <!-- Viso2 -->
+  <node pkg="viso2_ros" type="stereo_odometer" name="stereo_odometer" output="screen">
+    <remap from="stereo" to="$(arg camera)"/>
+    <remap from="image" to="image_rect"/>
+    <param name="base_link_frame_id" value="turbot/base_link"/>
+  </node>
+
+</launch>

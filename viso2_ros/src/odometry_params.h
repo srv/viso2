@@ -13,16 +13,16 @@ namespace odometry_params
 /// loads matcher params
 void loadParams(const ros::NodeHandle& local_nh, Matcher::parameters& params)
 {
-  local_nh.getParam("nms_n",                  params.nms_n);
-  local_nh.getParam("nms_tau",                params.nms_tau);
-  local_nh.getParam("match_binsize",          params.match_binsize);
-  local_nh.getParam("match_radius",           params.match_radius);
-  local_nh.getParam("match_disp_tolerance",   params.match_disp_tolerance);
-  local_nh.getParam("outlier_disp_tolerance", params.outlier_disp_tolerance);
-  local_nh.getParam("outlier_flow_tolerance", params.outlier_flow_tolerance);
-  local_nh.getParam("multi_stage",            params.multi_stage);
-  local_nh.getParam("half_resolution",        params.half_resolution);
-  local_nh.getParam("refinement",             params.refinement);
+  local_nh.getParam("nms_n",                  params.nms_n); /* Minimum distance between maxima in pixels for non-maxima-suppression.  */
+  local_nh.getParam("nms_tau",                params.nms_tau); /* Interest point peakiness threshold. */
+  local_nh.getParam("match_binsize",          params.match_binsize); /* Matching width/height (affects efficiency only). */
+  local_nh.getParam("match_radius",           params.match_radius); /* Matching radius (du/dv in pixels). */
+  local_nh.getParam("match_disp_tolerance",   params.match_disp_tolerance); /* dv tolerance for stereo matches (in pixels). */
+  local_nh.getParam("outlier_disp_tolerance", params.outlier_disp_tolerance); /* Disparity tolerance for outlier removal (in pixels). */
+  local_nh.getParam("outlier_flow_tolerance", params.outlier_flow_tolerance); /* Flow tolerance for outlier removal (in pixels). */
+  local_nh.getParam("multi_stage",            params.multi_stage); /* 0=disabled, 1=multistage matching (denser and faster). */
+  local_nh.getParam("half_resolution",        params.half_resolution); /* 0=disabled, 1=match at half resolution, refine at full resolution. */
+  local_nh.getParam("refinement",             params.refinement); /* 0=none, 1=pixel, 2=subpixel. */
 }
 
 /// loads bucketing params

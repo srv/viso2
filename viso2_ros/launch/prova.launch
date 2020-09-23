@@ -1,0 +1,18 @@
+<launch>
+<!-- Arguments -->
+  <arg name="bagfile" default="/home/uib/bagfiles/punta_negra/2018_02_15_punta_negra/180215_1655/img/images180215_1655_2018-02-15-15-55-02_0.bag"/> 
+
+  <arg name="camera" default="/stereo_down"/>
+  <param name="/use_sim_time" value="true"/>
+
+  <!-- Play the bagfile -->
+  <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)"  />
+
+  <!-- Run the stereo image proc -->
+  <node ns="$(arg camera)" pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" respawn="true" output="screen">
+	<param name="approximate_sync" value="True" />
+	<rosparam file="/home/uib/catkin_ws/src/turbot_stack/cola2_turbot/config/avt_manta/disparity_params_x1.yaml"/>
+   <!--       <param name="queue_size" value="100" />-->
+  </node>
+</launch>
+

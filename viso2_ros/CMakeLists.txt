@@ -16,6 +16,9 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
+#NEW
+FIND_LIBRARY(vlfeat-0.9.21_LIBRARIES vlfeat-0.9.21 /home/uib/prueba/vlfeat-0.9.21-bin/vlfeat-0.9.21/src)
+
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
@@ -60,3 +63,11 @@ include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(stereo_odometer ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+
+#NEW
+#add_executable(sift src/sift.c)
+#target_link_libraries(sift ${vlfeat-0.9.21_LIBRARIES})
+
+
+
+

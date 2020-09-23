@@ -1,0 +1,37 @@
+<launch>
+
+  <arg name="camera" default="/stereo_down/left"/>
+  <arg name="bagfile" default="/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag
+				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-02-04_1.bag
+				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag
+				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag
+				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/topics_2020-07-23-15-51-43_0.bag"/>
+
+  <param name="/use_sim_time" value="true"/>
+  <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)"/>
+
+  <!-- Republishes the compressed topic so it can be used to image_proc node -->
+  <node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=$(arg camera)/image raw out:=$(arg camera)/image_raw" />
+
+  <!-- Run image proc -->
+  <node ns="$(arg camera)" pkg="image_proc" type="image_proc" name="image_proc" />
+
+ <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /turbot/stereo_down /turbot/stereo_down/left_optical 30" />
+  
+  <!-- Viso2 -->
+  <node pkg="viso2_ros" type="mono_odometer" name="mono_odometer" output="screen">
+    <remap from="image" to="$(arg camera)/image_rect"/>
+    <remap from="altitude" to="/turbot/navigator/altitude_filtered"/>
+    <param name="base_link_frame_id" value="turbot/base_link"/>
+    <param name="odom_frame_id" value="/turbot/stereo_down/left_optical"/>
+
+    <param name="max_features" value="10" />
+    <param name="motion_threshold" value="350" />
+    <param name="camera_height" value="2.1" />
+    <param name="camera_pitch"  value="0.00" />
+  </node>
+
+</launch>

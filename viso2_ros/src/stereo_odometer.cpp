@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <ros/console.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_geometry/stereo_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
@@ -46,6 +47,7 @@ static const boost::array<double, 36> BAD_COVARIANCE =
 class StereoOdometer : public StereoProcessor, public OdometerBase
 {
 
+/* BMNF: Variables declaration */
 private:
 
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
@@ -71,6 +73,7 @@ public:
     StereoProcessor(transport), OdometerBase(),
     got_lost_(false), change_reference_frame_(false)
   {
+    ROS_INFO_STREAM("HOLA StereoOdometer");
     // Read local parameters
     ros::NodeHandle local_nh("~");
     odometry_params::loadParams(local_nh, visual_odometer_params_);
@@ -83,6 +86,7 @@ public:
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
 
     reference_motion_ = Matrix::eye(4);
+    
   }
 
 protected:
@@ -91,11 +95,12 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
+    ROS_INFO("Hola initOdometer");
     int queue_size;
     bool approximate_sync;
     ros::NodeHandle local_nh("~");
-    local_nh.param("queue_size", queue_size, 5);
-    local_nh.param("approximate_sync", approximate_sync, false);
+    local_nh.param("queue_size", queue_size, 10);
+    local_nh.param("approximate_sync", approximate_sync, true);
 
     // read calibration info from camera info message
     // to fill remaining parameters
@@ -149,6 +154,7 @@ protected:
     ROS_ASSERT(l_image_msg->height == r_image_msg->height);
 
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
+
     // on first run or when odometer got lost, only feed the odometer with
     // images without retrieving data
     if (first_run || got_lost_)
@@ -175,6 +181,7 @@ protected:
                   visual_odometer_->getNumberOfInliers());
         ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << motion);
         Matrix camera_motion;
+
         // if image was replaced due to small motion we have to subtract the
         // last motion to get the increment
         if (change_reference_frame_)
@@ -341,7 +348,7 @@ int main(int argc, char **argv)
              "topic is '%s'. Are you sure the images are rectified?",
              ros::names::remap("image").c_str());
   }
-
+  //ROS_INFO_STREAM("MAIN");
   std::string transport = argc > 1 ? argv[1] : "raw";
   viso2_ros::StereoOdometer odometer(transport);
 
