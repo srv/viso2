@@ -5950,19 +5950,27 @@ void mergehulls(struct mesh *m, struct behavior *b, struct otri *farleft,
 /*                                                                           */
 /*****************************************************************************/
 
-void divconqrecurse(struct mesh *m, struct behavior *b, vertex *sortarray,
+int divconqrecurse(struct mesh *m, struct behavior *b, vertex *sortarray,
                     int vertices, int axis,
                     struct otri *farleft, struct otri *farright)
 {
   struct otri midtri, tri1, tri2, tri3;
   struct otri innerleft, innerright;
   float area;
-  int divider;
+  int divider, result;
+  result = 0;
 
   if (b->verbose > 2) {
     printf("  Triangulating %d vertices.\n", vertices);
   }
-  if (vertices == 2) {
+  if(vertices <= 1){
+    //This shouldn't happen, but it can and if not handled, we will have infinite recursion and crash.*/
+    //What we'll do here to try and avoid crashing is just to make no triangles...
+    if (b->verbose > 2) {
+            printf("  Invalid divconqrecurse requested, can't have less than 2 vertices (Requested %d).\n", vertices);
+        }
+        result = 1; //Invalid.
+    } else if (vertices == 2) {
     /* The triangulation of two vertices is an edge.  An edge is */
     /*   represented by two bounding triangles.                  */
     maketriangle(m, b, farleft);
@@ -5988,7 +5996,6 @@ void divconqrecurse(struct mesh *m, struct behavior *b, vertex *sortarray,
     }
     /* Ensure that the origin of `farleft' is sortarray[0]. */
     lprev(*farright, *farleft);
-    return;
   } else if (vertices == 3) {
     /* The triangulation of three vertices is either a triangle (with */
     /*   three bounding triangles) or two edges (with four bounding   */
@@ -6085,13 +6092,12 @@ void divconqrecurse(struct mesh *m, struct behavior *b, vertex *sortarray,
       printf("  Creating ");
       printtriangle(m, b, &tri3);
     }
-    return;
   } else {
     /* Split the vertices in half. */
     divider = vertices >> 1;
     /* Recursively triangulate each half. */
-    divconqrecurse(m, b, sortarray, divider, 1 - axis, farleft, &innerleft);
-    divconqrecurse(m, b, &sortarray[divider], vertices - divider, 1 - axis,
+    result += divconqrecurse(m, b, sortarray, divider, 1 - axis, farleft, &innerleft);
+    result += divconqrecurse(m, b, &sortarray[divider], vertices - divider, 1 - axis,
                    &innerright, farright);
     if (b->verbose > 1) {
       printf("  Joining triangulations with %d and %d vertices.\n", divider,
@@ -6100,6 +6106,7 @@ void divconqrecurse(struct mesh *m, struct behavior *b, vertex *sortarray,
     /* Merge the two triangulations into one. */
     mergehulls(m, b, farleft, &innerleft, &innerright, farright, axis);
   }
+  return result;
 }
 
 long removeghosts(struct mesh *m, struct behavior *b, struct otri *startghost)
@@ -6210,7 +6217,11 @@ long divconqdelaunay(struct mesh *m, struct behavior *b)
   }
 
   /* Form the Delaunay triangulation. */
-  divconqrecurse(m, b, sortarray, i, 0, &hullleft, &hullright);
+  if(divconqrecurse(m, b, sortarray, i, 0, &hullleft, &hullright)){
+    /* Will only return a non-zero value if something went wrong. */
+    trifree((int *) sortarray);
+    return 0l;
+  }
   trifree((int *) sortarray);
 
   return removeghosts(m, b, &hullleft);

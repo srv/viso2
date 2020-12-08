@@ -14,7 +14,7 @@ if(ARM_CROSS_COMPILATION)
   SET(CMAKE_CXX_FLAGS -mfpu=neon)
 else(ARM_CROSS_COMPILATION)
   add_definitions(-msse3)
-endif
+endif(ARM_CROSS_COMPILATION)
 
 # sources
 FILE(GLOB LIBVISO2_SRC_FILES "src/*.cpp")
