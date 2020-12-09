@@ -114,8 +114,7 @@ protected:
     visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
     if (l_info_msg->header.frame_id != "") setSensorFrameId(l_info_msg->header.frame_id);
     ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
-                    "with the following parameters:" << std::endl <<
-                    visual_odometer_params_ <<
+                    "with the following parameters:" << visual_odometer_params_ << std::endl <<
                     "  queue_size = " << queue_size << std::endl <<
                     "  approximate_sync = " << approximate_sync << std::endl <<
                     "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<

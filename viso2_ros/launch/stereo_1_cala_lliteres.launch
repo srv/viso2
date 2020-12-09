@@ -4,7 +4,8 @@
   <arg name="bagfile" default="/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag
 				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-02-04_1.bag
 				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag
-				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag"/> 
+				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag
+				/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/topics_2020-07-23-15-51-43_0.bag"/>"/> 
 
   <arg name="camera" default="/stereo_down"/>
   <param name="/use_sim_time" value="true"/>

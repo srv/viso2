@@ -16,9 +16,6 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-#NEW
-FIND_LIBRARY(vlfeat-0.9.21_LIBRARIES vlfeat-0.9.21 /home/uib/prueba/vlfeat-0.9.21-bin/vlfeat-0.9.21/src)
-
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
@@ -40,22 +37,23 @@ else(ARM_CROSS_COMPILATION)
   add_definitions(-msse3)
 endif(ARM_CROSS_COMPILATION)
 
-include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
+include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
-add_executable(stereo_odometer
-  src/stereo_odometer.cpp)
+add_executable(stereo_odometer src/stereo_odometer.cpp)
 add_dependencies(stereo_odometer ${catkin_EXPORTED_TARGETS})
 add_dependencies(stereo_odometer ${PROJECT_NAME}_gencpp)
 
-add_executable(mono_odometer
-  src/mono_odometer.cpp)
+add_executable(mono_odometer src/mono_odometer.cpp)
 add_dependencies(mono_odometer ${catkin_EXPORTED_TARGETS})
 add_dependencies(mono_odometer ${PROJECT_NAME}_gencpp)
 
-add_executable(mono_odometer_omnidirectional
-  src/mono_odometer_omnidirectional.cpp)
+add_executable(mono_odometer_omnidirectional src/mono_odometer_omnidirectional.cpp)
 add_dependencies(mono_odometer_omnidirectional ${catkin_EXPORTED_TARGETS})
 add_dependencies(mono_odometer_omnidirectional ${PROJECT_NAME}_gencpp)
+
+add_executable(test src/test.cpp) # BMNF(18/11/2020): NEW
+add_dependencies(test ${catkin_EXPORTED_TARGETS}) # BMNF(18/11/2020): NEW
+add_dependencies(test ${PROJECT_NAME}_gencpp) # BMNF(18/11/2020): NEW
 
 target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 find_package(Boost REQUIRED COMPONENTS signals thread)
@@ -63,10 +61,9 @@ include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(stereo_odometer ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(test ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(18/11/2020): NEW
 
-#NEW
-#add_executable(sift src/sift.c)
-#target_link_libraries(sift ${vlfeat-0.9.21_LIBRARIES})
+
 
 
 
