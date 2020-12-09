@@ -51,9 +51,9 @@ add_executable(mono_odometer_omnidirectional src/mono_odometer_omnidirectional.c
 add_dependencies(mono_odometer_omnidirectional ${catkin_EXPORTED_TARGETS})
 add_dependencies(mono_odometer_omnidirectional ${PROJECT_NAME}_gencpp)
 
-add_executable(test src/test.cpp) # BMNF(18/11/2020): NEW
-add_dependencies(test ${catkin_EXPORTED_TARGETS}) # BMNF(18/11/2020): NEW
-add_dependencies(test ${PROJECT_NAME}_gencpp) # BMNF(18/11/2020): NEW
+add_executable(testORB src/testORB.cpp) # BMNF(18/11/2020): NEW
+add_dependencies(testORB ${catkin_EXPORTED_TARGETS}) # BMNF(18/11/2020): NEW
+add_dependencies(testORB ${PROJECT_NAME}_gencpp) # BMNF(18/11/2020): NEW
 
 target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 find_package(Boost REQUIRED COMPONENTS signals thread)
@@ -61,7 +61,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(stereo_odometer ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-target_link_libraries(test ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(18/11/2020): NEW
+target_link_libraries(testORB ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(18/11/2020): NEW
 
 
 

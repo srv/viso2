@@ -23,7 +23,7 @@
 
 
     <!-- Test -->
-    <node pkg="viso2_ros" type="test" name="test" output="screen">
+    <node pkg="viso2_ros" type="testORB" name="testORB" output="screen">
         <remap from="stereo" to="$(arg camera)"/>
         <!-- <remap from="image" to="image_rect"/> -->
         <param name="base_link_frame_id" value="turbot/base_link"/>
