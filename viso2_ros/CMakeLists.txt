@@ -127,6 +127,7 @@ message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
 include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 
+
 find_package(PCL REQUIRED)
 
 option(ARM_CROSS_COMPILATION "ARM Cross Compilation" OFF)
@@ -149,18 +150,15 @@ endif(ARM_CROSS_COMPILATION)
 
 include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIRS})
 
-add_executable(stereo_odometer
-  src/stereo_odometer.cpp)
+add_executable(stereo_odometer src/stereo_odometer.cpp)
 add_dependencies(stereo_odometer ${catkin_EXPORTED_TARGETS})
 add_dependencies(stereo_odometer ${PROJECT_NAME}_gencpp)
 
-add_executable(mono_odometer
-  src/mono_odometer.cpp)
+add_executable(mono_odometer src/mono_odometer.cpp)
 add_dependencies(mono_odometer ${catkin_EXPORTED_TARGETS})
 add_dependencies(mono_odometer ${PROJECT_NAME}_gencpp)
 
-add_executable(mono_odometer_omnidirectional
-  src/mono_odometer_omnidirectional.cpp)
+add_executable(mono_odometer_omnidirectional src/mono_odometer_omnidirectional.cpp)
 add_dependencies(mono_odometer_omnidirectional ${catkin_EXPORTED_TARGETS})
 add_dependencies(mono_odometer_omnidirectional ${PROJECT_NAME}_gencpp)
 
@@ -180,6 +178,7 @@ target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(testORB ${OpenCV_LIB} ${catkin_LIBRARIES}) # BMNF(16/11/2020): MODIFIED
 target_link_libraries(testSIFT ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(30/11/2020): NEW
+
 
 
 
