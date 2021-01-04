@@ -1,0 +1,30 @@
+<launch>
+
+<!-- Arguments -->
+    <arg name="bagfile" default="/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag "/> 
+				<!-- /home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-02-04_1.bag
+				/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag
+				/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag
+				/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/topics_2020-07-23-15-51-43_0.bag -->
+
+    <arg name="camera" default="/stereo_down"/>
+    <param name="/use_sim_time" value="true"/>
+
+    <!-- Play the bagfile -->
+    <node pkg="rosbag" type="play" name="rosbag" args="--clock $(arg bagfile)" />
+
+    <!-- Run the stereo image proc -->
+    <node ns="$(arg camera)" pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" respawn="true" output="screen">
+        <!-- <rosparam file="/home/uib/turbot_ws/src/turbot_stack/cola2_turbot/config/avt_manta/disparity_params_x1.yaml"/> -->
+        <param name="approximate_sync" value="True" />
+        <param name="queue_size" value="100" />
+    </node>
+
+    <!-- Test  with ORB-->
+    <node pkg="viso2_ros" type="testORB" name="testORB" output="screen">
+        <remap from="stereo" to="$(arg camera)"/>
+        <!-- <remap from="image" to="image_rect"/> -->
+        <param name="base_link_frame_id" value="turbot/base_link"/>
+    </node>
+
+</launch>
