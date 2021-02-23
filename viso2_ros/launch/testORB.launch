@@ -2,11 +2,16 @@
 
 <!-- Arguments -->
 
-    <arg name="bagfile" default="/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag "/> 
-				<!-- /home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-02-04_1.bag
-				/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag
-				/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag
-				/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/topics_2020-07-23-15-51-43_0.bag -->
+    <!--Pocs matches -->
+    <!-- <arg name = "bagfile" default = "/home/miguel/Desktop/bagfiles/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag" />  -->
+    <!-- Error al inicialitzar --> 
+    <!-- <arg name = "bagfile" default = "/home/miguel/Desktop/bagfiles/14_01_17/images_2020-12-03-14-01-17_0.bag" />   -->
+    <!--Va bastant bé -->
+    <!-- <arg name = "bagfile" default = "/home/miguel/Desktop/bagfiles/2020_09_18/14_16_55/images_2020-09-18-14-16-57_0.bag" /> --> 
+    <!-- Error al inicialitzar -->
+    <arg name = "bagfile" default = "/home/miguel/Desktop/bagfiles/2020_10_09/14_03_13/images_2020-10-09-14-03-14_0.bag" /> 
+    <!-- Error al inicialitzar -->
+    <!-- <arg name = "bagfile" default = "/home/miguel/Desktop/bagfiles/2020_09_17/15_19_55/images_2020-09-17-15-19-57_0.bag" /> --> 
 
 
     <arg name="camera" default="/stereo_down"/>
