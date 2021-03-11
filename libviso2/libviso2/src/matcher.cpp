@@ -210,18 +210,95 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
 //BMNF 03/02/2021: Create
 void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img){
 
-  Mat left_current_desc, right_current_desc ;
-  vector<KeyPoint> left_current_kpts, right_current_kpts ;
-  Ptr<SIFT> sift ;
   
-  int i ;
+  Ptr<cv::DescriptorMatcher> current_desc_matcher ;
+  Ptr<SIFT> sift ;
+
+  vector<KeyPoint> left_current_kpts, right_current_kpts ;
+  vector<vector<cv::DMatch>> current_vmatches ;
+  vector<cv::DMatch> current_good_matches ;
+  vector<cv::Point2f> current_obj, current_obj_RANSAC, current_scene, current_scene_RANSAC ;
+  // vector<cv::Point2f>  ;
+
+  Mat left_current_desc, right_current_desc ;
+  Mat current_H ;
+  Mat current_RANSACinliersMask ;
+
+  int k = 2 ;
+  const float ratio_thresh = 0.7f ;
+
   sift = SIFT::create(0,4,0.04,10,1.6);
   sift->detectAndCompute(left_img, Mat(), left_current_kpts, left_current_desc) ;
   sift = SIFT::create(0,4,0.04,10,1.6);
   sift->detectAndCompute(right_img, Mat(), right_current_kpts, right_current_desc) ;
 
-  std::cout << "Hello there" << std::endl ;
+  // std::cout << "Hello there" << std::endl ;
 
+  current_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+
+  if ((left_current_kpts.size() >= k) && (right_current_kpts.size() >= k)){
+  
+    current_desc_matcher->knnMatch(right_current_desc, left_current_desc, current_vmatches, k, cv::noArray(), true) ;
+
+    /////////////////////////////////////////////////////////////////
+    ///////////////////////Lowe's ratio test/////////////////////////
+    /////////////////////////////////////////////////////////////////
+
+    // Filter matches of the current images using the Lowe's ratio test.
+    for (size_t i = 0; i < current_vmatches.size(); i++){
+        if (current_vmatches[i][0].distance < ratio_thresh * current_vmatches[i][1].distance){
+            current_good_matches.push_back(current_vmatches[i][0]) ;
+        }
+    }
+
+    //////////////////////////////////////////////////////////////////
+    /////Getting keypoints from good matches of Lowe's ratio test/////
+    //////////////////////////////////////////////////////////////////
+
+    // Get the keypoints from the good matches of the right side.
+    for(int i = 0; i < current_good_matches.size(); i++){
+        current_obj.push_back(right_current_kpts[current_good_matches[i].queryIdx].pt) ;
+        current_scene.push_back(left_current_kpts[current_good_matches[i].trainIdx].pt) ;
+    }
+
+    //////////////////////////////////////////////////////////////////
+    ///////////////Compute homography & apply RANSAC//////////////////
+    //////////////////////////////////////////////////////////////////
+
+    // Obtaining homograpghy to apply RANSAC
+    try{
+
+        // left_H = cv::findHomography(left_obj, left_scene, CV_RANSAC, 3.0, left_RANSACinliersMask) ;
+        // previous_H = cv::findFundamentalMat(previous_obj, previous_scene, previous_RANSACinliersMask, CV_RANSAC, 3.f) ;
+        // right_H = cv::findHomography(right_obj, right_scene, CV_RANSAC, 3.0, right_RANSACinliersMask) ;
+        current_H = cv::findFundamentalMat(current_obj, current_scene, current_RANSACinliersMask, CV_RANSAC, 3.f) ;
+
+    } catch (cv::Exception& e) {
+
+      std::cout << "cv_bridge exception: " << e.what() << '\n';
+    }
+
+    //////////////////////////////////////////////////////////////////
+    /////////Getting keypoints from good matches of RANSAC////////////
+    //////////////////////////////////////////////////////////////////
+
+    for(int i = 0; i < current_RANSACinliersMask.rows; i++){
+        if(current_RANSACinliersMask.at<bool>(i, 0) == 1){
+            current_obj_RANSAC.push_back(current_obj[i]) ;
+            current_scene_RANSAC.push_back(current_scene[i]) ;
+        }
+    }
+
+    std::cout << "Current left of keypoints: " << left_current_kpts.size() << std::endl ;
+    std::cout << "Current right keypoints: " << right_current_kpts.size() << std::endl ;
+    std::cout << "Number of matches: " << current_vmatches.size() << std::endl ;
+    std::cout << "Number of good matches: " << current_good_matches.size() << std::endl ;
+    std::cout << "Number of rows after RANSAC: " << current_RANSACinliersMask.rows << std::endl ;
+    std::cout << "Good matches after RANSAC: " << (int)cv::sum(current_RANSACinliersMask)[0] << std::endl ;
+    std::cout << "Current obj RANSAC: " << current_obj_RANSAC.size() << std::endl ;
+    std::cout << "Current scene RANSAC: " << current_scene_RANSAC.size() << std::endl ;
+    std::cout << "-----------------------------------------------" << std::endl ;
+  }
 
 
 
