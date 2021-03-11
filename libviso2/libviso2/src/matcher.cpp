@@ -23,7 +23,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 #include "triangle.h"
 #include "filter.h"
 
-// BMNF 03/02/2021:
+// BMNF 03/03/2021:
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <opencv2/calib3d.hpp>
@@ -35,7 +35,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 using namespace std;
 
-// BMNF 03/02/2021:
+// BMNF 03/03/2021:
 using cv::Mat ;
 using cv::Ptr ;
 using cv::KeyPoint ;
@@ -207,22 +207,22 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
     computeFeatures(I2c,dims_c,m2c1,n2c1,m2c2,n2c2,I2c_du,I2c_dv,I2c_du_full,I2c_dv_full);
 }
 
-//BMNF 03/02/2021: Create
-void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img){
+//BMNF 03/03/2021: Create
+void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
   
-  Ptr<cv::DescriptorMatcher> current_desc_matcher ;
+  Ptr<cv::DescriptorMatcher> current_desc_matcher, left_desc_matcher, previous_desc_matcher, right_desc_matcher ;
   Ptr<SIFT> sift ;
 
   vector<KeyPoint> left_current_kpts, right_current_kpts ;
-  vector<vector<cv::DMatch>> current_vmatches ;
-  vector<cv::DMatch> current_good_matches ;
-  vector<cv::Point2f> current_obj, current_obj_RANSAC, current_scene, current_scene_RANSAC ;
-  // vector<cv::Point2f>  ;
+  vector<vector<cv::DMatch>> current_vmatches, left_vmatches, previous_vmatches, right_vmatches ;
+  vector<cv::DMatch> current_good_matches, left_good_matches, previous_good_matches, right_good_matches ;
+  vector<cv::Point2f> left_obj, right_obj, previous_obj, current_obj, left_obj_RANSAC, right_obj_RANSAC, previous_obj_RANSAC, current_obj_RANSAC ;
+  vector<cv::Point2f> left_scene, right_scene, previous_scene, current_scene, left_scene_RANSAC, right_scene_RANSAC, previous_scene_RANSAC, current_scene_RANSAC ;
 
   Mat left_current_desc, right_current_desc ;
-  Mat current_H ;
-  Mat current_RANSACinliersMask ;
+  Mat left_H, right_H, previous_H, current_H ;
+  Mat left_RANSACinliersMask, right_RANSACinliersMask, previous_RANSACinliersMask, current_RANSACinliersMask ;
 
   int k = 2 ;
   const float ratio_thresh = 0.7f ;
@@ -234,72 +234,215 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img){
 
   // std::cout << "Hello there" << std::endl ;
 
-  current_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+  if(no_matching == false){
 
-  if ((left_current_kpts.size() >= k) && (right_current_kpts.size() >= k)){
-  
-    current_desc_matcher->knnMatch(right_current_desc, left_current_desc, current_vmatches, k, cv::noArray(), true) ;
+    // Matching descriptors.
+    left_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+    previous_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+    right_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+    current_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
 
-    /////////////////////////////////////////////////////////////////
-    ///////////////////////Lowe's ratio test/////////////////////////
-    /////////////////////////////////////////////////////////////////
+    if ((left_current_kpts.size() >= k) && (right_current_kpts.size() >= k)){
+    
+      left_desc_matcher->knnMatch(left_current_desc, left_previous_desc, left_vmatches, k, cv::noArray(), true) ; 
+      previous_desc_matcher->knnMatch(left_previous_desc, right_previous_desc, previous_vmatches, k, cv::noArray(), true) ;
+      right_desc_matcher->knnMatch(right_previous_desc, right_current_desc, right_vmatches, k, cv::noArray(), true) ; 
+      current_desc_matcher->knnMatch(right_current_desc, left_current_desc, current_vmatches, k, cv::noArray(), true) ;
 
-    // Filter matches of the current images using the Lowe's ratio test.
-    for (size_t i = 0; i < current_vmatches.size(); i++){
-        if (current_vmatches[i][0].distance < ratio_thresh * current_vmatches[i][1].distance){
-            current_good_matches.push_back(current_vmatches[i][0]) ;
-        }
-    }
+      /////////////////////////////////////////////////////////////////
+      ///////////////////////Lowe's ratio test/////////////////////////
+      /////////////////////////////////////////////////////////////////
 
-    //////////////////////////////////////////////////////////////////
-    /////Getting keypoints from good matches of Lowe's ratio test/////
-    //////////////////////////////////////////////////////////////////
+      // Filter matches of the left side using the Lowe's ratio test.
+      for (size_t i = 0; i < left_vmatches.size(); i++){
+          if (left_vmatches[i][0].distance < ratio_thresh * left_vmatches[i][1].distance){
+              left_good_matches.push_back(left_vmatches[i][0]) ;
+          }
+      }
 
-    // Get the keypoints from the good matches of the right side.
-    for(int i = 0; i < current_good_matches.size(); i++){
-        current_obj.push_back(right_current_kpts[current_good_matches[i].queryIdx].pt) ;
-        current_scene.push_back(left_current_kpts[current_good_matches[i].trainIdx].pt) ;
-    }
+      // Filter matches of the previous images using the Lowe's ratio test.
+      for (size_t i = 0; i < previous_vmatches.size(); i++){
+          if (previous_vmatches[i][0].distance < ratio_thresh * previous_vmatches[i][1].distance){
+              previous_good_matches.push_back(previous_vmatches[i][0]) ;
+          }
+      }
 
-    //////////////////////////////////////////////////////////////////
-    ///////////////Compute homography & apply RANSAC//////////////////
-    //////////////////////////////////////////////////////////////////
+      // Filter matches of the right side using the Lowe's ratio test.
+      for (size_t i = 0; i < right_vmatches.size(); i++){
+          if (right_vmatches[i][0].distance < ratio_thresh * right_vmatches[i][1].distance){
+              right_good_matches.push_back(right_vmatches[i][0]) ;
+          }
+      }
 
-    // Obtaining homograpghy to apply RANSAC
-    try{
+      // Filter matches of the current images using the Lowe's ratio test.
+      for (size_t i = 0; i < current_vmatches.size(); i++){
+          if (current_vmatches[i][0].distance < ratio_thresh * current_vmatches[i][1].distance){
+              current_good_matches.push_back(current_vmatches[i][0]) ;
+          }
+      }
 
-        // left_H = cv::findHomography(left_obj, left_scene, CV_RANSAC, 3.0, left_RANSACinliersMask) ;
-        // previous_H = cv::findFundamentalMat(previous_obj, previous_scene, previous_RANSACinliersMask, CV_RANSAC, 3.f) ;
-        // right_H = cv::findHomography(right_obj, right_scene, CV_RANSAC, 3.0, right_RANSACinliersMask) ;
-        current_H = cv::findFundamentalMat(current_obj, current_scene, current_RANSACinliersMask, CV_RANSAC, 3.f) ;
+      //////////////////////////////////////////////////////////////////
+      /////Getting keypoints from good matches of Lowe's ratio test/////
+      //////////////////////////////////////////////////////////////////
 
-    } catch (cv::Exception& e) {
+      // Get the keypoints from the good matches of the left side.
+      for(int i = 0; i < left_good_matches.size(); i++){
+          left_obj.push_back(left_current_kpts[left_good_matches[i].queryIdx].pt) ;
+          left_scene.push_back(left_previous_kpts[left_good_matches[i].trainIdx].pt) ;
+      }
 
-      std::cout << "cv_bridge exception: " << e.what() << '\n';
-    }
+      // Get the keypoints from the good matches of the previous images.
+      for(int i = 0; i < previous_good_matches.size(); i++){
+          previous_obj.push_back(left_previous_kpts[previous_good_matches[i].queryIdx].pt) ;
+          previous_scene.push_back(right_previous_kpts[previous_good_matches[i].trainIdx].pt) ;
+      }
 
-    //////////////////////////////////////////////////////////////////
-    /////////Getting keypoints from good matches of RANSAC////////////
-    //////////////////////////////////////////////////////////////////
+      // Get the keypoints from the good matches of the right side.
+      for(int i = 0; i < right_good_matches.size(); i++){
+          right_obj.push_back(right_previous_kpts[right_good_matches[i].queryIdx].pt) ;
+          right_scene.push_back(right_current_kpts[right_good_matches[i].trainIdx].pt) ; 
+      }
 
-    for(int i = 0; i < current_RANSACinliersMask.rows; i++){
-        if(current_RANSACinliersMask.at<bool>(i, 0) == 1){
+      // Get the keypoints from the good matches of the right side.
+      for(int i = 0; i < current_good_matches.size(); i++){
+          current_obj.push_back(right_current_kpts[current_good_matches[i].queryIdx].pt) ;
+          current_scene.push_back(left_current_kpts[current_good_matches[i].trainIdx].pt) ;
+      }
+
+      //////////////////////////////////////////////////////////////////
+      ///////////////Compute homography & apply RANSAC//////////////////
+      //////////////////////////////////////////////////////////////////
+
+      // Obtaining homograpghy to apply RANSAC
+      try{
+
+          left_H = cv::findHomography(left_obj, left_scene, CV_RANSAC, 3.0, left_RANSACinliersMask) ;
+          previous_H = cv::findFundamentalMat(previous_obj, previous_scene, previous_RANSACinliersMask, CV_RANSAC, 3.f) ;
+          right_H = cv::findHomography(right_obj, right_scene, CV_RANSAC, 3.0, right_RANSACinliersMask) ;
+          current_H = cv::findFundamentalMat(current_obj, current_scene, current_RANSACinliersMask, CV_RANSAC, 3.f) ;
+
+      } catch (cv::Exception& e) {
+
+        std::cout << "cv_bridge exception: " << e.what() << '\n';
+      }
+
+      //////////////////////////////////////////////////////////////////
+      /////////Getting keypoints from good matches of RANSAC////////////
+      //////////////////////////////////////////////////////////////////
+
+      for(int i = 0; i < left_RANSACinliersMask.rows; i++){
+          if(left_RANSACinliersMask.at<bool>(i, 0) == 1){
+            left_obj_RANSAC.push_back(left_obj[i]) ;
+            left_scene_RANSAC.push_back(left_scene[i]) ;
+          }
+      }
+
+      for(int i = 0; i < previous_RANSACinliersMask.rows; i++){
+          if(previous_RANSACinliersMask.at<bool>(i, 0) == 1){
+            previous_obj_RANSAC.push_back(previous_obj[i]) ;
+            previous_scene_RANSAC.push_back(previous_scene[i]) ;
+          }
+      }
+
+      for(int i = 0; i < right_RANSACinliersMask.rows; i++){
+          if(right_RANSACinliersMask.at<bool>(i, 0) == 1){
+            right_obj_RANSAC.push_back(right_obj[i]) ;
+            right_scene_RANSAC.push_back(right_scene[i]) ;
+          }
+      }
+
+      for(int i = 0; i < current_RANSACinliersMask.rows; i++){
+          if(current_RANSACinliersMask.at<bool>(i, 0) == 1){
             current_obj_RANSAC.push_back(current_obj[i]) ;
             current_scene_RANSAC.push_back(current_scene[i]) ;
-        }
+          }
+      }
+
+      //////////////////////////////////////////////////////////////////
+      /////////Getting keypoints from good matches of RANSAC////////////
+      //////////////////////////////////////////////////////////////////
+
+      int cont = 0 ;
+      
+
+      for(int i = 0; i < left_obj_RANSAC.size(); i++ ){
+
+          for(int j = 0; j < current_scene_RANSAC.size(); j++){
+
+              if((left_obj_RANSAC[i].x == current_scene_RANSAC[j].x) && (left_obj_RANSAC[i].y == current_scene_RANSAC[j].y)){
+                  cont++ ;
+              }
+          }
+
+      } 
+
+      //////////////////////////////////////////////////////////////////
+      ///////////////////////Debugging zone/////////////////////////////
+      //////////////////////////////////////////////////////////////////
+
+      // left_good_inliers = (int)cv::sum(left_RANSACinliersMask)[0] ;
+      // previous_good_inliers = (int)cv::sum(previous_RANSACinliersMask)[0] ;
+      // right_good_inliers = (int)cv::sum(right_RANSACinliersMask)[0] ;
+      // current_good_inliers = (int)cv::sum(current_RANSACinliersMask)[0] ;
+
+      std::cout << "Current left of keypoints: " << left_current_kpts.size() << std::endl ;
+      std::cout << "Previous left of keypoints: " << left_previous_kpts.size() << std::endl ;
+      std::cout << "Number of matches: " << left_vmatches.size() << std::endl ;
+      std::cout << "Number of good matches: " << left_good_matches.size() << std::endl ;
+      std::cout << "Number of rows after RANSAC: " << left_RANSACinliersMask.rows << std::endl ;
+      std::cout << "Good matches after RANSAC: " << (int)cv::sum(left_RANSACinliersMask)[0] << std::endl ;
+      std::cout << "Left obj RANSAC: " << left_obj_RANSAC.size() << std::endl ;
+      std::cout << "Left scene RANSAC: " << left_scene_RANSAC.size() << std::endl ;
+      
+      std::cout << "-----------------------------------------------" << std::endl ;
+
+      // ROS_INFO("Previous left keypoints: %d", left_previous_kpts.size()) ;
+      // ROS_INFO("Previous right keypoints: %d", right_previous_kpts.size()) ;
+      // ROS_INFO("Number of matches: %d", previous_vmatches.size()) ;
+      // ROS_INFO("Number of good matches: %d", previous_good_matches.size()) ;
+      // ROS_INFO("Number of rows after RANSAC: %d", previous_RANSACinliersMask.rows) ;
+      // ROS_INFO("Good matches after RANSAC: %d", previous_good_inliers) ;
+      // ROS_INFO("Left obj RANSAC: %d", left_obj_RANSAC.size()) ;
+      // ROS_INFO("Left scene RANSAC: %d", left_scene_RANSAC.size()) ;
+
+      // ROS_INFO("-----------------------------------------------") ;
+
+      // ROS_INFO("Previous right of keypoints: %d", right_previous_kpts.size()) ;
+      // ROS_INFO("Current right of keypoints: %d", right_current_kpts.size()) ;
+      // ROS_INFO("Number of matches: %d", right_vmatches.size()) ;
+      // ROS_INFO("Number of good matches: %d", right_good_matches.size()) ;
+      // ROS_INFO("Good matches after RANSAC: %d", right_good_inliers) ;
+
+      // ROS_INFO("-----------------------------------------------") ;
+
+      std::cout << "Current right keypoints: " << right_current_kpts.size() << std::endl ;
+      std::cout << "Current left keypoints: " << left_current_kpts.size() << std::endl ;
+      std::cout << "Number of matches: " << current_vmatches.size() << std::endl ;
+      std::cout << "Number of good matches: " << current_good_matches.size() << std::endl ;
+      std::cout << "Number of rows after RANSAC: " << current_RANSACinliersMask.rows << std::endl ;
+      std::cout << "Good matches after RANSAC: " << (int)cv::sum(current_RANSACinliersMask)[0] << std::endl ;
+      std::cout << "Current obj RANSAC: " << current_obj_RANSAC.size() << std::endl ;
+      std::cout << "Current scene RANSAC: " << current_scene_RANSAC.size() << std::endl ;
+          
+      std::cout << "***********************************************" << std::endl ;
+      std::cout << "Feature counter at the end of the matching circle: " << cont << std::endl ;
+      std::cout << "***********************************************" << std::endl ;
+
     }
+    
+  } else {
 
-    std::cout << "Current left of keypoints: " << left_current_kpts.size() << std::endl ;
-    std::cout << "Current right keypoints: " << right_current_kpts.size() << std::endl ;
-    std::cout << "Number of matches: " << current_vmatches.size() << std::endl ;
-    std::cout << "Number of good matches: " << current_good_matches.size() << std::endl ;
-    std::cout << "Number of rows after RANSAC: " << current_RANSACinliersMask.rows << std::endl ;
-    std::cout << "Good matches after RANSAC: " << (int)cv::sum(current_RANSACinliersMask)[0] << std::endl ;
-    std::cout << "Current obj RANSAC: " << current_obj_RANSAC.size() << std::endl ;
-    std::cout << "Current scene RANSAC: " << current_scene_RANSAC.size() << std::endl ;
+    std::cout << "Es el primer try o me he perdido" << std::endl ;
     std::cout << "-----------------------------------------------" << std::endl ;
-  }
 
+  }
+  
+
+  // Actual keypoints and descriptors turns into previous keypoints and descriptors. 
+  left_previous_kpts = left_current_kpts ;
+  left_previous_desc = left_current_desc ;
+  right_previous_kpts = right_current_kpts ;
+  right_previous_desc = right_current_desc ;
 
 
 }

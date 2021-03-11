@@ -17,7 +17,7 @@
 // to remove after debugging
 #include </usr/local/include/opencv2/highgui/highgui.hpp>
 
-using cv::Mat ; //BMNF 03/02/2021:
+using cv::Mat ; //BMNF 03/03/2021:
 
 namespace viso2_ros
 {
@@ -152,7 +152,7 @@ protected:
     r_step = r_cv_ptr->image.step[0];
 
 
-    //BMNF 03/02/2021:
+    //BMNF 03/03/2021:
     Mat left_img_SIFT = l_cv_ptr -> image ;
     Mat right_img_SIFT = r_cv_ptr -> image ;
 
@@ -166,8 +166,8 @@ protected:
     // images without retrieving data
     if (first_run || got_lost_)
     {
-      visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims) ; // BMNF 03/02/2021
-      visual_odometer_->process(l_image_data, r_image_data, dims); // BMNF 03/02/2021
+      visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, true) ; // BMNF 03/03/2021
+      visual_odometer_->process(l_image_data, r_image_data, dims); // BMNF 03/03/2021
       got_lost_ = false;
       // on first run publish zero once
       if (first_run)
@@ -180,8 +180,8 @@ protected:
     else
     {
       bool success ;
-      success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/02/2021
-      success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_); // BMNF 03/02/2021
+      success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, false) ; // BMNF 03/03/2021
+      success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_); // BMNF 03/03/2021
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());

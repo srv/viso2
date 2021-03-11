@@ -65,7 +65,7 @@ public:
   //                     an older coordinate system / time step than the previous one.
   // output: returns false if an error occured
   bool process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace=false);
-  bool process_SIFT(Mat left_img_SIFT, Mat right_img_SIFT, int32_t* dims, bool replace=false) ;
+  bool process_SIFT(Mat left_img_SIFT, Mat right_img_SIFT, int32_t* dims, bool no_matching) ;
 
   using VisualOdometry::process;
 

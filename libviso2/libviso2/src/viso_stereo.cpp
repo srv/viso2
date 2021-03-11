@@ -30,8 +30,8 @@ VisualOdometryStereo::VisualOdometryStereo (parameters param) : param(param), Vi
 VisualOdometryStereo::~VisualOdometryStereo() {
 }
 
-bool VisualOdometryStereo::process_SIFT(Mat left_img_SIFT, Mat right_img_SIFT, int32_t* dims, bool replace) {
-  matcher->matchFeaturesSIFT(left_img_SIFT, right_img_SIFT) ;
+bool VisualOdometryStereo::process_SIFT(Mat left_img_SIFT, Mat right_img_SIFT, int32_t* dims, bool no_maching) {
+  matcher->matchFeaturesSIFT(left_img_SIFT, right_img_SIFT, no_maching) ;
 
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();

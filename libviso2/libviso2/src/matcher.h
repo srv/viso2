@@ -38,13 +38,22 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 #include "matrix.h"
 
-//BMNF 03/02/2021:
+//BMNF 03/03/2021:
 #include <opencv2/core/core.hpp>
 using cv::Mat ;
+
+//BMNF 11/03/2021:
+using cv::KeyPoint ;
+using std::vector ;
+
 
 class Matcher {
 
 public:
+
+  //BMNF 11/03/2021:
+  vector<KeyPoint> left_previous_kpts, right_previous_kpts ;
+  Mat left_previous_desc, right_previous_desc ;
 
   // parameter settings
   struct parameters {
@@ -154,7 +163,7 @@ public:
   // and you want to cancel the change of (unknown) camera gain.
   float getGain (std::vector<int32_t> inliers);
 
-  void matchFeaturesSIFT(Mat left_img, Mat right_img) ; //BMNF 03/02/2021: Create
+  void matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching) ; //BMNF 03/03/2021: Create
 
 private:
 
