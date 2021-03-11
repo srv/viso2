@@ -38,6 +38,10 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 #include "matrix.h"
 
+//BMNF 03/02/2021:
+#include <opencv2/core/core.hpp>
+using cv::Mat ;
+
 class Matcher {
 
 public:
@@ -149,6 +153,8 @@ public:
   // the previous frame. this function is useful if you want to reconstruct 3d
   // and you want to cancel the change of (unknown) camera gain.
   float getGain (std::vector<int32_t> inliers);
+
+  void matchFeaturesSIFT(Mat left_img, Mat right_img) ; //BMNF 03/02/2021: Create
 
 private:
 

@@ -23,7 +23,25 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 #include "triangle.h"
 #include "filter.h"
 
+// BMNF 03/02/2021:
+#include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d/nonfree.hpp>
+#include <opencv2/calib3d.hpp>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/objdetect.hpp>
+#include <iostream>
+
+
 using namespace std;
+
+// BMNF 03/02/2021:
+using cv::Mat ;
+using cv::Ptr ;
+using cv::KeyPoint ;
+
+using cv::xfeatures2d::SIFT ;
+
 
 //////////////////////
 // PUBLIC FUNCTIONS //
@@ -187,6 +205,26 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
   computeFeatures(I1c,dims_c,m1c1,n1c1,m1c2,n1c2,I1c_du,I1c_dv,I1c_du_full,I1c_dv_full);
   if (I2!=0)
     computeFeatures(I2c,dims_c,m2c1,n2c1,m2c2,n2c2,I2c_du,I2c_dv,I2c_du_full,I2c_dv_full);
+}
+
+//BMNF 03/02/2021: Create
+void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img){
+
+  Mat left_current_desc, right_current_desc ;
+  vector<KeyPoint> left_current_kpts, right_current_kpts ;
+  Ptr<SIFT> sift ;
+  
+  int i ;
+  sift = SIFT::create(0,4,0.04,10,1.6);
+  sift->detectAndCompute(left_img, Mat(), left_current_kpts, left_current_desc) ;
+  sift = SIFT::create(0,4,0.04,10,1.6);
+  sift->detectAndCompute(right_img, Mat(), right_current_kpts, right_current_desc) ;
+
+  std::cout << "Hello there" << std::endl ;
+
+
+
+
 }
 
 void Matcher::matchFeatures(int32_t method, Matrix *Tr_delta) {

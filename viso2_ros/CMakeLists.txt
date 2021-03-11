@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(viso2_ros)
 
 find_package(catkin REQUIRED COMPONENTS
+  #OpenCV REQUIRED
   libviso2
   roscpp
   sensor_msgs
@@ -68,7 +69,7 @@ set(OpenCV_LIBS
   opencv_ximgproc
   opencv_xobjdetect
   opencv_xphoto
- opencv_xfeatures2d
+  opencv_xfeatures2d
 )
 
 set(OpenCV_LIBRARIES
@@ -113,10 +114,8 @@ set(OpenCV_LIBRARIES
   opencv_ximgproc
   opencv_xobjdetect
   opencv_xphoto
- opencv_xfeatures2d
+  opencv_xfeatures2d
 )
-
-
 
 #find_package(OpenCV REQUIRED)
 message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
@@ -170,11 +169,12 @@ add_executable(testSIFT src/testSIFT.cpp) # BMNF(30/11/2020): NEW
 add_dependencies(testSIFT ${catkin_EXPORTED_TARGETS}) # BMNF(30/11/2020): NEW 
 add_dependencies(testSIFT ${PROJECT_NAME}_gencpp) # BMNF(30/11/2020): NEW 
 
-target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+#target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 find_package(Boost REQUIRED COMPONENTS signals thread)
 include_directories(${Boost_INCLUDE_DIRS})
-target_link_libraries(stereo_odometer ${Boost_LIBRARIES} ${catkin_LIBRARIES})
-target_link_libraries(mono_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
+
+target_link_libraries(stereo_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
+target_link_libraries(mono_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(testORB ${OpenCV_LIB} ${catkin_LIBRARIES}) # BMNF(16/11/2020): MODIFIED
 target_link_libraries(testSIFT ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(30/11/2020): NEW

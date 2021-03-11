@@ -82,7 +82,7 @@ void imageCallback(const sensor_msgs::ImageConstPtr& l_image_msg, const sensor_m
     // Transform image from ROS tu OpenCV.
     try{
 
-        l_cv_ptr = cv_bridge::toCvCopy(l_image_msg, sensor_msgs::image_encodings::MONO8) ;
+        l_cv_ptr = cv_bridge::toCvShare(l_image_msg, sensor_msgs::image_encodings::MONO8) ;
         r_cv_ptr = cv_bridge::toCvShare(r_image_msg, sensor_msgs::image_encodings::MONO8) ;
 
     } catch (cv_bridge::Exception& e) {
