@@ -1,6 +1,6 @@
 <launch>
 
- <arg name="bagfile" default="/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0000.bag
+ <!-- <arg name="bagfile" default="/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0000.bag
 				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0001.bag
 				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0002.bag
 				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0003.bag
@@ -11,7 +11,9 @@
 				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0008.bag
 				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0009.bag
 				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0010.bag
-				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0011.bag"/> 
+				/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0011.bag"/>  -->
+
+  <arg name = "bagfile" default = "/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0000.bag" />
 
   <arg name="camera" default="/stereo_down"/>
   <param name="/use_sim_time" value="true"/>

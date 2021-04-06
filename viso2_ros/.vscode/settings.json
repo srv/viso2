@@ -8,6 +8,8 @@
         "deque": "cpp",
         "string": "cpp",
         "*.ipp": "cpp",
-        "bitset": "cpp"
+        "bitset": "cpp",
+        "hash_map": "cpp",
+        "hash_set": "cpp"
     }
 }

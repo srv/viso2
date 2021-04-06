@@ -19,7 +19,8 @@
                 "/home/uib/catkin_ws/src/utiles/include/**",
                 "/home/uib/catkin_ws/src/uware/include/**",
                 "/home/uib/catkin_ws/src/vlfeat/vlfeat_ros/include/**",
-                "/usr/include/**"
+                "/usr/include/**",
+                "/opt/ros/melodic/include"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",

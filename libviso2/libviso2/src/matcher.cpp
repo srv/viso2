@@ -210,15 +210,21 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
 //BMNF 03/03/2021: Create
 void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
-  
+  clock_t Time_ImageCurrent = clock() ;
+
   Ptr<cv::DescriptorMatcher> current_desc_matcher, left_desc_matcher, previous_desc_matcher, right_desc_matcher ;
   Ptr<SIFT> sift ;
 
   vector<KeyPoint> left_current_kpts, right_current_kpts ;
   vector<vector<cv::DMatch>> current_vmatches, left_vmatches, previous_vmatches, right_vmatches ;
   vector<cv::DMatch> current_good_matches, left_good_matches, previous_good_matches, right_good_matches ;
-  vector<cv::Point2f> left_obj, right_obj, previous_obj, current_obj, left_obj_RANSAC, right_obj_RANSAC, previous_obj_RANSAC, current_obj_RANSAC ;
-  vector<cv::Point2f> left_scene, right_scene, previous_scene, current_scene, left_scene_RANSAC, right_scene_RANSAC, previous_scene_RANSAC, current_scene_RANSAC ;
+  vector<cv::Point2f> left_obj, right_obj, previous_obj, current_obj ;
+  // , left_obj_RANSAC, right_obj_RANSAC, previous_obj_RANSAC, current_obj_RANSAC ;
+  vector<cv::Point2f> left_scene, right_scene, previous_scene, current_scene ;
+  // , left_scene_RANSAC, right_scene_RANSAC, previous_scene_RANSAC, current_scene_RANSAC ;
+
+  vector<cv::Point2f> obj_left_current_RANSAC, obj_left_previous_RANSAC, obj_right_previous_RANSAC, obj_right_current_RANSAC ;
+  vector<cv::Point2f> ref_left_current_RANSAC, ref_left_previous_RANSAC, ref_right_previous_RANSAC, ref_right_current_RANSAC ;
 
   Mat left_current_desc, right_current_desc ;
   Mat left_H, right_H, previous_H, current_H ;
@@ -227,12 +233,17 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
   int k = 2 ;
   const float ratio_thresh = 0.7f ;
 
-  sift = SIFT::create(0,4,0.04,10,1.6);
+  // clock_t before_SIFT = clock() ;
+  // std::cout << "Time before sift: " << before_SIFT / (double)CLOCKS_PER_SEC << std::endl ;
+
+  sift = SIFT::create(0, 3, 0.09, 10, 1.6) ;
   sift->detectAndCompute(left_img, Mat(), left_current_kpts, left_current_desc) ;
-  sift = SIFT::create(0,4,0.04,10,1.6);
+  sift = SIFT::create(0, 3, 0.09, 10, 1.6) ;
   sift->detectAndCompute(right_img, Mat(), right_current_kpts, right_current_desc) ;
 
-  // std::cout << "Hello there" << std::endl ;
+  // clock_t after_SIFT = clock() ;
+  // std::cout << "Time after sift: " << after_SIFT / (double)CLOCKS_PER_SEC << std::endl ;
+  // std::cout << "Time wasted for sift: " << (after_SIFT / (double)CLOCKS_PER_SEC) - (before_SIFT / (double)CLOCKS_PER_SEC) << std::endl ;
 
   if(no_matching == false){
 
@@ -330,102 +341,231 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       /////////Getting keypoints from good matches of RANSAC////////////
       //////////////////////////////////////////////////////////////////
 
+      // for(int i = 0; i < left_RANSACinliersMask.rows; i++){
+      //     if(left_RANSACinliersMask.at<bool>(i, 0) == 1){
+      //       left_obj_RANSAC.push_back(left_obj[i]) ;
+      //       left_scene_RANSAC.push_back(left_scene[i]) ;
+      //     }
+      // }
+
+      // for(int i = 0; i < previous_RANSACinliersMask.rows; i++){
+      //     if(previous_RANSACinliersMask.at<bool>(i, 0) == 1){
+      //       previous_obj_RANSAC.push_back(previous_obj[i]) ;
+      //       previous_scene_RANSAC.push_back(previous_scene[i]) ;
+      //     }
+      // }
+
+      // for(int i = 0; i < right_RANSACinliersMask.rows; i++){
+      //     if(right_RANSACinliersMask.at<bool>(i, 0) == 1){
+      //       right_obj_RANSAC.push_back(right_obj[i]) ;
+      //       right_scene_RANSAC.push_back(right_scene[i]) ;
+      //     }
+      // }
+
+      // for(int i = 0; i < current_RANSACinliersMask.rows; i++){
+      //     if(current_RANSACinliersMask.at<bool>(i, 0) == 1){
+      //       current_obj_RANSAC.push_back(current_obj[i]) ;
+      //       current_scene_RANSAC.push_back(current_scene[i]) ;
+      //     }
+      // }
+
       for(int i = 0; i < left_RANSACinliersMask.rows; i++){
           if(left_RANSACinliersMask.at<bool>(i, 0) == 1){
-            left_obj_RANSAC.push_back(left_obj[i]) ;
-            left_scene_RANSAC.push_back(left_scene[i]) ;
+              obj_left_current_RANSAC.push_back(left_obj[i]) ; 
+              ref_left_previous_RANSAC.push_back(left_scene[i]) ;
           }
       }
 
       for(int i = 0; i < previous_RANSACinliersMask.rows; i++){
           if(previous_RANSACinliersMask.at<bool>(i, 0) == 1){
-            previous_obj_RANSAC.push_back(previous_obj[i]) ;
-            previous_scene_RANSAC.push_back(previous_scene[i]) ;
+              obj_left_previous_RANSAC.push_back(previous_obj[i]) ;
+              ref_right_previous_RANSAC.push_back(previous_scene[i]) ;
           }
       }
 
       for(int i = 0; i < right_RANSACinliersMask.rows; i++){
           if(right_RANSACinliersMask.at<bool>(i, 0) == 1){
-            right_obj_RANSAC.push_back(right_obj[i]) ;
-            right_scene_RANSAC.push_back(right_scene[i]) ;
+              obj_right_previous_RANSAC.push_back(right_obj[i]) ;
+              ref_right_current_RANSAC.push_back(right_scene[i]) ;
           }
       }
 
       for(int i = 0; i < current_RANSACinliersMask.rows; i++){
           if(current_RANSACinliersMask.at<bool>(i, 0) == 1){
-            current_obj_RANSAC.push_back(current_obj[i]) ;
-            current_scene_RANSAC.push_back(current_scene[i]) ;
+              obj_right_current_RANSAC.push_back(current_obj[i]) ;
+              ref_left_current_RANSAC.push_back(current_scene[i]) ;
           }
       }
 
       //////////////////////////////////////////////////////////////////
-      /////////Getting keypoints from good matches of RANSAC////////////
-      //////////////////////////////////////////////////////////////////
+      //////////////////////Circle of matchings///////////////////////// clock_t TimeStarted = clock() ; 
+      ////////////////////////////////////////////////////////////////// tiempo = (clock() - TimeStarted) / (double)CLOCKS_PER_SEC
 
-      int cont = 0 ;
-      
+      int cont1 = 0 ;
+      int cont2 = 0 ;
+      int cont3 = 0 ;
+      int cont4 = 0 ;
+      int cont5 = 0 ;
 
-      for(int i = 0; i < left_obj_RANSAC.size(); i++ ){
+      int iter_ref_left_pre = 0 ;
+      int iter_obj_left_pre = 0 ;
+      int iter_obj_right_pre = 0 ;
+      int iter_obj_right_curr = 0 ;
+      int iter_obj_left_curr = 0 ;
 
-          for(int j = 0; j < current_scene_RANSAC.size(); j++){
+      bool left_pre_save ;
+      bool right_pre_save ;
+      bool right_curr_save ;
 
-              if((left_obj_RANSAC[i].x == current_scene_RANSAC[j].x) && (left_obj_RANSAC[i].y == current_scene_RANSAC[j].y)){
-                  cont++ ;
+      float left_previous_u = 0 ;
+      float left_previous_v = 0 ;
+      int32_t left_previous_i = 0 ;
+
+      float right_previous_u = 0 ;
+      float right_previous_v = 0 ;
+      int32_t right_previous_i = 0 ;
+
+      float right_current_u = 0 ;
+      float right_current_v = 0 ;
+      int32_t right_current_i = 0 ;
+
+      float left_current_u = 0 ;
+      float left_current_v = 0 ;
+      int32_t left_current_i = 0 ;
+
+      p_matched_2.clear() ;
+
+      for(iter_ref_left_pre ; iter_ref_left_pre < ref_left_previous_RANSAC.size() ; iter_ref_left_pre++ ){
+
+          left_pre_save = false ;
+          right_pre_save = false ;
+          right_curr_save = false ;
+
+          for(iter_obj_left_pre = 0 ; iter_obj_left_pre < obj_left_previous_RANSAC.size() ; iter_obj_left_pre++){
+
+              if((ref_left_previous_RANSAC[iter_ref_left_pre].x == obj_left_previous_RANSAC[iter_obj_left_pre].x) && (ref_left_previous_RANSAC[iter_ref_left_pre].y == obj_left_previous_RANSAC[iter_obj_left_pre].y)){
+                  left_pre_save = true ;
+                  left_previous_u = obj_left_previous_RANSAC[iter_obj_left_pre].x ;
+                  left_previous_v = obj_left_previous_RANSAC[iter_obj_left_pre].y ;
+                  left_previous_i = iter_obj_left_pre ;
+
+                  cont1++ ;
+                  break ;
               }
           }
 
-      } 
+          for(iter_obj_right_pre = 0 ; iter_obj_right_pre < obj_right_previous_RANSAC.size() ; iter_obj_right_pre++){
+
+              if((ref_right_previous_RANSAC[iter_obj_left_pre].x == obj_right_previous_RANSAC[iter_obj_right_pre].x) && (ref_right_previous_RANSAC[iter_obj_left_pre].y == obj_right_previous_RANSAC[iter_obj_right_pre].y) && left_pre_save){
+                  right_pre_save = true ;
+                  right_previous_u = obj_right_previous_RANSAC[iter_obj_right_pre].x ;
+                  right_previous_v = obj_right_previous_RANSAC[iter_obj_right_pre].y ;
+                  right_previous_i = iter_obj_right_pre ;
+
+                  cont2++ ;
+                  break ;
+              }
+
+          }
+
+          for(iter_obj_right_curr = 0 ; iter_obj_right_curr < obj_right_current_RANSAC.size() ; iter_obj_right_curr++){
+
+              if((ref_right_current_RANSAC[iter_obj_right_pre].x == obj_right_current_RANSAC[iter_obj_right_curr].x) && (ref_right_current_RANSAC[iter_obj_right_pre].y == obj_right_current_RANSAC[iter_obj_right_curr].y) && right_pre_save){
+                  right_curr_save = true ;
+                  right_current_u = obj_right_current_RANSAC[iter_obj_right_curr].x ;
+                  right_current_v = obj_right_current_RANSAC[iter_obj_right_curr].y ;
+                  right_current_i = iter_obj_right_curr ;
+
+                  cont3++ ;
+                  break ;
+              }
+
+          }
+
+          for(iter_obj_left_curr = 0 ; iter_obj_left_curr < obj_left_current_RANSAC.size() ; iter_obj_left_curr++){
+
+              if((ref_left_current_RANSAC[iter_obj_right_curr].x == obj_left_current_RANSAC[iter_obj_left_curr].x) && (ref_left_current_RANSAC[iter_obj_right_curr].y == obj_left_current_RANSAC[iter_obj_left_curr].y) && right_curr_save){
+                  left_current_u = obj_left_current_RANSAC[iter_obj_left_curr].x ;
+                  left_current_v = obj_left_current_RANSAC[iter_obj_left_curr].y ;
+                  left_current_i = iter_obj_left_curr ;
+
+                  cont4++ ;
+                  
+                  if(iter_obj_left_curr == iter_ref_left_pre){
+                    cont5++ ;
+                    p_matched_2.push_back(Matcher::p_match(left_previous_u,
+                                                          left_previous_v,
+                                                          left_previous_i,
+                                                          right_previous_u,
+                                                          right_previous_v,
+                                                          right_previous_i,
+                                                          left_current_u,
+                                                          left_current_v,
+                                                          left_current_i,
+                                                          right_current_u,
+                                                          right_current_v,
+                                                          right_current_i));
+                      
+                  }
+                  
+                  break ;
+              }
+
+          }
+
+      }
 
       //////////////////////////////////////////////////////////////////
       ///////////////////////Debugging zone/////////////////////////////
       //////////////////////////////////////////////////////////////////
 
-      // left_good_inliers = (int)cv::sum(left_RANSACinliersMask)[0] ;
-      // previous_good_inliers = (int)cv::sum(previous_RANSACinliersMask)[0] ;
-      // right_good_inliers = (int)cv::sum(right_RANSACinliersMask)[0] ;
-      // current_good_inliers = (int)cv::sum(current_RANSACinliersMask)[0] ;
-
-      std::cout << "Current left of keypoints: " << left_current_kpts.size() << std::endl ;
-      std::cout << "Previous left of keypoints: " << left_previous_kpts.size() << std::endl ;
+      std::cout << "Current left keypoints: " << left_current_kpts.size() << std::endl ;
+      std::cout << "Previous left keypoints: " << left_previous_kpts.size() << std::endl ;
       std::cout << "Number of matches: " << left_vmatches.size() << std::endl ;
       std::cout << "Number of good matches: " << left_good_matches.size() << std::endl ;
-      std::cout << "Number of rows after RANSAC: " << left_RANSACinliersMask.rows << std::endl ;
       std::cout << "Good matches after RANSAC: " << (int)cv::sum(left_RANSACinliersMask)[0] << std::endl ;
-      std::cout << "Left obj RANSAC: " << left_obj_RANSAC.size() << std::endl ;
-      std::cout << "Left scene RANSAC: " << left_scene_RANSAC.size() << std::endl ;
+      std::cout << "Left current RANSAC: " << obj_left_current_RANSAC.size() << std::endl ;
+      std::cout << "Left previous RANSAC: " << ref_left_previous_RANSAC.size() << std::endl ;
       
       std::cout << "-----------------------------------------------" << std::endl ;
 
-      // ROS_INFO("Previous left keypoints: %d", left_previous_kpts.size()) ;
-      // ROS_INFO("Previous right keypoints: %d", right_previous_kpts.size()) ;
-      // ROS_INFO("Number of matches: %d", previous_vmatches.size()) ;
-      // ROS_INFO("Number of good matches: %d", previous_good_matches.size()) ;
-      // ROS_INFO("Number of rows after RANSAC: %d", previous_RANSACinliersMask.rows) ;
-      // ROS_INFO("Good matches after RANSAC: %d", previous_good_inliers) ;
-      // ROS_INFO("Left obj RANSAC: %d", left_obj_RANSAC.size()) ;
-      // ROS_INFO("Left scene RANSAC: %d", left_scene_RANSAC.size()) ;
+      std::cout << "Previous left keypoints: " << left_previous_kpts.size() << std::endl ;
+      std::cout << "Previous right keypoints: " << right_previous_kpts.size() << std::endl ;
+      std::cout << "Number of matches: " << previous_vmatches.size() << std::endl ;
+      std::cout << "Number of good matches: " << previous_good_matches.size() << std::endl ;
+      std::cout << "Good matches after RANSAC: " << (int)cv::sum(previous_RANSACinliersMask)[0] << std::endl ;
+      std::cout << "Left previous RANSAC: " << obj_left_previous_RANSAC.size() << std::endl ;
+      std::cout << "Right previous RANSAC: " << ref_right_previous_RANSAC.size() << std::endl ;
 
-      // ROS_INFO("-----------------------------------------------") ;
+      std::cout << "-----------------------------------------------" << std::endl ;
 
-      // ROS_INFO("Previous right of keypoints: %d", right_previous_kpts.size()) ;
-      // ROS_INFO("Current right of keypoints: %d", right_current_kpts.size()) ;
-      // ROS_INFO("Number of matches: %d", right_vmatches.size()) ;
-      // ROS_INFO("Number of good matches: %d", right_good_matches.size()) ;
-      // ROS_INFO("Good matches after RANSAC: %d", right_good_inliers) ;
+      std::cout << "Previous right keypoints: " << right_previous_kpts.size() << std::endl ;
+      std::cout << "Current right keypoints: " << right_current_kpts.size() << std::endl ;
+      std::cout << "Number of matches: " << right_vmatches.size() << std::endl ;
+      std::cout << "Number of good matches: " << right_good_matches.size() << std::endl ;
+      std::cout << "Good matches after RANSAC: " << (int)cv::sum(right_RANSACinliersMask)[0] << std::endl ;
+      std::cout << "Right previous RANSAC: " << obj_right_previous_RANSAC.size() << std::endl ;
+      std::cout << "Right current RANSAC: " << ref_right_current_RANSAC.size() << std::endl ;
 
-      // ROS_INFO("-----------------------------------------------") ;
+      std::cout << "-----------------------------------------------" << std::endl ;
 
       std::cout << "Current right keypoints: " << right_current_kpts.size() << std::endl ;
       std::cout << "Current left keypoints: " << left_current_kpts.size() << std::endl ;
       std::cout << "Number of matches: " << current_vmatches.size() << std::endl ;
       std::cout << "Number of good matches: " << current_good_matches.size() << std::endl ;
-      std::cout << "Number of rows after RANSAC: " << current_RANSACinliersMask.rows << std::endl ;
       std::cout << "Good matches after RANSAC: " << (int)cv::sum(current_RANSACinliersMask)[0] << std::endl ;
-      std::cout << "Current obj RANSAC: " << current_obj_RANSAC.size() << std::endl ;
-      std::cout << "Current scene RANSAC: " << current_scene_RANSAC.size() << std::endl ;
+      std::cout << "Right current RANSAC: " << obj_right_current_RANSAC.size() << std::endl ;
+      std::cout << "Left current RANSAC: " << ref_left_current_RANSAC.size() << std::endl ;
           
       std::cout << "***********************************************" << std::endl ;
-      std::cout << "Feature counter at the end of the matching circle: " << cont << std::endl ;
+      std::cout << "Feature counter 1: " << cont1 << std::endl ;
+      std::cout << "Feature counter 2: " << cont2 << std::endl ;
+      std::cout << "Feature counter 3: " << cont3 << std::endl ;
+      std::cout << "Feature counter 4: " << cont5 << std::endl ;
+      std::cout << "Feature counter at the end of the matching circle: " << cont5 << std::endl ;
+      std::cout << "Previous image time: " << Time_ImagePrevious / (double)CLOCKS_PER_SEC << std::endl ;
+      std::cout << "Current image time: " << Time_ImageCurrent / (double)CLOCKS_PER_SEC << std::endl ;
+      std::cout << "Time between process: " << (Time_ImageCurrent / (double)CLOCKS_PER_SEC) - (Time_ImagePrevious / (double)CLOCKS_PER_SEC) << std::endl ;
       std::cout << "***********************************************" << std::endl ;
 
     }
@@ -437,13 +577,12 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
   }
   
-
   // Actual keypoints and descriptors turns into previous keypoints and descriptors. 
   left_previous_kpts = left_current_kpts ;
   left_previous_desc = left_current_desc ;
   right_previous_kpts = right_current_kpts ;
   right_previous_desc = right_current_desc ;
-
+  Time_ImagePrevious = Time_ImageCurrent ;
 
 }
 
@@ -1159,6 +1298,7 @@ void Matcher::createIndexVector (int32_t* m,int32_t n,vector<int32_t> *k,const i
 inline void Matcher::findMatch (int32_t* m1,const int32_t &i1,int32_t* m2,const int32_t &step_size,vector<int32_t> *k2,
                                 const int32_t &u_bin_num,const int32_t &v_bin_num,const int32_t &stat_bin,
                                 int32_t& min_ind,int32_t stage,bool flow,bool use_prior,double u_,double v_) {
+                                  // (m1p,i1p,m2p,step_size,k2p,u_bin_num,v_bin_num,stat_bin,i2p, 0,false,use_prior)
   
   // init and load image coordinates + feature
   min_ind          = 0;
