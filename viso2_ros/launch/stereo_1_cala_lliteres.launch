@@ -2,8 +2,8 @@
 
   <!-- Arguments -->
 
-  <arg name="bagfile" default="/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag"/> 
-
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag"/>  -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/12_24_51/images_2021-01-19-12-31-10_1.bag" /> -->
 
   <arg name="camera" default="/stereo_down"/>
   <param name="/use_sim_time" value="true"/>

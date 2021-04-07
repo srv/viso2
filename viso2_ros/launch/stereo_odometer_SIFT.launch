@@ -1,0 +1,71 @@
+<launch>
+
+  <!-- Arguments -->
+  <arg name = "resolution" default = "full"/>
+  <arg name = "stereo" default = "stereo_down"/>
+  <arg name = "camera" default = "/stereo_down"/>
+  <arg name = "enable_decimate_x1" default = "false"/>
+  <arg name = "enable_decimate_x2" default = "true"/>
+  <arg name = "enable_decimate_x4" default = "false"/>
+
+  <!-- Bagfiles -->
+
+  <!-- Illetes replanning -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/illetes/2021_03_18/12_33_24/images_2021-03-18-12-33-25_0.bag"/> -->
+
+  <!-- Cala Lliteres. No es un bon survey però funciona -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag"/> -->
+
+  <!-- Bendinat. Bon dataset amb molt de features però no funciona a l'odometre no se perquè -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/12_24_51/images_2021-01-19-12-31-10_1.bag" /> -->
+
+  <!-- Portals. Es suposa que es un bon dataset però no dona molt de features i peta. -->
+  <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag"/>
+
+  <!-- Play the bagfile -->
+  <node pkg = "rosbag" type = "play" name = "rosbag" args = "--clock $(arg bagfile)" />
+
+  <!-- Run the stereo image proc -->
+  <group>
+    <include file="/home/uib/catkin_ws/src/image_pipeline/stereo_image_proc/launch/stereo_proc.launch">
+    <arg name = "stereo" value = "$(arg stereo)" />
+    <arg name = "resolution" value = "$(arg resolution)" />
+    <arg name = "enable_decimate_x1" value = "$(arg enable_decimate_x1)" />
+    <arg name = "enable_decimate_x2" value = "$(arg enable_decimate_x2)" />
+    <arg name = "enable_decimate_x4" value = "$(arg enable_decimate_x4)" />
+    </include>
+  </group>
+
+  <!-- Static TF's -->
+  <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
+
+  <!-- Viso2 -->
+  <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
+    <remap from = "stereo" to = "$(arg camera)"/>
+    <remap from = "image" to = "image_rect"/>
+    <param name = "queue_size" value = "70"/>
+    <param name = "base_link_frame_id" value = "turbot/base_link"/>
+  </node>
+
+  <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
+    <remap from = "stereo" to = "$(arg camera)"/>
+    <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x2/left/image_rect"/>
+    <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x2/right/image_rect"/> 
+    <remap from = "image" to = "image_rect"/>
+    <param name = "queue_size" value = "70"/>
+    <param name = "base_link_frame_id" value = "turbot/base_link"/>
+  </node>
+
+  <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
+    <remap from = "stereo" to = "$(arg camera)"/>
+    <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x4/left/image_rect"/>
+    <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x4/right/image_rect"/> 
+    <remap from = "image" to = "image_rect"/>
+    <param name = "queue_size" value = "70"/>
+    <param name = "base_link_frame_id" value = "turbot/base_link"/>
+  </node>
+
+
+</launch>

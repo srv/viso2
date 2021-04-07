@@ -35,6 +35,8 @@ bool VisualOdometryStereo::process_SIFT(Mat left_img_SIFT, Mat right_img_SIFT, i
 
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();
+  std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl ;
+  std::cout << "***********************************************" << std::endl ;
   return updateMotion(0.0,false);
 }
 

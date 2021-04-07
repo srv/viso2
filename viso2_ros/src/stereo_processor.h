@@ -131,6 +131,7 @@ protected:
 
     // Synchronize input topics. Optionally do approximate synchronization.
     local_nh.param("queue_size", queue_size_, 5);
+    ROS_INFO("Queue size BMNF: %d", queue_size_);
     bool approx;
     local_nh.param("approximate_sync", approx, true);
     if (approx)

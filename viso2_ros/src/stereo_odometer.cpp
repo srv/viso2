@@ -101,7 +101,7 @@ protected:
     int queue_size;
     bool approximate_sync;
     ros::NodeHandle local_nh("~");
-    local_nh.param("queue_size", queue_size, 10);
+    local_nh.param("queue_size", queue_size, 50); // 10
     local_nh.param("approximate_sync", approximate_sync, true);
 
     // read calibration info from camera info message
@@ -163,10 +163,10 @@ protected:
 
     // on first run or when odometer got lost, only feed the odometer with
     // images without retrieving data
-    //if (first_run || got_lost_)
-    if(first_run)
+    if (first_run || got_lost_)
+    // if(first_run)
     {
-      visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, true) ; // BMNF 03/03/2021
+      visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021
       // visual_odometer_->process(l_image_data, r_image_data, dims); // BMNF 03/03/2021
       got_lost_ = false;
       // on first run publish zero once
@@ -180,7 +180,7 @@ protected:
     else
     {
       bool success ;
-      success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, false) ; // BMNF 03/03/2021
+      success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021
       // success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_); // BMNF 03/03/2021
       if (success)
       {

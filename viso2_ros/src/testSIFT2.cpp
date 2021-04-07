@@ -216,9 +216,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& l_image_msg, const sensor_m
             ///////////////Compute homography & apply RANSAC//////////////////
             //////////////////////////////////////////////////////////////////
 
-            // Obtaining homograpghy to apply RANSAC
-            // double time_test_before = ros::Time::now().toSec() ;
-            // ROS_INFO("Time before RANSAC: %f", time_test_before) ;
             try{
 
                 left_H = cv::findHomography(left_obj, left_scene, CV_RANSAC, 3.0, left_RANSACinliersMask) ;
@@ -231,9 +228,6 @@ void imageCallback(const sensor_msgs::ImageConstPtr& l_image_msg, const sensor_m
                 ROS_ERROR("cv exception: %s", e.what()) ;
 
             }
-            double time_test_after = ros::Time::now().toSec() ;
-            // ROS_INFO("Time after RANSAC: %f", time_test_after) ;
-            // ROS_INFO("Time wasted for RANSAC: %f", time_test_after - time_test_before) ;
 
             //////////////////////////////////////////////////////////////////
             /////////Getting keypoints from good matches of RANSAC////////////

@@ -1,11 +1,11 @@
 <launch>
 
   <!-- Arguments -->
-  <arg name = "stereo" default = "stereo_down" />
-  <arg name="enable_decimate_x1" default="false"/>
-  <arg name="enable_decimate_x2" default="false"/>
-  <arg name="enable_decimate_x4" default="true"/>
-  <arg name="resolution" default="full"/>
+  <arg name = "resolution" default = "full"/>
+  <arg name = "stereo" default = "stereo_down"/>
+  <arg name = "enable_decimate_x1" default = "true"/>
+  <arg name = "enable_decimate_x2" default = "false"/>
+  <arg name = "enable_decimate_x4" default = "false"/>
 
   <!-- Bagfiles -->
 
@@ -24,11 +24,11 @@
   <!-- Run the stereo image proc -->
   <group>
     <include file="/home/uib/catkin_ws/src/image_pipeline/stereo_image_proc/launch/stereo_proc.launch">
-    <arg name="stereo" value="$(arg stereo)" />
-    <arg name="resolution" value="$(arg resolution)" />
-    <arg name="enable_decimate_x1" value="$(arg enable_decimate_x1)" />
-    <arg name="enable_decimate_x2" value="$(arg enable_decimate_x2)" />
-    <arg name="enable_decimate_x4" value="$(arg enable_decimate_x4)" />
+    <arg name = "stereo" value = "$(arg stereo)" />
+    <arg name = "resolution" value = "$(arg resolution)" />
+    <arg name = "enable_decimate_x1" value = "$(arg enable_decimate_x1)" />
+    <arg name = "enable_decimate_x2" value = "$(arg enable_decimate_x2)" />
+    <arg name = "enable_decimate_x4" value = "$(arg enable_decimate_x4)" />
     </include>
   </group>
 
