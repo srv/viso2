@@ -249,7 +249,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
     current_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
 
     if ((left_current_kpts.size() >= k) && (left_previous_kpts.size() >= k) && (right_current_kpts.size() >= k) && (right_previous_kpts.size() >= k)){
-    
+
       left_desc_matcher->knnMatch(left_current_desc, left_previous_desc, left_vmatches, k, cv::noArray(), true) ; 
       previous_desc_matcher->knnMatch(left_previous_desc, right_previous_desc, previous_vmatches, k, cv::noArray(), true) ;
       right_desc_matcher->knnMatch(right_previous_desc, right_current_desc, right_vmatches, k, cv::noArray(), true) ; 
@@ -455,13 +455,14 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
       p_matched_2.clear() ;
 
-      for(iter_ref_left_pre ; iter_ref_left_pre < ref_left_previous_RANSAC.size() ; iter_ref_left_pre++ ){
+      if(ref_left_previous_RANSAC.size() != 0 && obj_left_previous_RANSAC.size() != 0 && obj_right_previous_RANSAC.size() != 0 && obj_right_current_RANSAC.size() != 0 && obj_left_current_RANSAC.size() != 0){
+        for(iter_ref_left_pre ; iter_ref_left_pre < ref_left_previous_RANSAC.size() ; iter_ref_left_pre++ ){
 
           left_pre_save = false ;
           right_pre_save = false ;
           right_curr_save = false ;
 
-          for(iter_obj_left_pre = 0 ; iter_obj_left_pre < obj_left_previous_RANSAC.size() ; iter_obj_left_pre++){
+          for(iter_obj_left_pre = 0 ; iter_obj_left_pre <= obj_left_previous_RANSAC.size() ; iter_obj_left_pre++){
 
               if((ref_left_previous_RANSAC[iter_ref_left_pre].x == obj_left_previous_RANSAC[iter_obj_left_pre].x) && (ref_left_previous_RANSAC[iter_ref_left_pre].y == obj_left_previous_RANSAC[iter_obj_left_pre].y)){
                   left_pre_save = true ;
@@ -474,7 +475,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
               }
           }
 
-          for(iter_obj_right_pre = 0 ; iter_obj_right_pre < obj_right_previous_RANSAC.size() ; iter_obj_right_pre++){
+          for(iter_obj_right_pre = 0 ; iter_obj_right_pre <= obj_right_previous_RANSAC.size() ; iter_obj_right_pre++){
 
               if((ref_right_previous_RANSAC[iter_obj_left_pre].x == obj_right_previous_RANSAC[iter_obj_right_pre].x) && (ref_right_previous_RANSAC[iter_obj_left_pre].y == obj_right_previous_RANSAC[iter_obj_right_pre].y) && left_pre_save){
                   right_pre_save = true ;
@@ -488,7 +489,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
           }
 
-          for(iter_obj_right_curr = 0 ; iter_obj_right_curr < obj_right_current_RANSAC.size() ; iter_obj_right_curr++){
+          for(iter_obj_right_curr = 0 ; iter_obj_right_curr <= obj_right_current_RANSAC.size() ; iter_obj_right_curr++){
 
               if((ref_right_current_RANSAC[iter_obj_right_pre].x == obj_right_current_RANSAC[iter_obj_right_curr].x) && (ref_right_current_RANSAC[iter_obj_right_pre].y == obj_right_current_RANSAC[iter_obj_right_curr].y) && right_pre_save){
                   right_curr_save = true ;
@@ -502,7 +503,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
           }
 
-          for(iter_obj_left_curr = 0 ; iter_obj_left_curr < obj_left_current_RANSAC.size() ; iter_obj_left_curr++){
+          for(iter_obj_left_curr = 0 ; iter_obj_left_curr <= obj_left_current_RANSAC.size() ; iter_obj_left_curr++){
 
               if((ref_left_current_RANSAC[iter_obj_right_curr].x == obj_left_current_RANSAC[iter_obj_left_curr].x) && (ref_left_current_RANSAC[iter_obj_right_curr].y == obj_left_current_RANSAC[iter_obj_left_curr].y) && right_curr_save){
                   left_current_u = obj_left_current_RANSAC[iter_obj_left_curr].x ;
@@ -533,6 +534,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
           }
 
+        }
       }
 
       //////////////////////////////////////////////////////////////////
