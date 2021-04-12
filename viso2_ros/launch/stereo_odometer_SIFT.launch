@@ -14,13 +14,24 @@
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/illetes/2021_03_18/12_33_24/images_2021-03-18-12-33-25_0.bag"/> -->
 
   <!-- Cala Lliteres. No es un bon survey però funciona -->
-  <arg name = "bagfile" default = "/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag
                                     /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-02-04_1.bag
                                     /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag
-                                    /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag"/>
+                                    /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag"/> -->
 
-  <!-- Bendinat. Bon dataset amb molt de features però no funciona a l'odometre no se perquè -->
+  <!-- Bendinat hivern. Bon dataset amb molt de features però no funciona a l'odometre no se perquè -->
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/12_24_51/images_2021-01-19-12-31-10_1.bag" /> -->
+
+  <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-14-57_0.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-25-08_1.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-35-22_2.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-45-29_3.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-55-38_4.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-05-47_5.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-16-02_6.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-26-12_7.bag
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-36-23_8.bag" />
+
 
   <!-- Portals. Es suposa que es un bon dataset però no dona molt de features i peta. -->
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
