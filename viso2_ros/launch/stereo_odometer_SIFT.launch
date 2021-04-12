@@ -4,8 +4,8 @@
   <arg name = "resolution" default = "full"/>
   <arg name = "stereo" default = "stereo_down"/>
   <arg name = "camera" default = "/stereo_down"/>
-  <arg name = "enable_decimate_x1" default = "true"/>
-  <arg name = "enable_decimate_x2" default = "false"/>
+  <arg name = "enable_decimate_x1" default = "false"/>
+  <arg name = "enable_decimate_x2" default = "true"/>
   <arg name = "enable_decimate_x4" default = "false"/>
 
   <!-- Bagfiles -->
@@ -22,7 +22,7 @@
   <!-- Bendinat hivern. Bon dataset amb molt de features però no funciona a l'odometre no se perquè -->
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/12_24_51/images_2021-01-19-12-31-10_1.bag" /> -->
 
-  <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-14-57_0.bag
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-14-57_0.bag
                                   /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-25-08_1.bag
                                   /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-35-22_2.bag
                                   /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-17-45-29_3.bag
@@ -30,7 +30,7 @@
                                   /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-05-47_5.bag
                                   /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-16-02_6.bag
                                   /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-26-12_7.bag
-                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-36-23_8.bag" />
+                                  /home/uib/bagfiles/bendinat/2020_07_21/17_14_56/images_2020-07-21-18-36-23_8.bag" /> -->
 
 
   <!-- Portals. Es suposa que es un bon dataset però no dona molt de features i peta. -->
@@ -41,7 +41,7 @@
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-06-23_4.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/> -->
 
-  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag"/> -->
+  <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag"/>
 
 
   <!-- Play the bagfile -->
