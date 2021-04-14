@@ -173,6 +173,10 @@ add_executable(testSIFT2 src/testSIFT2.cpp) # BMNF(19/03/2021): NEW
 add_dependencies(testSIFT2 ${catkin_EXPORTED_TARGETS}) # BMNF(19/03/2021): NEW 
 add_dependencies(testSIFT2 ${PROJECT_NAME}_gencpp) # BMNF(19/03/2021): NEW 
 
+add_executable(testSIFT3 src/testSIFT3.cpp) # BMNF(12/04/2021): NEW 
+add_dependencies(testSIFT3 ${catkin_EXPORTED_TARGETS}) # BMNF(12/04/2021): NEW 
+add_dependencies(testSIFT3 ${PROJECT_NAME}_gencpp) # BMNF(12/04/2021): NEW 
+
 target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 find_package(Boost REQUIRED COMPONENTS signals thread)
 include_directories(${Boost_INCLUDE_DIRS})
@@ -183,6 +187,7 @@ target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin
 target_link_libraries(testORB ${OpenCV_LIB} ${catkin_LIBRARIES}) # BMNF(16/11/2020): MODIFIED
 target_link_libraries(testSIFT ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(30/11/2020): NEW
 target_link_libraries(testSIFT2 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(19/03/2021): NEW 
+target_link_libraries(testSIFT3 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(12/04/2021): NEW 
 
 
 
