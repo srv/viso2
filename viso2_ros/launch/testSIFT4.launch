@@ -44,17 +44,17 @@
     </group>
 
     <!-- Run feature tracker SIFT -->
-    <node pkg = "viso2_ros" type = "testSIFT3" name = "testSIFT3" output = "screen" if="$(eval enable_decimate_x1 == true)">
+    <node pkg = "viso2_ros" type = "testSIFT4" name = "testSIFT4" output = "screen" if="$(eval enable_decimate_x1 == true)">
         <remap from = "stereo" to = "$(arg stereo)"/>
     </node>
 
-    <node pkg = "viso2_ros" type = "testSIFT3" name = "testSIFT3" output = "screen" if="$(eval enable_decimate_x2 == true)">
+    <node pkg = "viso2_ros" type = "testSIFT4" name = "testSIFT4" output = "screen" if="$(eval enable_decimate_x2 == true)">
         <remap from = "stereo" to = "$(arg stereo)"/>
         <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x2/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x2/right/image_rect"/> 
     </node>
 
-    <node pkg = "viso2_ros" type = "testSIFT3" name = "testSIFT3" output = "screen" if="$(eval enable_decimate_x4 == true)">
+    <node pkg = "viso2_ros" type = "testSIFT4" name = "testSIFT4" output = "screen" if="$(eval enable_decimate_x4 == true)">
         <remap from = "stereo" to = "$(arg stereo)"/>
         <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x4/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x4/right/image_rect"/> 
