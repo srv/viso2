@@ -52,8 +52,8 @@ class Matcher {
 public:
 
   //BMNF 11/03/2021:
-  vector<KeyPoint> left_previous_kpts, right_previous_kpts ;
-  Mat left_previous_desc, right_previous_desc ;
+  vector<KeyPoint> l_pre_kpts, r_pre_kpts ;
+  Mat l_pre_desc, r_pre_desc ;
 
   //BMNF 23/03/2021:
   clock_t Time_ImagePrevious ;

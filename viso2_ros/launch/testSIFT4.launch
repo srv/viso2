@@ -6,7 +6,6 @@
     <arg name = "enable_decimate_x1" default = "false"/>
     <arg name = "enable_decimate_x2" default = "true"/>
     <arg name = "enable_decimate_x4" default = "false"/>
-
     <!-- Bagfiles -->
 
     <!-- Cala Lliteres -->

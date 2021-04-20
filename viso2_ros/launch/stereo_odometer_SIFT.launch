@@ -8,6 +8,9 @@
   <arg name = "enable_decimate_x2" default = "true"/>
   <arg name = "enable_decimate_x4" default = "false"/>
 
+  <!-- Parameters -->
+  <param name="/use_sim_time" value = "true"/>
+
   <!-- Bagfiles -->
 
   <!-- Illetes replanning -->
@@ -34,14 +37,15 @@
 
 
   <!-- Portals. Es suposa que es un bon dataset però no dona molt de features i peta. -->
-  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
+  <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-53-45_2.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-06-23_4.bag
-                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/> -->
+                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag
+                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/>
 
-  <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag"/>
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag"/> -->
 
 
   <!-- Play the bagfile -->
