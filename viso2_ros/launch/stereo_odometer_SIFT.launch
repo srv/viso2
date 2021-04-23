@@ -4,8 +4,8 @@
   <arg name = "resolution" default = "full"/>
   <arg name = "stereo" default = "stereo_down"/>
   <arg name = "camera" default = "/stereo_down"/>
-  <arg name = "enable_decimate_x1" default = "false"/>
-  <arg name = "enable_decimate_x2" default = "true"/>
+  <arg name = "enable_decimate_x1" default = "true"/>
+  <arg name = "enable_decimate_x2" default = "false"/>
   <arg name = "enable_decimate_x4" default = "false"/>
 
   <!-- Parameters -->
@@ -17,10 +17,10 @@
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/illetes/2021_03_18/12_33_24/images_2021-03-18-12-33-25_0.bag"/> -->
 
   <!-- Cala Lliteres. No es un bon survey però funciona -->
-  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag
+  <arg name = "bagfile" default = "/home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-15-51-43_0.bag
                                     /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-02-04_1.bag
                                     /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-12-25_2.bag
-                                    /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag"/> -->
+                                    /home/uib/bagfiles/cala_lliteres/2020_07_23_cala_lliteres/15_51_42/images_2020-07-23-16-22-45_3.bag"/>
 
   <!-- Bendinat hivern. Bon dataset amb molt de features però no funciona a l'odometre no se perquè -->
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/12_24_51/images_2021-01-19-12-31-10_1.bag" /> -->
@@ -45,7 +45,7 @@
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
-  <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-51-55_0.bag
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-51-55_0.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-58-15_1.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-04-34_2.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-10-54_3.bag
@@ -53,7 +53,7 @@
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-23-32_5.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-29-51_6.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-36-11_7.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-42-30_8.bag"/>
+                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-42-30_8.bag"/> -->
 
 
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-10-54_3.bag"/> -->
