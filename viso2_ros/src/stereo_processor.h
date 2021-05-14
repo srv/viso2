@@ -133,7 +133,7 @@ protected:
     local_nh.param("queue_size", queue_size_, 5);
     ROS_INFO("Queue size BMNF: %d", queue_size_);
     bool approx;
-    local_nh.param("approximate_sync", approx, true);
+    local_nh.param("approximate_sync", approx, false);
     if (approx)
     {
       approximate_sync_.reset(new ApproximateSync(ApproximatePolicy(queue_size_),

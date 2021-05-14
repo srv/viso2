@@ -102,7 +102,7 @@ protected:
     bool approximate_sync;
     ros::NodeHandle local_nh("~");
     local_nh.param("queue_size", queue_size, 50); // 10
-    local_nh.param("approximate_sync", approximate_sync, true);
+    local_nh.param("approximate_sync", approximate_sync, false);
 
     // read calibration info from camera info message
     // to fill remaining parameters

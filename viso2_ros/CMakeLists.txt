@@ -123,7 +123,6 @@ message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
 message(STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
 message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
 
-include_directories(${OpenCV_INCLUDE_DIRS})
 link_directories(${OpenCV_LIBRARY_DIRS})
 
 

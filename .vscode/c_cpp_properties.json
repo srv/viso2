@@ -20,7 +20,8 @@
                 "/home/uib/catkin_ws/src/uware/include/**",
                 "/home/uib/catkin_ws/src/vlfeat/vlfeat_ros/include/**",
                 "/usr/include/**",
-                "/opt/ros/melodic/include"
+                "/opt/ros/melodic/include",
+                "${workspaceFolder}/libviso2/libviso2/src"
             ],
             "name": "ROS",
             "intelliSenseMode": "gcc-x64",

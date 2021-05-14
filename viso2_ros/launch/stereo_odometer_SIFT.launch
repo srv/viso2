@@ -84,6 +84,7 @@
     <remap from = "image" to = "image_rect"/>
     <param name = "queue_size" value = "70"/>
     <param name = "base_link_frame_id" value = "turbot/base_link"/>
+    <
   </node>
 
   <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">

@@ -652,7 +652,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
       // ROS_INFO("l_curr_coord_aft_H.size(): %d", l_curr_coord_aft_H.size()) ;
       std::cout << "Contador: " << cont << std::endl ;
-      std::cout << "Time between process: " << Time_ImageCurrent - Time_ImagePrevious << std::endl ;
+      std::cout << "Time between process: " << ((Time_ImageCurrent - Time_ImagePrevious) / (double)CLOCKS_PER_SEC) << std::endl ;
       std::cout << "***********************************************" << std::endl ;
 
     } else {
