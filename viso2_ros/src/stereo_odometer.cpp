@@ -87,6 +87,7 @@ public:
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
 
+    // Era aquesta?
     reference_motion_ = Matrix::eye(4);
     
   }

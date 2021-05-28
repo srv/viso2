@@ -77,6 +77,8 @@
   <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
   <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
   <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
+  <node pkg="tf" type="static_transform_publisher" name="stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /turbot/stereo_down /turbot/stereo_down/left_optical 30" />
+
 
   <!-- Viso2 -->
   <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
