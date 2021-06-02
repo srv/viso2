@@ -20,6 +20,7 @@ find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED)
 
 option(ARM_CROSS_COMPILATION "ARM Cross Compilation" OFF)
+option(ARM64_CROSS_COMPILATION "ARM64 Cross Compilation" OFF)
 
 add_message_files( DIRECTORY msg FILES VisoInfo.msg)
 
@@ -33,9 +34,12 @@ catkin_package()
 if(ARM_CROSS_COMPILATION)
   SET(CMAKE_SYSTEM_PROCESSOR arm)
   SET(CMAKE_CXX_FLAGS -mfpu=neon)
-else(ARM_CROSS_COMPILATION)
+elseif (ARM64_CROSS_COMPILATION)
+  SET(CMAKE_SYSTEM_PROCESSOR aarch64)
+  add_definitions(-D__ARM_NEON__)
+else()
   add_definitions(-msse3)
-endif(ARM_CROSS_COMPILATION)
+endif()
 
 include_directories(src ${libviso2_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS})
 
