@@ -45,6 +45,8 @@
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/>
                                     <!-- /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/> -->
+
   <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-51-55_0.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-58-15_1.bag
                                   /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-04-34_2.bag

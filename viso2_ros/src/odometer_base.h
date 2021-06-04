@@ -74,51 +74,7 @@ public:
 
     reset_service_ = local_nh.advertiseService("reset_pose", &OdometerBase::resetPose, this);
 
-
-    // [ INFO] [1622114609.566293356, 1614260485.775736583]: base_to_sensor x: 0.399952
-    // [ INFO] [1622114609.566315631, 1614260485.775736583]: base_to_sensor y: -0.060000
-    // [ INFO] [1622114609.566333835, 1614260485.775736583]: base_to_sensor z: 0.800000
-    // [ INFO] [1622114609.566370158, 1614260485.775736583]: base_to_sensor roll: 0.000000
-    // [ INFO] [1622114609.566387227, 1614260485.775736583]: base_to_sensor pitch: -0.000000
-    // [ INFO] [1622114609.566404184, 1614260485.775736583]: base_to_sensor yaw: 1.570000
-
-
-    tf::Transform base_to_sensor_auxiliar ;
-
-    tf::Vector3 aux_t(0.399952, -0.060000, 0.800000) ;
-
-    tf::Quaternion myQuaternion;
-    myQuaternion.setRPY(0.000000, -0.000000, 1.570000) ;
-
-    base_to_sensor_auxiliar.setOrigin(aux_t) ;
-
-    base_to_sensor_auxiliar.setRotation(myQuaternion) ;
-
-    // // Precompute sine/cosine
-    // double s_roll = sin(-0.06352688364046247);
-    // double c_roll = cos(-0.06352688364046247);
-    // double s_pitch = sin(-0.1750601524898814);
-    // double c_pitch = cos(-0.1750601524898814);
-    // double s_yaw = sin(1.2347373125385348);
-    // double c_yaw = cos(1.2347373125385348);
-
-    // // Compute rotation matrix
-    // tf::Matrix3x3 rot_mat(
-    // c_yaw * c_pitch, -s_yaw * c_roll + c_yaw * s_pitch * s_roll , s_yaw * s_roll + c_yaw * s_pitch * c_roll,
-    // s_yaw * c_pitch, c_yaw * c_roll + s_yaw * s_pitch * s_roll, -c_yaw * s_roll + s_yaw * s_pitch * c_roll,
-    // -s_pitch, c_pitch * s_roll, c_pitch * c_roll);
-
-    tf::Quaternion myQuaternion2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ;
-    
-    tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ;
-
-    integrated_pose_.setOrigin(t) ;
-    integrated_pose_.setRotation(myQuaternion2) ;
-
-    integrated_pose_ = base_to_sensor_auxiliar.inverse() * integrated_pose_ * base_to_sensor_auxiliar;
-
-    // O aquesta?
-    // integrated_pose_.setIdentity();
+    integrated_pose_.setIdentity();
 
     pose_covariance_.assign(0.0);
     twist_covariance_.assign(0.0);
@@ -183,47 +139,21 @@ protected:
       base_to_sensor.setIdentity();
     }
 
-    // tf::Vector3 aux6(integrated_pose_.getOrigin()) ;
-
-    // ROS_INFO("integrated_pose_ x: %f", aux6.getX()) ;
-
-    // tf::Vector3 aux5(base_to_sensor.getOrigin()) ;
-
-    // ROS_INFO("base_to_sensor x: %f", aux5.getX()) ;
-    // ROS_INFO("base_to_sensor y: %f", aux5.getY()) ;
-    // ROS_INFO("base_to_sensor z: %f", aux5.getZ()) ;
-
-    // tf::Quaternion myQuaternion = base_to_sensor.getRotation() ;
-
-    /**< quaternion -> rotation Matrix */
-    // tf::Matrix3x3 m(myQuaternion);
-  
-    // double roll, pitch, yaw;
-    // m.getRPY(roll, pitch, yaw);
-  
-    // ROS_INFO("base_to_sensor roll: %f", roll) ;
-    // ROS_INFO("base_to_sensor pitch: %f", pitch) ;
-    // ROS_INFO("base_to_sensor yaw: %f", yaw) ;
-
-    // tf::Quaternion q_aux(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316);
-    
-    // tf::Vector3 t_aux(74.568675009499998, 18.5392068604, 5.4271955410699997) ;
-
-    // tf::Transform TF_aux ;
-
-    // TF_aux.setOrigin(t_aux) ;
-    // TF_aux.setRotation(q_aux) ;
-
     /* Multiplication of tfs. */
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
 
-    // tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse() * TF_aux;
+    /* Initial pose. */
+    tf::Quaternion q2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ;
+    
+    tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ;
 
-    // tf::Vector3 aux4(base_transform.getOrigin()) ;
+    tf::Transform EKF_initial_pose ;
 
-    // ROS_INFO("Matriu despres de mutiplicar-se amb base_to_sensor x: %f", aux4.getX()) ;
+    EKF_initial_pose.setOrigin(t) ;
+    EKF_initial_pose.setRotation(q2) ;
 
-    /* */
+    base_transform = EKF_initial_pose * base_transform ;
+
     nav_msgs::Odometry odometry_msg;
     odometry_msg.header.stamp = timestamp;
     odometry_msg.header.frame_id = odom_frame_id_;

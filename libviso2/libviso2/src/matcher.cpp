@@ -327,7 +327,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute left Homography
       try{
 
-        left_H = cv::findHomography(l_curr_coord_aft_match, l_pre_coord_aft_match, CV_RANSAC, 3.0, left_RANSACinliersMask) ;
+        left_H = cv::findHomography(l_curr_coord_aft_match, l_pre_coord_aft_match, CV_RANSAC, 1.0, left_RANSACinliersMask) ;
 
       } catch (cv::Exception& e) {
 
@@ -393,7 +393,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute previous Fundamental Matrix
       try{
 
-        previous_F = cv::findFundamentalMat(l_pre_coord_aft_H_aft_previous_match, r_pre_coord_aft_match, previous_RANSACinliersMask, CV_RANSAC, 3.f) ;
+        previous_F = cv::findFundamentalMat(l_pre_coord_aft_H_aft_previous_match, r_pre_coord_aft_match, previous_RANSACinliersMask, CV_RANSAC, 1.f) ;
 
       } catch (cv::Exception& e) {
 
@@ -458,7 +458,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute right Homography
       try{
 
-        right_H = cv::findHomography(r_pre_coord_aft_F_aft_right_match, r_curr_coord_aft_match, CV_RANSAC, 3.0, right_RANSACinliersMask) ;
+        right_H = cv::findHomography(r_pre_coord_aft_F_aft_right_match, r_curr_coord_aft_match, CV_RANSAC, 1.0, right_RANSACinliersMask) ;
 
       } catch (cv::Exception& e) {
 
@@ -524,7 +524,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute current Fundamental Matrix
       try{
 
-        current_F = cv::findFundamentalMat(r_curr_coord_aft_H_aft_current_match, l_curr_coord_aft_H_aft_current_match, current_RANSACinliersMask, CV_RANSAC, 3.f) ;
+        current_F = cv::findFundamentalMat(r_curr_coord_aft_H_aft_current_match, l_curr_coord_aft_H_aft_current_match, current_RANSACinliersMask, CV_RANSAC, 1.f) ;
 
       } catch (cv::Exception& e) {
 
@@ -656,7 +656,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       std::cout << "***********************************************" << std::endl ;
 
     } else {
-
+      p_matched_2.clear() ;
       std::cout << "There isn't enough keypoints" << std::endl ;
       std::cout << "***********************************************" << std::endl ;
 
