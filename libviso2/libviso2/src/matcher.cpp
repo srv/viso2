@@ -41,7 +41,7 @@ using cv::Ptr ;
 using cv::KeyPoint ;
 
 using cv::xfeatures2d::SIFT ;
-
+using cv::FastFeatureDetector ;
 
 //////////////////////
 // PUBLIC FUNCTIONS //
@@ -235,7 +235,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
   vector<KeyPoint> r_curr_kpts_aft_F, l_curr_kpts_aft_F ;
 
   // Matrix
-  // Mat left_img, right_img ;
 
   Mat l_curr_desc, r_curr_desc ;
 
@@ -261,6 +260,7 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
   // Pointers
   Ptr<SIFT> sift ;
+  Ptr<FastFeatureDetector> fast_detector ;
   Ptr<cv::DescriptorMatcher> left_desc_matcher, right_desc_matcher, previous_desc_matcher, current_desc_matcher ;
 
   // Point2f
@@ -282,15 +282,32 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
   // Integers
   int k = 2 ;
+  int FC = 3 ;
+  int HC = 3 ;
 
   /////////////////////////////////////////////////////////////////
-  ////////////////////////Compute SIFT/////////////////////////////
+  ///////////////Compute new feature tracker///////////////////////
   /////////////////////////////////////////////////////////////////
 
   sift = SIFT::create(0, 3, 0.04, 10, 1.6) ;
   sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
   sift = SIFT::create(0, 3, 0.04, 10, 1.6) ;
   sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
+
+  // fast_detector = FastFeatureDetector::create(10, true) ;
+  // fast_detector->detect(left_img, l_curr_kpts) ;
+  // fast_detector = FastFeatureDetector::create(10, true) ;
+  // fast_detector->detect(right_img, r_curr_kpts) ;
+
+  // Ptr<cv::xfeatures2d::SiftDescriptorExtractor> extractor = SIFT::create() ;
+
+  // Ptr<cv::ORB> orb_extractor = cv::ORB::create() ;
+
+  // extractor->compute(left_img, l_curr_kpts, l_curr_desc) ;
+  // extractor->compute(right_img, r_curr_kpts, r_curr_desc) ;
+
+  // orb_extractor->compute(left_img, l_curr_kpts, l_curr_desc) ;
+  // orb_extractor->compute(right_img, r_curr_kpts, r_curr_desc) ;
 
   if(no_matching == false){
 
@@ -303,6 +320,9 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute the matchings of the left side
       left_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
       left_desc_matcher->knnMatch(l_curr_desc, l_pre_desc, left_matches, k, cv::noArray(), true) ;
+
+      // left_desc_matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
+      // left_desc_matcher->knnMatch(l_curr_desc, l_pre_desc, left_matches, k, cv::noArray(), true) ;
 
       // Obtaining keypoints, coordinates and descriptors of the left side after matching 
       for(i = 0; i < left_matches.size(); i++){
@@ -317,17 +337,10 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
       }
 
-      std::cout << "Current left keypoints: " << l_curr_kpts.size() << std::endl ;
-      std::cout << "Previous left keypoints: " << l_pre_kpts.size() << std::endl ;
-      std::cout << "Current left keypoints after matches: " << l_curr_kpts_aft_match.size() << std::endl ;
-      std::cout << "Previous left matches keypoints: " << l_pre_kpts_aft_match.size() << std::endl ;
-      std::cout << "Current left matches descriptors: " << l_curr_desc_aft_match.size() << std::endl ; 
-      std::cout << "Previous left matches descriptors: " << l_pre_desc_aft_match.size() << std::endl ;
-
       // Compute left Homography
       try{
 
-        left_H = cv::findHomography(l_curr_coord_aft_match, l_pre_coord_aft_match, CV_RANSAC, 1.0, left_RANSACinliersMask) ;
+        left_H = cv::findHomography(l_curr_coord_aft_match, l_pre_coord_aft_match, CV_RANSAC, HC, left_RANSACinliersMask) ;
 
       } catch (cv::Exception& e) {
 
@@ -359,11 +372,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
         }
       }
 
-      std::cout << "Current left keypoints after H: " << l_curr_kpts_aft_H.size() << std::endl ;
-      std::cout << "Previous left keypoints after H: " << l_pre_kpts_aft_H.size() << std::endl ;
-      std::cout << "-----------------------------------------------" << std::endl ;
-
-
       /////////////////////////////////////////////////////////////////
       ////////////////////////Previous side////////////////////////////
       /////////////////////////////////////////////////////////////////
@@ -371,6 +379,9 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute the matchings of the previous side
       previous_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
       previous_desc_matcher->knnMatch(l_pre_desc_aft_H, r_pre_desc, previous_matches, k, cv::noArray(), true) ;
+
+      // previous_desc_matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
+      // previous_desc_matcher->knnMatch(l_pre_desc_aft_H, r_pre_desc, previous_matches, k, cv::noArray(), true) ;
 
       // Obtaining keypoints, coordinates and descriptors of the previous side after matching 
       for(i = 0; i < previous_matches.size(); i++){
@@ -385,15 +396,10 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
       }
 
-      std::cout << "Previous left keypoints after H: " << l_pre_kpts_aft_H.size() << std::endl ;
-      std::cout << "Previous right keypoints: " << r_pre_kpts.size() << std::endl ;
-      std::cout << "Previous left keypoints after H and after match : " << l_pre_kpts_aft_H_aft_previous_match.size() << std::endl ;
-      std::cout << "Previous right keypoints after match: " << r_pre_kpts_aft_match.size() << std::endl ;
-
       // Compute previous Fundamental Matrix
       try{
 
-        previous_F = cv::findFundamentalMat(l_pre_coord_aft_H_aft_previous_match, r_pre_coord_aft_match, previous_RANSACinliersMask, CV_RANSAC, 1.f) ;
+        previous_F = cv::findFundamentalMat(l_pre_coord_aft_H_aft_previous_match, r_pre_coord_aft_match, previous_RANSACinliersMask, CV_RANSAC, FC) ;
 
       } catch (cv::Exception& e) {
 
@@ -425,10 +431,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
         }
       }
 
-      std::cout << "Previous left keypoints after F: " << l_pre_kpts_aft_F.size() << std::endl ;
-      std::cout << "Previous right keypoints after F: " << r_pre_kpts_aft_F.size() << std::endl ;
-      std::cout << "-----------------------------------------------" << std::endl ;
-
       /////////////////////////////////////////////////////////////////
       /////////////////////////Right side//////////////////////////////
       /////////////////////////////////////////////////////////////////
@@ -436,6 +438,9 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute the matchings of the right side
       right_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
       right_desc_matcher->knnMatch(r_pre_desc_aft_F, r_curr_desc, right_matches, k, cv::noArray(), true) ;
+
+      // right_desc_matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
+      // right_desc_matcher->knnMatch(r_pre_desc_aft_F, r_curr_desc, right_matches, k, cv::noArray(), true) ;
 
       // Obtaining keypoints, coordinates and descriptors of the right side after matching 
       for(i = 0; i < right_matches.size(); i++){
@@ -449,16 +454,11 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
         r_curr_coord_aft_match.push_back(r_curr_kpts[right_matches[i][0].trainIdx].pt) ;
 
       }
-          
-      std::cout << "Previous right keypoints after F: " << r_pre_kpts_aft_F.size() << std::endl ;
-      std::cout << "Current right keypoints: " << r_curr_kpts.size() << std::endl ;
-      std::cout << "Previous right keypoints after H and after match : " << r_pre_kpts_aft_F_aft_right_match.size() << std::endl ;
-      std::cout << "current right keypoints after match: " << r_curr_kpts_aft_match.size() << std::endl ;
 
       // Compute right Homography
       try{
 
-        right_H = cv::findHomography(r_pre_coord_aft_F_aft_right_match, r_curr_coord_aft_match, CV_RANSAC, 1.0, right_RANSACinliersMask) ;
+        right_H = cv::findHomography(r_pre_coord_aft_F_aft_right_match, r_curr_coord_aft_match, CV_RANSAC, HC, right_RANSACinliersMask) ;
 
       } catch (cv::Exception& e) {
 
@@ -490,10 +490,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
         }
       }
 
-      std::cout << "Previous right keypoints after H: " << r_pre_kpts_aft_H.size() << std::endl ;
-      std::cout << "Current right keypoints after H: " << r_curr_kpts_aft_H.size() << std::endl ;
-      std::cout << "-----------------------------------------------" << std::endl ;
-
       /////////////////////////////////////////////////////////////////
       ///////////////////////Current side//////////////////////////////
       /////////////////////////////////////////////////////////////////
@@ -501,6 +497,9 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
       // Compute the matchings of the current side
       current_desc_matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
       current_desc_matcher->knnMatch(r_curr_desc_aft_H, l_curr_desc_aft_H, current_matches, k, cv::noArray(), true) ;
+
+      // current_desc_matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
+      // current_desc_matcher->knnMatch(r_curr_desc_aft_H, l_curr_desc_aft_H, current_matches, k, cv::noArray(), true) ;
 
       // Obtaining keypoints, coordinates and descriptors of the current side after matching 
       for(i = 0; i < current_matches.size(); i++){
@@ -515,16 +514,10 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
           
       }
 
-      std::cout << "Current right keypoints after H: " << r_curr_kpts_aft_H.size() << std::endl ;
-      std::cout << "Current left keypoints after H: " << l_curr_kpts_aft_H.size() << std::endl ;
-      std::cout << "Current right keypoints after H and after match: " << r_curr_kpts_aft_H_aft_current_match.size() << std::endl ;
-      std::cout << "Current left keypoints after H and after match: " << l_curr_kpts_aft_H_aft_current_match.size() << std::endl ;
-
-
       // Compute current Fundamental Matrix
       try{
 
-        current_F = cv::findFundamentalMat(r_curr_coord_aft_H_aft_current_match, l_curr_coord_aft_H_aft_current_match, current_RANSACinliersMask, CV_RANSAC, 1.f) ;
+        current_F = cv::findFundamentalMat(r_curr_coord_aft_H_aft_current_match, l_curr_coord_aft_H_aft_current_match, current_RANSACinliersMask, CV_RANSAC, FC) ;
 
       } catch (cv::Exception& e) {
 
@@ -554,11 +547,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
         }
       }
-
-      std::cout << "Current right keypoints after F: " << r_curr_kpts_aft_F.size() << std::endl ;
-      std::cout << "Current left keypoints after F: " << l_curr_kpts_aft_F.size() << std::endl ;
-      std::cout << "Current left coord after F: " << l_curr_coord_aft_F.size() << std::endl ;
-
 
       /////////////////////////////////////////////////////////////////
       ///////////////Obtaining previous coordinates////////////////////
@@ -591,8 +579,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
               l_pre_coord_aft_H_y = l_pre_coord_aft_H[j].y ;
               l_pre_index = j ;
               l_curr_index = i ;
-              // save l_pre_coord_aft_H[j].x
-              // save l_pre_coord_aft_H[j].y
               break ;
             }                    
           }
@@ -606,8 +592,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
               r_pre_coord_aft_H_y = r_pre_coord_aft_H[j].y ;
               r_pre_index = j ;
               r_curr_index = i ;
-              // save r_pre_coord_after_H[j].x
-              // save r_pre_coord_after_H[j].y
               break ;
             }   
           }
@@ -632,15 +616,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
                                                 r_curr_coord_aft_F[i].y,
                                                 r_curr_index)) ;
 
-          //p_matched_2.push_back(l_curr_coord_aft_F[i].x)
-          //p_matched_2.push_back(l_curr_coord_aft_F[i].y)
-          //p_matched_2.push_back(r_curr_coord_aft_F[i].x)
-          //p_matched_2.push_back(r_curr_coord_aft_F[i].y)
-          //p_matched_2.push_back(l_pre_coord_aft_H[j].x)
-          //p_matched_2.push_back(l_pre_coord_aft_H[j].y)
-          //p_matched_2.push_back(r_pre_coord_aft_H[j].x)
-          //p_matched_2.push_back(r_pre_coord_aft_H[i].y)
-
         }else{
 
           save_cont1 = false ;
@@ -650,7 +625,6 @@ void Matcher::matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching){
 
       }
 
-      // ROS_INFO("l_curr_coord_aft_H.size(): %d", l_curr_coord_aft_H.size()) ;
       std::cout << "Contador: " << cont << std::endl ;
       std::cout << "Time between process: " << ((Time_ImageCurrent - Time_ImagePrevious) / (double)CLOCKS_PER_SEC) << std::endl ;
       std::cout << "***********************************************" << std::endl ;

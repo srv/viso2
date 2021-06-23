@@ -37,29 +37,34 @@
 
 
   <!-- Portals. Es suposa que es un bon dataset però no dona molt de features i peta. -->
-  <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-53-45_2.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-06-23_4.bag
-                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/>
+                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/> -->
                                     <!-- /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
-  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/> -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-46-15_0.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-52-34_1.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-58-54_2.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-17-05-13_3.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-17-11-32_4.bag"/> -->
+                                    <!-- /home/uib/bagfiles/colonia_sant_jordi/2020_11_04/topics_2020-11-04-15-22-32_0.bag"/> -->
+ 
 
-  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-51-55_0.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-15-58-15_1.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-04-34_2.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-10-54_3.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-17-13_4.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-23-32_5.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-29-51_6.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-36-11_7.bag
-                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-42-30_8.bag"/> -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42/images_2020-11-03-11-17-43_0.bag
+                                  /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42/images_2020-11-03-11-25-22_1.bag"/> -->
 
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/andratx/2021_06_09/14_33_35/images_2021-06-09-14-33-36_0.bag
+                                  /home/uib/bagfiles/andratx/2021_06_09/14_33_35/images_2021-06-09-14-39-55_1.bag
+                                  /home/uib/bagfiles/andratx/2021_06_09/14_33_35/images_2021-06-09-14-46-17_2.bag
+                                  /home/uib/bagfiles/andratx/2021_06_09/14_33_35/images_2021-06-09-14-52-39_3.bag
+                                  /home/uib/bagfiles/andratx/2021_06_09/14_33_35/images_2021-06-09-14-58-59_4.bag"/> -->
 
-  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/15_51_55/images_2020-11-03-16-10-54_3.bag"/> -->
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2021_01_19/16_33_57/images_2021-01-19-16-33-58_0.bag"/> -->
 
+      <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2021_05_19/15_41_48/images_2021-05-19-15-41-49_0.bag"/> 
 
   <!-- Play the bagfile -->
   <node pkg = "rosbag" type = "play" name = "rosbag" args = "--clock $(arg bagfile)" />

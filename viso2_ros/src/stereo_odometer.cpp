@@ -167,8 +167,8 @@ protected:
     if (first_run || got_lost_)
     // if(first_run)
     {
-      visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021, true
-      // visual_odometer_->process(l_image_data, r_image_data, dims); // BMNF 03/03/2021
+      // visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021, true
+      visual_odometer_->process(l_image_data, r_image_data, dims); // BMNF 03/03/2021
       got_lost_ = false;
       // on first run publish zero once
       if (first_run)
@@ -181,8 +181,8 @@ protected:
     else
     {
       bool success ;
-      success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021, false
-      // success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_); // BMNF 03/03/2021
+      // success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021, false
+      success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_); // BMNF 03/03/2021
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());

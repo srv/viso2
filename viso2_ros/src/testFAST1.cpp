@@ -31,6 +31,7 @@ using cv::Ptr ;
 using cv::FastFeatureDetector ;
 using cv::xfeatures2d::SIFT ;
 using cv::xfeatures2d::SiftDescriptorExtractor ;
+using cv::ORB ;
 
 
 /////////////////////////////////////////////////////////////////
@@ -93,7 +94,9 @@ Struct SIFTmatching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, M
     int i ;
 
     // Compute the matchings
-    matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+    // matcher = cv::DescriptorMatcher::create(cv::DescriptorMatcher::FLANNBASED) ;
+
+    matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
     matcher->knnMatch(desc1, desc2, matches, k, cv::noArray(), true) ;
 
     // Obtaining keypoints, coordinates and descriptors after matching 
@@ -227,10 +230,15 @@ void imageCallback(const sensor_msgs::ImageConstPtr& l_image_msg, const sensor_m
 
     ROS_INFO("Time FAST process: %f", Time_after_fast - Time_before_fast) ;
 
-    Ptr<SiftDescriptorExtractor> extractor = SIFT::create() ;
+    // Ptr<SiftDescriptorExtractor> extractor = SIFT::create() ;
 
-    extractor->compute(left_img, l_curr_kpts, l_curr_desc) ;
-    extractor->compute(right_img, r_curr_kpts, r_curr_desc) ;
+    Ptr<ORB> orb_extractor = ORB::create() ;
+
+    // extractor->compute(left_img, l_curr_kpts, l_curr_desc) ;
+    // extractor->compute(right_img, r_curr_kpts, r_curr_desc) ;
+
+    orb_extractor->compute(left_img, l_curr_kpts, l_curr_desc) ;
+    orb_extractor->compute(right_img, r_curr_kpts, r_curr_desc) ;
 
     double Time_after_sift = ros::Time::now().toSec() ;
 
