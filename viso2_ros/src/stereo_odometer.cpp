@@ -14,10 +14,8 @@
 #include "odometer_base.h"
 #include "odometry_params.h"
 
-// to remove after debugging
-#include </usr/local/include/opencv2/highgui/highgui.hpp>
-
-using cv::Mat ; //BMNF 03/03/2021:
+//BMNF
+using cv::Mat ;
 
 namespace viso2_ros
 {
@@ -49,7 +47,6 @@ static const boost::array<double, 36> BAD_COVARIANCE =
 class StereoOdometer : public StereoProcessor, public OdometerBase
 {
 
-/* BMNF: Variables declaration */
 private:
 
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
@@ -67,6 +64,11 @@ private:
   int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low
   Matrix reference_motion_;
 
+  // BMNF: Parameters to select the odometer configuration.
+  bool viso2_processor ;
+  bool bucketing ;
+  int feature_tracker ;
+
 public:
 
   typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
@@ -75,7 +77,7 @@ public:
     StereoProcessor(transport), OdometerBase(),
     got_lost_(false), change_reference_frame_(false)
   {
-    ROS_INFO_STREAM("HOLA StereoOdometer");
+
     // Read local parameters
     ros::NodeHandle local_nh("~");
     odometry_params::loadParams(local_nh, visual_odometer_params_);
@@ -87,7 +89,6 @@ public:
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
 
-    // Era aquesta?
     reference_motion_ = Matrix::eye(4);
     
   }
@@ -98,12 +99,15 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
-    ROS_INFO("Hola initOdometer");
     int queue_size;
     bool approximate_sync;
+
     ros::NodeHandle local_nh("~");
     local_nh.param("queue_size", queue_size, 50); // 10
     local_nh.param("approximate_sync", approximate_sync, false);
+    local_nh.param("Viso2_processor", viso2_processor, true) ;
+    local_nh.param("Bucketing", bucketing, true) ;
+    local_nh.param("Feature_tracker", feature_tracker, 0) ;
 
     // read calibration info from camera info message
     // to fill remaining parameters
@@ -122,7 +126,10 @@ protected:
                     "  approximate_sync = " << approximate_sync << std::endl <<
                     "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<
                     "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl <<
-                    "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_);
+                    "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
+                    "  Viso2_processor = " << viso2_processor << std::endl <<
+                    "  Bucketing = " << bucketing << std::endl <<
+                    "  Feature_tracker = " << feature_tracker);
   }
 
   void imageCallback(
@@ -151,10 +158,9 @@ protected:
     r_image_data = r_cv_ptr->image.data;
     r_step = r_cv_ptr->image.step[0];
 
-
-    //BMNF 03/03/2021:
-    Mat left_img_SIFT = l_cv_ptr -> image ;
-    Mat right_img_SIFT = r_cv_ptr -> image ;
+    //BMNF: Save image into opencv matrix
+    Mat lef_img_new = l_cv_ptr -> image ;
+    Mat rig_img_new = r_cv_ptr -> image ;
 
     ROS_ASSERT(l_step == r_step);
     ROS_ASSERT(l_image_msg->width == r_image_msg->width);
@@ -165,10 +171,17 @@ protected:
     // on first run or when odometer got lost, only feed the odometer with
     // images without retrieving data
     if (first_run || got_lost_)
-    // if(first_run)
     {
-      // visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021, true
-      visual_odometer_->process(l_image_data, r_image_data, dims); // BMNF 03/03/2021
+      // BMNF
+      if(viso2_processor == true){
+
+        visual_odometer_->process(l_image_data, r_image_data, dims);
+
+      } else {
+
+        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker) ; 
+
+      }
       got_lost_ = false;
       // on first run publish zero once
       if (first_run)
@@ -180,9 +193,19 @@ protected:
     }
     else
     {
-      bool success ;
-      // success = visual_odometer_->process_SIFT(left_img_SIFT, right_img_SIFT, dims, change_reference_frame_) ; // BMNF 03/03/2021, false
-      success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_); // BMNF 03/03/2021
+      bool success;
+
+      // BMNF
+      if(viso2_processor == true){
+
+        success = visual_odometer_->process(l_image_data, r_image_data, dims);
+
+      } else {
+
+        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker) ; // BMNF 03/03/2021, true
+
+      }
+
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());
@@ -358,7 +381,7 @@ int main(int argc, char **argv)
              "topic is '%s'. Are you sure the images are rectified?",
              ros::names::remap("image").c_str());
   }
-  //ROS_INFO_STREAM("MAIN");
+
   std::string transport = argc > 1 ? argv[1] : "raw";
   viso2_ros::StereoOdometer odometer(transport);
 

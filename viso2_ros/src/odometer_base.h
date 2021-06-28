@@ -118,8 +118,6 @@ protected:
 
     integrated_pose_ *= delta_transform;
      
-    /* Transform integrated pose to base frame. The program listen tf topic (?) and obtain the transform between
-    base link and the sensor. If the transfrom doesn't exist the program advise you.  */
     tf::StampedTransform base_to_sensor;
     std::string error_msg;
     if (tf_listener_.canTransform(base_link_frame_id_, sensor_frame_id_, timestamp, &error_msg))
@@ -139,26 +137,27 @@ protected:
       base_to_sensor.setIdentity();
     }
 
-    /* Multiplication of tfs. */
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
 
-    /* Initial pose. */
+    // BMNF: Initial orientation when the robot is not in NED origin.
     // tf::Quaternion q2(0.01229814164, -0.05866396396, 0.9742064727, 0.2175523926) ;
-    // tf::Quaternion q2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ;
+    tf::Quaternion q2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ;
     // tf::Quaternion q2(0.06656106726, 0.02654796015, -0.9259859207, 0.3706951643) ;
     // tf::Quaternion q2(-0.03900879093, 0.05679888864, -0.2387434845, 0.9686349927) ;
-    tf::Quaternion q2(-0.02564399815, 0.06341876553, 0.4646516965, 0.882847238461) ;
+    // tf::Quaternion q2(-0.02564399815, 0.06341876553, 0.4646516965, 0.882847238461) ;
     
-    // tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ;
+    // BMNF: Initial pose when the robot is not in NED origin.
+    tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ;
     // tf::Vector3 t(58.33139893, -1.011998077, 0.1093880108) ; 
     // tf::Vector3 t(1.05552999574, 26.1954855264, 0.14202065041) ;                  
-    tf::Vector3 t(-19.84049806, 16.37197326, 0.1311650139) ;                                                                                                                                                   
+    // tf::Vector3 t(-19.84049806, 16.37197326, 0.1311650139) ;                                                                                                                                                   
 
     tf::Transform EKF_initial_pose ;
 
     EKF_initial_pose.setOrigin(t) ;
     EKF_initial_pose.setRotation(q2) ;
 
+    // BMNF: transform between NED origin and initial position of the robot when odometer starts.
     base_transform = EKF_initial_pose * base_transform ;
 
     nav_msgs::Odometry odometry_msg;
@@ -167,7 +166,6 @@ protected:
     odometry_msg.child_frame_id = base_link_frame_id_;
     tf::poseTFToMsg(base_transform, odometry_msg.pose.pose);
 
-    /* Calculate twist (not possible for first run as no delta_t can be computed). Is not the same multiplication? */
     tf::Transform delta_base_transform = base_to_sensor * delta_transform * base_to_sensor.inverse();
     if (!last_update_time_.isZero())
     {

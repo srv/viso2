@@ -30,15 +30,45 @@ VisualOdometryStereo::VisualOdometryStereo (parameters param) : param(param), Vi
 VisualOdometryStereo::~VisualOdometryStereo() {
 }
 
-bool VisualOdometryStereo::process_SIFT(Mat left_img_SIFT, Mat right_img_SIFT, int32_t* dims, bool no_maching) {
-  matcher->matchFeaturesSIFT(left_img_SIFT, right_img_SIFT, no_maching) ;
 
-  matcher->bucketFeatures(param.bucket.max_features, param.bucket.bucket_width, param.bucket.bucket_height);                          
+//BMNF
+bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int feature_tracker) {
+
+  /**********************************************************************************************************
+  Process a new images, push the images back, compute the new match circle, do a bucketing if is required and
+  updates motion.
+
+  Parameters:
+  @left_img:  Opencv matrix that contains the left image.
+  @right_img: Opencv matrix that contains the right image.
+  @replace: Boolean that allows to calculated the circle match if its value is "false". If its value is 
+            "true" the information of current images is transformed to information of previous images.
+  @bucketing: Boolean that allows the bucketing
+  @feature_tracker: Integer that defines which feature tracker is being used.
+
+  Returns:
+  @updateMotion: Boolean that returns if the motion update is correct or if an error occured.
+  ***********************************************************************************************************/
+
+  // If "replace" is "false" current images becomes previous images and new images becomes current images.
+  // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
+  // new images becomes current images but the circle match is not calculated.
+  matcher->new_matching_circle(left_img, right_img, replace, feature_tracker) ;
+
+  if(bucketing == true){
+
+    matcher->bucketFeatures(param.bucket.max_features, param.bucket.bucket_width, param.bucket.bucket_height) ; 
+
+  }
+                       
   p_matched = matcher->getMatches();
+
   std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl ;
   std::cout << "***********************************************" << std::endl ;
+
   return updateMotion(0.0,false);
 }
+
 
 bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace) {
   matcher->pushBack(I1,I2,dims,replace);
@@ -48,6 +78,8 @@ bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool r
   p_matched = matcher->getMatches();
   return updateMotion(0.0,false);
 }
+
+
 
 vector<double> VisualOdometryStereo::estimateMotion (vector<Matcher::p_match> p_matched,double cameraHeight, bool mono_odometry) {
   // camera height and mono_odometry are not used here

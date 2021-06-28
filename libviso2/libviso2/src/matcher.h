@@ -38,8 +38,11 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 #include "matrix.h"
 
+using namespace std ;
+
 //BMNF 03/03/2021:
 #include <opencv2/core/core.hpp>
+#include <opencv2/core/types.hpp>
 using cv::Mat ;
 
 //BMNF 11/03/2021:
@@ -51,12 +54,33 @@ class Matcher {
 
 public:
 
-  //BMNF 11/03/2021:
+  //BMNF New global variable declaration
+  /**********************************************************************************************************/
+  
+  // Previous key point vectors
   vector<KeyPoint> l_pre_kpts, r_pre_kpts ;
   Mat l_pre_desc, r_pre_desc ;
 
-  //BMNF 23/03/2021:
   clock_t Time_ImagePrevious ;
+
+  // Structure to store matching information 
+  struct auxiliar_return {
+
+    vector<KeyPoint> kpts1 ;
+    vector<KeyPoint> kpts2 ;
+    Mat desc1 ;
+    Mat desc2 ;
+    vector<cv::Point2f> coord1 ;
+    vector<cv::Point2f> coord2 ;
+    bool correct ;
+
+  };
+  
+  typedef struct auxiliar_return Struct;
+
+
+  /**********************************************************************************************************/
+
 
   // parameter settings
   struct parameters {
@@ -166,7 +190,9 @@ public:
   // and you want to cancel the change of (unknown) camera gain.
   float getGain (std::vector<int32_t> inliers);
 
-  void matchFeaturesSIFT(Mat left_img, Mat right_img, bool no_matching) ; //BMNF 03/03/2021: Create
+
+  // BMNF: Function that implements a new push back and compute the new circle match between four images using opencv.
+  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker) ; 
 
 private:
 
@@ -276,6 +302,11 @@ private:
   std::vector<Matcher::p_match> p_matched_1;
   std::vector<Matcher::p_match> p_matched_2;
   std::vector<Matcher::range>   ranges;
+
+
+  // BMNF: Auxiliar function to compute matchings between two images using opencv libraries.
+  Struct new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k) ; 
+
 };
 
 #endif
