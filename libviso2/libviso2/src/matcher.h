@@ -192,7 +192,7 @@ public:
 
 
   // BMNF: Function that implements a new push back and compute the new circle match between four images using opencv.
-  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker) ; 
+  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker, int epipolar_constrain) ; 
 
 private:
 
@@ -305,7 +305,7 @@ private:
 
 
   // BMNF: Auxiliar function to compute matchings between two images using opencv libraries.
-  Struct new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k) ; 
+  Struct new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k, int epipolar_constrain) ; 
 
 };
 

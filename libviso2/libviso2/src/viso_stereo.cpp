@@ -32,7 +32,7 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 
 
 //BMNF
-bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int feature_tracker) {
+bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int feature_tracker, int epipolar_constrain) {
 
   /**********************************************************************************************************
   Process a new images, push the images back, compute the new match circle, do a bucketing if is required and
@@ -53,7 +53,7 @@ bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace
   // If "replace" is "false" current images becomes previous images and new images becomes current images.
   // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
   // new images becomes current images but the circle match is not calculated.
-  matcher->new_matching_circle(left_img, right_img, replace, feature_tracker) ;
+  matcher->new_matching_circle(left_img, right_img, replace, feature_tracker, epipolar_constrain) ;
 
   if(bucketing == true){
 

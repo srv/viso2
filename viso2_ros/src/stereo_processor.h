@@ -62,7 +62,6 @@ private:
 
   void checkInputsSynchronized()
   {
-    ROS_INFO("Sincronitzacio");
     int threshold = 3 * all_received_;
     if (left_received_ >= threshold || right_received_ >= threshold ||
         left_info_received_ >= threshold || right_info_received_ >= threshold) {
@@ -100,7 +99,7 @@ protected:
   {
     // Read local parameters
     ros::NodeHandle local_nh("~");
-   // ROS_INFO_STREAM("Hola StereoProcessor");
+
     // Resolve topic names
     ros::NodeHandle nh;
     std::string stereo_ns = nh.resolveName("stereo");

@@ -211,7 +211,7 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
 
 
 // BMNF 
-Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k) {
+Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k, int epipolar_constrain) {
   
   /**********************************************************************************************************
   Auxiliar function to compute matchings between two images using opencv libraries.
@@ -303,7 +303,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
     try{
 
-      F = cv::findFundamentalMat(coord1_aft_match, coord2_aft_match, RANSACinliersMask, CV_RANSAC, 3.f) ;
+      F = cv::findFundamentalMat(coord1_aft_match, coord2_aft_match, RANSACinliersMask, CV_RANSAC, epipolar_constrain) ;
 
     } catch (cv::Exception& e) {
 
@@ -345,7 +345,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
 
 //BMNF
-void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker){
+void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker, int epipolar_constrain){
 
   /**********************************************************************************************************
   Function that implements a new push back and compute the new circle match between four images using opencv.
@@ -451,7 +451,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between current left image and previous left image using the function "new_matching" to do the matching. 
       // In this matching the homography is computed.
-      left_matching = new_matching(l_curr_kpts, l_pre_kpts, l_curr_desc, l_pre_desc, true, feature_tracker, k) ;
+      left_matching = new_matching(l_curr_kpts, l_pre_kpts, l_curr_desc, l_pre_desc, true, feature_tracker, k, epipolar_constrain) ;
 
       // If in the "left matching" ithere is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -473,7 +473,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between previous left image and previous right image using the function "new_matching" to do the matching. 
       // In this matching the fundamental matrix is computed.
-      previous_matching = new_matching(left_matching.kpts2, r_pre_kpts, left_matching.desc2, r_pre_desc, false, feature_tracker, k) ;
+      previous_matching = new_matching(left_matching.kpts2, r_pre_kpts, left_matching.desc2, r_pre_desc, false, feature_tracker, k, epipolar_constrain) ;
 
       // If in the "previous matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -495,7 +495,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between previous right image and current right image using the function "new_matching" to do the matching. 
       // In this matching the homography is computed.
-      right_matching = new_matching(previous_matching.kpts2, r_curr_kpts, previous_matching.desc2, r_curr_desc, true, feature_tracker, k) ;
+      right_matching = new_matching(previous_matching.kpts2, r_curr_kpts, previous_matching.desc2, r_curr_desc, true, feature_tracker, k, epipolar_constrain) ;
 
       // If in the "right matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -517,7 +517,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between current right image and current left image using the function "new_matching" to do the matching. 
       // In this matching the fundamental matrix is computed.
-      current_matching = new_matching(right_matching.kpts2, left_matching.kpts1, right_matching.desc2, left_matching.desc1, false, feature_tracker, k) ;
+      current_matching = new_matching(right_matching.kpts2, left_matching.kpts1, right_matching.desc2, left_matching.desc1, false, feature_tracker, k, epipolar_constrain) ;
 
       // If in the "current matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 

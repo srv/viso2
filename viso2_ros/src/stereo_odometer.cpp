@@ -68,6 +68,7 @@ private:
   bool viso2_processor ;
   bool bucketing ;
   int feature_tracker ;
+  int epipolar_constrain ;
 
 public:
 
@@ -108,6 +109,7 @@ protected:
     local_nh.param("Viso2_processor", viso2_processor, true) ;
     local_nh.param("Bucketing", bucketing, true) ;
     local_nh.param("Feature_tracker", feature_tracker, 0) ;
+    local_nh.param("Epipolar_constrain", epipolar_constrain, 3) ;
 
     // read calibration info from camera info message
     // to fill remaining parameters
@@ -129,7 +131,8 @@ protected:
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
                     "  Viso2_processor = " << viso2_processor << std::endl <<
                     "  Bucketing = " << bucketing << std::endl <<
-                    "  Feature_tracker = " << feature_tracker);
+                    "  Feature_tracker = " << feature_tracker << std::endl <<
+                    "  Epipolar_constrain = " << epipolar_constrain);
   }
 
   void imageCallback(
@@ -179,7 +182,7 @@ protected:
 
       } else {
 
-        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker) ; 
+        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker, epipolar_constrain) ; 
 
       }
       got_lost_ = false;
@@ -202,7 +205,7 @@ protected:
 
       } else {
 
-        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker) ; // BMNF 03/03/2021, true
+        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker, epipolar_constrain) ; // BMNF 03/03/2021, true
 
       }
 

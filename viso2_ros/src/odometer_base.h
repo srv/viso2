@@ -139,15 +139,20 @@ protected:
 
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
 
-    // BMNF: Initial orientation when the robot is not in NED origin.
+    // BMNF: Initial position when the robot is not in NED origin.
+    // tf::Quaternion q2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ; // Portals Vells
+    // tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ; // Portals Vells
+
+    tf::Quaternion q2(-0.02665389152, 0.1151081534, 0.5226100899, 0.8443449396) ;
+    tf::Vector3 t(-40.34574719, -46.88363208, 1.162873993) ;
+
+
     // tf::Quaternion q2(0.01229814164, -0.05866396396, 0.9742064727, 0.2175523926) ;
-    tf::Quaternion q2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ;
     // tf::Quaternion q2(0.06656106726, 0.02654796015, -0.9259859207, 0.3706951643) ;
     // tf::Quaternion q2(-0.03900879093, 0.05679888864, -0.2387434845, 0.9686349927) ;
     // tf::Quaternion q2(-0.02564399815, 0.06341876553, 0.4646516965, 0.882847238461) ;
     
-    // BMNF: Initial pose when the robot is not in NED origin.
-    tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ;
+    
     // tf::Vector3 t(58.33139893, -1.011998077, 0.1093880108) ; 
     // tf::Vector3 t(1.05552999574, 26.1954855264, 0.14202065041) ;                  
     // tf::Vector3 t(-19.84049806, 16.37197326, 0.1311650139) ;                                                                                                                                                   
