@@ -67,8 +67,10 @@ private:
   // BMNF: Parameters to select the odometer configuration.
   bool viso2_processor ;
   bool bucketing ;
-  int feature_tracker ;
+  int combination ;
   int epipolar_constrain ;
+  float contrast_threshold ;
+  int min_hessian ;
 
 public:
 
@@ -104,12 +106,14 @@ protected:
     bool approximate_sync;
 
     ros::NodeHandle local_nh("~");
-    local_nh.param("queue_size", queue_size, 50); // 10
-    local_nh.param("approximate_sync", approximate_sync, false);
-    local_nh.param("Viso2_processor", viso2_processor, true) ;
-    local_nh.param("Bucketing", bucketing, true) ;
-    local_nh.param("Feature_tracker", feature_tracker, 0) ;
-    local_nh.param("Epipolar_constrain", epipolar_constrain, 3) ;
+    local_nh.param<int>("queue_size", queue_size, 50); // 10
+    local_nh.param<bool>("approximate_sync", approximate_sync, false);
+    local_nh.param<bool>("Viso2_processor", viso2_processor, true) ;
+    local_nh.param<bool>("Bucketing", bucketing, true) ;
+    local_nh.param<int>("Combination", combination, 0) ;
+    local_nh.param<int>("Epipolar_constrain", epipolar_constrain, 3) ;
+    local_nh.param<float>("Contrast_threshold", contrast_threshold, 0.06) ;
+    local_nh.param<int>("Min_hessian", min_hessian, 1000) ;
 
     // read calibration info from camera info message
     // to fill remaining parameters
@@ -131,8 +135,10 @@ protected:
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
                     "  Viso2_processor = " << viso2_processor << std::endl <<
                     "  Bucketing = " << bucketing << std::endl <<
-                    "  Feature_tracker = " << feature_tracker << std::endl <<
-                    "  Epipolar_constrain = " << epipolar_constrain);
+                    "  Combination = " << combination << std::endl <<
+                    "  Epipolar_constrain = " << epipolar_constrain << std::endl <<
+                    "  Contrast_threshold = " << contrast_threshold << std::endl <<
+                    "  Min_hessian = " << min_hessian);
   }
 
   void imageCallback(
@@ -182,7 +188,7 @@ protected:
 
       } else {
 
-        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker, epipolar_constrain) ; 
+        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, combination, epipolar_constrain, contrast_threshold, min_hessian) ; 
 
       }
       got_lost_ = false;
@@ -205,7 +211,7 @@ protected:
 
       } else {
 
-        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, feature_tracker, epipolar_constrain) ; // BMNF 03/03/2021, true
+        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, bucketing, combination, epipolar_constrain, contrast_threshold, min_hessian) ; // BMNF 03/03/2021, true
 
       }
 

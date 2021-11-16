@@ -192,7 +192,7 @@ public:
 
 
   // BMNF: Function that implements a new push back and compute the new circle match between four images using opencv.
-  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker, int epipolar_constrain) ; 
+  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker, int epipolar_constrain, float contrast_threshold, int min_hessian) ; 
 
 private:
 

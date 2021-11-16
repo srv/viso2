@@ -32,7 +32,7 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 
 
 //BMNF
-bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int feature_tracker, int epipolar_constrain) {
+bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int epipolar_constrain, float contrast_threshold, int min_hessian) {
 
   /**********************************************************************************************************
   Process a new images, push the images back, compute the new match circle, do a bucketing if is required and
@@ -44,7 +44,10 @@ bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace
   @replace: Boolean that allows to calculated the circle match if its value is "false". If its value is 
             "true" the information of current images is transformed to information of previous images.
   @bucketing: Boolean that allows the bucketing
-  @feature_tracker: Integer that defines which feature tracker is being used.
+  @combination: Integer that defines which combination of feature detector and descriptors detector is being used.
+  @epipolar_constrain: Constraint to calculate the fundamental matrix
+  @contrast_threshold: Parameter for SIFT feature detector
+  @min_heassian: Parameter for SURF feature detector
 
   Returns:
   @updateMotion: Boolean that returns if the motion update is correct or if an error occured.
@@ -53,7 +56,7 @@ bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace
   // If "replace" is "false" current images becomes previous images and new images becomes current images.
   // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
   // new images becomes current images but the circle match is not calculated.
-  matcher->new_matching_circle(left_img, right_img, replace, feature_tracker, epipolar_constrain) ;
+  matcher->new_matching_circle(left_img, right_img, replace, combination, epipolar_constrain, contrast_threshold, min_hessian) ;
 
   if(bucketing == true){
 
