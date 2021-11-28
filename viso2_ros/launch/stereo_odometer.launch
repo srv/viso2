@@ -14,7 +14,7 @@
   <!-- Odometer arguments -->
   <arg name = "viso2_processor" default = "false"/>
   <arg name = "bucketing" default = "false"/>
-  <arg name = "combination" value = "2"/> <!-- 0: SIFT_SIFT, 1: SURF_SIFT, 2: SURF_BRISK -->
+  <arg name = "combination" value = "0"/> <!-- 0: SIFT_SIFT, 1: SURF_SIFT, 2: SURF_BRISK -->
   <arg name = "epipolar_constrain" value = "1"/>
   <arg name = "contrast_threshold" value = "0.04"/> <!-- Only when SIFT is used as feature detector -->
   <arg name = "min_hessian" value = "1500"/> <!-- Only when SURF is used as feature detector. 
@@ -27,33 +27,42 @@
   <!-- <arg name = "base_link" default = "sparus2"/>
   <arg name = "sensor" default = "left_optical"/> -->
 
+  <!-- Initial pose and orientation arguments -->
+  <!-- Portals Vells: t_x = 74.568675009499998, t_y = 18.5392068604, t_z = 5.4271955410699997, 
+                      q_x = 0.02478365567, q_y = -0.08955947924, q_z = 0.5741207366, q_w = 0.8134803316-->
+  <!-- Colonia:       t_x = 44.6347349852, t_y = -98.2854146474, t_z = 1.05341597965, 
+                      q_x = 0.0122981416421, q_y = -0.0586639639608, q_z = 0.974206472743, q_w = 0.217552392564-->
+  <arg name = "t_x" default = "44.6347349852"/>
+  <arg name = "t_y" default = "-98.2854146474"/>
+  <arg name = "t_z" default = "1.05341597965"/>
+  <arg name = "q_x" default = "0.0122981416421"/>
+  <arg name = "q_y" default = "-0.0586639639608"/>
+  <arg name = "q_z" default = "0.974206472743"/>
+  <arg name = "q_w" default = "0.217552392564"/>
+
   <!-- Parameters -->
   <param name="/use_sim_time" value = "true"/>
 
   <!-- Bagfiles -->
 
   <!-- Portals Vells -->
-  <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
+  <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-53-45_2.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag
                                     /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-06-23_4.bag
-                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/>
+                                    /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/> -->
                                     <!-- /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
   <!-- Valldemossa -->
-  <!-- <arg name="bagfile" default="/home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0000.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0001.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0002.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0003.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0004.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0005.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0006.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0007.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0008.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0009.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0010.bag
-                                  /home/uib/bagfiles/valldemossa/2016_09_21_valldemossa/2016_09_21_valldemossa/160921_1659/20160921_165907_0011.bag"/>  -->
+  <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-46-15_0.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-52-34_1.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-58-54_2.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-17-05-13_3.bag
+                                    /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-17-11-32_4.bag"/>
+                                    <!-- /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/topics_2020-11-03-16-46-16_0.bag" -->
+
+
 
   <!-- Play the bagfile -->
   <!-- <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 0.25 clock $(arg bagfile)" /> -->
@@ -91,6 +100,13 @@
     <param name = "Min_hessian" value = "$(arg min_hessian)"/>
     <param name = "base_link_frame_id" value = "$(arg base_link)"/>
     <param name = "sensor_frame_id" value = "$(arg sensor)"/>
+    <param name = "initial_translation_x" value = "$(arg t_x)"/>
+    <param name = "initial_translation_y" value = "$(arg t_y)"/>
+    <param name = "initial_translation_z" value = "$(arg t_z)"/>
+    <param name = "initial_rotation_x" value = "$(arg q_x)"/>
+    <param name = "initial_rotation_y" value = "$(arg q_y)"/>
+    <param name = "initial_rotation_z" value = "$(arg q_z)"/>
+    <param name = "initial_rotation_w" value = "$(arg q_w)"/>
   </node>
 
   <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
@@ -108,6 +124,13 @@
     <param name = "Min_hessian" value = "$(arg min_hessian)"/>
     <param name = "base_link_frame_id" value = "$(arg base_link)"/>
     <param name = "sensor_frame_id" value = "$(arg sensor)"/>
+    <param name = "initial_translation_x" value = "$(arg t_x)"/>
+    <param name = "initial_translation_y" value = "$(arg t_y)"/>
+    <param name = "initial_translation_z" value = "$(arg t_z)"/>
+    <param name = "initial_rotation_x" value = "$(arg q_x)"/>
+    <param name = "initial_rotation_y" value = "$(arg q_y)"/>
+    <param name = "initial_rotation_z" value = "$(arg q_z)"/>
+    <param name = "initial_rotation_w" value = "$(arg q_w)"/>
   </node>
 
   <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
@@ -125,6 +148,13 @@
     <param name = "Min_hessian" value = "$(arg min_hessian)"/>
     <param name = "base_link_frame_id" value = "$(arg base_link)"/>
     <param name = "sensor_frame_id" value = "$(arg sensor)"/>
+    <param name = "initial_translation_x" value = "$(arg t_x)"/>
+    <param name = "initial_translation_y" value = "$(arg t_y)"/>
+    <param name = "initial_translation_z" value = "$(arg t_z)"/>
+    <param name = "initial_rotation_x" value = "$(arg q_x)"/>
+    <param name = "initial_rotation_y" value = "$(arg q_y)"/>
+    <param name = "initial_rotation_z" value = "$(arg q_z)"/>
+    <param name = "initial_rotation_w" value = "$(arg q_w)"/>
   </node>
 
 

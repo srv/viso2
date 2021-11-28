@@ -48,6 +48,9 @@ private:
   boost::array<double, 36> pose_covariance_;
   boost::array<double, 36> twist_covariance_;
 
+  //BMNF: Initial pose
+  tf::Transform initial_pose_ ;
+
 public:
 
   OdometerBase()
@@ -55,18 +58,37 @@ public:
     // Read local parameters
     ros::NodeHandle local_nh("~");
 
+    //BMNF
+    double x, y, z, q0, q1, q2, q3 ;
+
     local_nh.param("odom_frame_id", odom_frame_id_, std::string("/odom"));
     local_nh.param("base_link_frame_id", base_link_frame_id_, std::string("/base_link"));
     local_nh.param("sensor_frame_id", sensor_frame_id_, std::string("/camera")); 
     local_nh.param("publish_tf", publish_tf_, true);
     local_nh.param("invert_tf", invert_tf_, false);
 
+    //BMNF
+    local_nh.param("initial_translation_x", x, 0.0) ;
+    local_nh.param("initial_translation_y", y, 0.0) ;
+    local_nh.param("initial_translation_z", z, 0.0) ;
+    local_nh.param("initial_rotation_x", q0, 0.0) ;
+    local_nh.param("initial_rotation_y", q1, 0.0) ;
+    local_nh.param("initial_rotation_z", q2, 0.0) ;
+    local_nh.param("initial_rotation_w", q3, 1.0) ;
+
     ROS_INFO_STREAM("Basic Odometer Settings:" << std::endl <<
-                    "  odom_frame_id      = " << odom_frame_id_ << std::endl <<
-                    "  base_link_frame_id = " << base_link_frame_id_ << std::endl <<
-                    "  sensor_frame_id    = " << sensor_frame_id_ << std::endl <<
-                    "  publish_tf         = " << (publish_tf_?"true":"false") << std::endl <<
-                    "  invert_tf          = " << (invert_tf_?"true":"false"));
+                    "  odom_frame_id         = " << odom_frame_id_ << std::endl <<
+                    "  base_link_frame_id    = " << base_link_frame_id_ << std::endl <<
+                    "  sensor_frame_id       = " << sensor_frame_id_ << std::endl <<
+                    "  publish_tf            = " << (publish_tf_?"true":"false") << std::endl <<
+                    "  invert_tf             = " << (invert_tf_?"true":"false") << std::endl <<
+                    "  initial_translation_x = " << x << std::endl <<
+                    "  initial_translation_y = " << y << std::endl <<
+                    "  initial_translation_z = " << z << std::endl <<
+                    "  initial_rotation_x    = " << q0 << std::endl <<
+                    "  initial_rotation_y    = " << q1 << std::endl <<
+                    "  initial_rotation_z    = " << q2 << std::endl <<
+                    "  initial_rotation_w    = " << q3) ;
 
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
@@ -78,6 +100,12 @@ public:
 
     pose_covariance_.assign(0.0);
     twist_covariance_.assign(0.0);
+
+    //BMNF
+    tf::Vector3 initial_translation_vector(x, y, z) ; 
+    tf::Quaternion initial_orientation_quaternion(q0, q1, q2, q3) ; 
+    initial_pose_.setOrigin(initial_translation_vector) ;
+    initial_pose_.setRotation(initial_orientation_quaternion) ;
   }
 
 protected:
@@ -139,31 +167,8 @@ protected:
 
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
 
-    // BMNF: Initial position when the robot is not in NED origin.
-    tf::Quaternion q2(0.02478365567, -0.08955947924, 0.5741207366, 0.8134803316) ; // Portals Vells
-    tf::Vector3 t(74.568675009499998, 18.5392068604, 5.4271955410699997) ; // Portals Vells
-
-    // tf::Quaternion q2(-0.02665389152, 0.1151081534, 0.5226100899, 0.8443449396) ;
-    // tf::Vector3 t(-40.34574719, -46.88363208, 1.162873993) ;
-
-
-    // tf::Quaternion q2(0.01229814164, -0.05866396396, 0.9742064727, 0.2175523926) ;
-    // tf::Quaternion q2(0.06656106726, 0.02654796015, -0.9259859207, 0.3706951643) ;
-    // tf::Quaternion q2(-0.03900879093, 0.05679888864, -0.2387434845, 0.9686349927) ;
-    // tf::Quaternion q2(-0.02564399815, 0.06341876553, 0.4646516965, 0.882847238461) ;
-    
-    
-    // tf::Vector3 t(58.33139893, -1.011998077, 0.1093880108) ; 
-    // tf::Vector3 t(1.05552999574, 26.1954855264, 0.14202065041) ;                  
-    // tf::Vector3 t(-19.84049806, 16.37197326, 0.1311650139) ;                                                                                                                                                   
-
-    tf::Transform EKF_initial_pose ;
-
-    EKF_initial_pose.setOrigin(t) ;
-    EKF_initial_pose.setRotation(q2) ;
-
     // BMNF: transform between NED origin and initial position of the robot when odometer starts.
-    base_transform = EKF_initial_pose * base_transform ;
+    base_transform = initial_pose_ * base_transform ;
 
     nav_msgs::Odometry odometry_msg;
     odometry_msg.header.stamp = timestamp;
