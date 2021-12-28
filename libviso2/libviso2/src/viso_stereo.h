@@ -67,7 +67,10 @@ public:
   bool process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace=false);
   
   //BMNF: Process a new images, push the images back, compute the new match circle, do a bucketing if is required and updates motion.
-  bool new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int epipolar_constrain, float contrast_threshold, int min_hessian) ; 
+  bool new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int nOctaveLayers,
+                  int nfeatures_SIFT, double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
+                  double hessianThreshold_SURF, int nOctaves_SURF, bool extended_SURF, bool upright_SURF, 
+                  double homography_reprojThreshold, int epipolar_constrain) ; 
 
   using VisualOdometry::process;
 

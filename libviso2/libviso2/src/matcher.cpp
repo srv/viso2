@@ -212,7 +212,7 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
 
 
 // BMNF 
-Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int combination, int k, int epipolar_constrain) {
+Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int combination, int k, double homography_reprojThreshold, int epipolar_constrain) {
   
   /**********************************************************************************************************
   Auxiliar function to compute matchings between two images using opencv libraries.
@@ -291,7 +291,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
     try{
 
-      H = cv::findHomography(coord1_aft_match, coord2_aft_match, CV_RANSAC, 3.0, RANSACinliersMask) ;
+      H = cv::findHomography(coord1_aft_match, coord2_aft_match, CV_RANSAC, homography_reprojThreshold, RANSACinliersMask) ;
 
     } catch (cv::Exception& e) {
 
@@ -347,7 +347,10 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
 
 //BMNF
-void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int epipolar_constrain, float contrast_threshold, int min_hessian){
+void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
+                                  int nfeatures_SIFT, double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
+                                  double hessianThreshold_SURF, int nOctaves_SURF, bool extended_SURF, bool upright_SURF, 
+                                  double homography_reprojThreshold, int epipolar_constrain){
 
   /**********************************************************************************************************
   Function that implements a new push back and compute the new circle match between four images using opencv.
@@ -417,62 +420,46 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   switch(combination) {
 
     case 0:
-      sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
+      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
-      sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
+      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
-      std::cout << contrast_threshold << std::endl ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
 
     case 1:
-      surf = SURF::create(min_hessian) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+      // surf = SURF::create(min_hessian) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(min_hessian) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+      // surf = SURF::create(min_hessian) ;
       surf->detect(right_img, r_curr_kpts) ;
       sift_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       sift_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
-      std::cout << min_hessian << std::endl ;
       std::cout << "Using SURF_SIFT " << std::endl ;
       break ;
 
     case 2:
-      surf = SURF::create(min_hessian) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+      // surf = SURF::create(min_hessian) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(min_hessian) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+      // surf = SURF::create(min_hessian) ;
       surf->detect(right_img, r_curr_kpts) ;
       brisk_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       brisk_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
-      std::cout << min_hessian << std::endl ;
       std::cout << "Using SURF_BRISK " << std::endl ;
       break ;
 
-    case 3:
-      fast = FastFeatureDetector::create(10, true) ;
-      fast->detect(left_img, l_curr_kpts) ;
-      fast = FastFeatureDetector::create(10, true) ;
-      fast->detect(right_img, r_curr_kpts) ;
-      sift_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
-      sift_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
-      std::cout << "Using FAST_SIFT " << std::endl ;
-      break ;
-
-    case 4:
-      fast = FastFeatureDetector::create(10, true) ;
-      fast->detect(left_img, l_curr_kpts) ;
-      fast = FastFeatureDetector::create(10, true) ;
-      fast->detect(right_img, r_curr_kpts) ;
-      orb_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
-      orb_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
-      std::cout << "Using FAST_ORB " << std::endl ;
-      break ;
-
     default:
-      sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
+      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
-      sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
+      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
-      std::cout << contrast_threshold << std::endl ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
 
@@ -490,7 +477,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between current left image and previous left image using the function "new_matching" to do the matching. 
       // In this matching the homography is computed.
-      left_matching = new_matching(l_curr_kpts, l_pre_kpts, l_curr_desc, l_pre_desc, true, combination, k, epipolar_constrain) ;
+      left_matching = new_matching(l_curr_kpts, l_pre_kpts, l_curr_desc, l_pre_desc, true, combination, k, homography_reprojThreshold, epipolar_constrain) ;
 
       // If in the "left matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -512,7 +499,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between previous left image and previous right image using the function "new_matching" to do the matching. 
       // In this matching the fundamental matrix is computed.
-      previous_matching = new_matching(left_matching.kpts2, r_pre_kpts, left_matching.desc2, r_pre_desc, false, combination, k, epipolar_constrain) ;
+      previous_matching = new_matching(left_matching.kpts2, r_pre_kpts, left_matching.desc2, r_pre_desc, false, combination, k, homography_reprojThreshold, epipolar_constrain) ;
 
       // If in the "previous matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -534,7 +521,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between previous right image and current right image using the function "new_matching" to do the matching. 
       // In this matching the homography is computed.
-      right_matching = new_matching(previous_matching.kpts2, r_curr_kpts, previous_matching.desc2, r_curr_desc, true, combination, k, epipolar_constrain) ;
+      right_matching = new_matching(previous_matching.kpts2, r_curr_kpts, previous_matching.desc2, r_curr_desc, true, combination, k, homography_reprojThreshold, epipolar_constrain) ;
 
       // If in the "right matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -556,7 +543,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       // Matching between current right image and current left image using the function "new_matching" to do the matching. 
       // In this matching the fundamental matrix is computed.
-      current_matching = new_matching(right_matching.kpts2, left_matching.kpts1, right_matching.desc2, left_matching.desc1, false, combination, k, epipolar_constrain) ;
+      current_matching = new_matching(right_matching.kpts2, left_matching.kpts1, right_matching.desc2, left_matching.desc1, false, combination, k, homography_reprojThreshold, epipolar_constrain) ;
 
       // If in the "current matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -649,63 +636,6 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
         }
       }
-      
-
-      // for(i = 0; i < current_matching.coord2.size(); i++){
-      //   for(j = 0; j < left_matching.coord1.size(); j++){
-      //     if((current_matching.coord2[i].x == left_matching.coord1[j].x) && (current_matching.coord2[i].y == left_matching.coord1[j].y)){
-      //       if (std::find(std::begin(cont_j1), std::end(cont_j1), j) == std::end(cont_j1)){
-      //         save_cont1 = true ;
-      //         cont_j1.push_back(j) ;
-      //         l_pre_coord_aft_RANSAC_x = left_matching.coord2[j].x ;
-      //         l_pre_coord_aft_RANSAC_y = left_matching.coord2[j].y ;
-      //         l_pre_index = j ;
-      //         l_curr_index = i ;
-      //         break ;
-      //       }                    
-      //     }
-      //   }
-      //   for(j = 0; j < right_matching.coord2.size(); j++){
-      //     if((current_matching.coord1[i].x == right_matching.coord2[j].x) && (current_matching.coord1[i].y == right_matching.coord2[j].y)){
-      //       if (std::find(std::begin(cont_j2), std::end(cont_j2), j) == std::end(cont_j2)){
-      //         save_cont2 = true ;
-      //         cont_j2.push_back(j) ;
-      //         r_pre_coord_aft_RANSAC_x = right_matching.coord1[j].x ;
-      //         r_pre_coord_aft_RANSAC_y = right_matching.coord1[j].y ;
-      //         r_pre_index = j ;
-      //         r_curr_index = i ;
-      //         break ;
-      //       }   
-      //     }
-      //   }
-
-      //   if(save_cont1 == true && save_cont2 == true){
-
-      //     cont++ ;
-      //     save_cont1 = false ;
-      //     save_cont2 = false ;
-
-      //     p_matched_2.push_back(Matcher::p_match(l_pre_coord_aft_RANSAC_x,
-      //                                           l_pre_coord_aft_RANSAC_y,
-      //                                           l_pre_index,
-      //                                           r_pre_coord_aft_RANSAC_x,
-      //                                           r_pre_coord_aft_RANSAC_y,
-      //                                           r_pre_index,
-      //                                           current_matching.coord2[i].x,
-      //                                           current_matching.coord2[i].y,
-      //                                           l_curr_index,
-      //                                           current_matching.coord1[i].x,
-      //                                           current_matching.coord1[i].y,
-      //                                           r_curr_index)) ;
-
-      //   } else {
-
-      //     save_cont1 = false ;
-      //     save_cont2 = false ;
-
-      //   }
-
-      // }
 
       std::cout << "Accountant: " << cont << std::endl ;
       std::cout << "Time between process: " << ((Time_ImageCurrent - Time_ImagePrevious) / (double)CLOCKS_PER_SEC) << std::endl ;

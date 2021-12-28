@@ -191,8 +191,11 @@ public:
   float getGain (std::vector<int32_t> inliers);
 
 
-  // BMNF: Function that implements a new push back and compute the new circle match between four images using opencv.
-  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int feature_tracker, int epipolar_constrain, float contrast_threshold, int min_hessian) ; 
+  // BMNF: Function that implements a new feature and descriptor detection and a new circle match between four images using opencv.
+  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
+                           int nfeatures_SIFT, double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
+                           double hessianThreshold_SURF, int nOctaves_SURF, bool extended_SURF, bool upright_SURF, 
+                           double homography_reprojThreshold, int epipolar_constrain) ; 
 
 private:
 
@@ -305,7 +308,7 @@ private:
 
 
   // BMNF: Auxiliar function to compute matchings between two images using opencv libraries.
-  Struct new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k, int epipolar_constrain) ; 
+  Struct new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int feature_tracker, int k, double homography_reprojThreshold, int epipolar_constrain) ; 
 
 };
 
