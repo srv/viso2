@@ -255,7 +255,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
   int i ;
 
   // Compute the matchings. Depending on the type of descriptor being used, Brute Force or FLANN are used.
-  if((combination == 2) || (combination == 4)){
+  if((combination == 3)){
  
     matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
 
@@ -348,8 +348,8 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
 //BMNF
 void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
-                                  int nfeatures_SIFT, double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                                  double hessianThreshold_SURF, int nOctaves_SURF, bool extended_SURF, bool upright_SURF, 
+                                  double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
+                                  double hessianThreshold_SURF, int nOctaves_SURF,
                                   double homography_reprojThreshold, int epipolar_constrain){
 
   /**********************************************************************************************************
@@ -419,21 +419,21 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   // Image features are calculated with the selected feature tracker 
   switch(combination) {
 
-    case 0:
-      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+    case 1:
+      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
       // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
-      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
       // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
 
-    case 1:
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+    case 2:
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
       // surf = SURF::create(min_hessian) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
       // surf = SURF::create(min_hessian) ;
       surf->detect(right_img, r_curr_kpts) ;
       sift_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
@@ -441,11 +441,11 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       std::cout << "Using SURF_SIFT " << std::endl ;
       break ;
 
-    case 2:
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+    case 3:
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
       // surf = SURF::create(min_hessian) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, extended_SURF, upright_SURF) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
       // surf = SURF::create(min_hessian) ;
       surf->detect(right_img, r_curr_kpts) ;
       brisk_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
@@ -454,10 +454,10 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       break ;
 
     default:
-      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
       // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
-      sift = SIFT::create(nfeatures_SIFT, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
       // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SIFT_SIFT " << std::endl ;

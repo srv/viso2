@@ -66,19 +66,15 @@ private:
 
   // BMNF: Parameter declaration
   // Version
-  bool viso2_process ;
-  int combination ;
+  int detection_and_tracking_version ;
   // Bucketing
   bool enable_bucketing ;
   // Feature and descriptor detection
-  int nfeatures_SIFT ; 
   double contrastThreshold_SIFT ; 
   double edgeThreshold_SIFT ; 
   double sigma_SIFT ;                                
   double hessianThreshold_SURF ; 
   int nOctaves_SURF ; 
-  bool extended_SURF ; 
-  bool upright_SURF ; 
   int nOctaveLayers ;
   // Outlier rejection
   int epipolar_constrain ;
@@ -123,19 +119,15 @@ protected:
 
     // BMNF: Parameter definition
     // Version
-    local_nh.param<bool>("viso2_process", viso2_process, true) ;
-    local_nh.param<int>("combination", combination, 0) ;
+    local_nh.param<int>("detection_and_tracking_version", detection_and_tracking_version, 0) ;
     // Bucketing
     local_nh.param<bool>("enable_bucketing", enable_bucketing, true) ;
-    // Feature and descriptor detection
-    local_nh.param<int>("nfeatures_SIFT", nfeatures_SIFT, 0) ;  
+    // Feature and descriptor detection  
     local_nh.param<double>("contrastThreshold_SIFT", contrastThreshold_SIFT, 0.06) ; 
     local_nh.param<double>("edgeThreshold_SIFT", edgeThreshold_SIFT, 10.0) ; 
     local_nh.param<double>("sigma_SIFT", sigma_SIFT, 1.6) ; 
     local_nh.param<double>("hessianThreshold_SURF", hessianThreshold_SURF, 100.0) ; 
-    local_nh.param<int>("nOctaves_SURF", nOctaves_SURF, 4) ;  
-    local_nh.param<bool>("extended_SURF", extended_SURF, false) ; 
-    local_nh.param<bool>("upright_SURF", upright_SURF, false) ; 
+    local_nh.param<int>("nOctaves_SURF", nOctaves_SURF, 4) ;   
     local_nh.param<int>("nOctaveLayers", nOctaveLayers, 3) ;
     // Outlier rejection
     local_nh.param<double>("homography_reprojThreshold", homography_reprojThreshold, 1.0) ; 
@@ -159,17 +151,13 @@ protected:
                     "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<
                     "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl <<
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
-                    "  viso2_process = " << viso2_process << std::endl <<
-                    "  combination = " << combination << std::endl <<
+                    "  detection_and_tracking_version = " << detection_and_tracking_version << std::endl <<
                     "  enable_bucketing = " << enable_bucketing << std::endl <<
-                    "  nfeatures_SIFT = " << nfeatures_SIFT << std::endl <<
                     "  contrastThreshold_SIFT = " << contrastThreshold_SIFT << std::endl <<
                     "  edgeThreshold_SIFT = " << edgeThreshold_SIFT << std::endl <<
                     "  sigma_SIFT = " << sigma_SIFT << std::endl <<
                     "  hessianThreshold_SURF = " << hessianThreshold_SURF << std::endl <<
                     "  nOctaves_SURF = " << nOctaves_SURF << std::endl <<
-                    "  extended_SURF = " << extended_SURF << std::endl << 
-                    "  upright_SURF = " << upright_SURF << std::endl <<
                     "  nOctaveLayers = " << nOctaveLayers << std::endl <<
                     "  homography_reprojThreshold = " << homography_reprojThreshold << std::endl <<
                     "  epipolar_constrain = " << epipolar_constrain);
@@ -216,15 +204,15 @@ protected:
     if (first_run || got_lost_)
     {
       // BMNF
-      if(viso2_process == true){
+      if(detection_and_tracking_version == 0){
 
         visual_odometer_->process(l_image_data, r_image_data, dims);
 
       } else {
 
-        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing, combination, nOctaveLayers,
-                                      nfeatures_SIFT, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
-                                      hessianThreshold_SURF, nOctaves_SURF, extended_SURF, upright_SURF, 
+        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing, detection_and_tracking_version, nOctaveLayers,
+                                      contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
+                                      hessianThreshold_SURF, nOctaves_SURF,
                                       homography_reprojThreshold, epipolar_constrain) ; 
 
       }
@@ -242,15 +230,15 @@ protected:
       bool success;
 
       // BMNF
-      if(viso2_process == true){
+      if(detection_and_tracking_version == 0){
 
         success = visual_odometer_->process(l_image_data, r_image_data, dims);
 
       } else {
 
-        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing, combination, nOctaveLayers, 
-                                                nfeatures_SIFT, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
-                                                hessianThreshold_SURF, nOctaves_SURF, extended_SURF, upright_SURF, 
+        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing, detection_and_tracking_version, nOctaveLayers, 
+                                                contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
+                                                hessianThreshold_SURF, nOctaves_SURF,
                                                 homography_reprojThreshold, epipolar_constrain) ; // BMNF 03/03/2021, true
 
       }

@@ -16,22 +16,18 @@ stereo_odometer:
 
   # VERSION PARAMETERS:
   # LIBVISO2-ROS-Modified
-  viso2_process: false
-  combination: 0
+  detection_and_tracking_version: 3 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK
 
   # FEATURE DETECTION PARAMETERS:
   # Original LIBVISO2
   nms_n: 3
   nms_tau: 3
   # LIBVISO2-ROS-Modified
-  nfeatures_SIFT: 0
   contrastThreshold_SIFT: 0.03
   edgeThreshold_SIFT: 10
   sigma_SIFT: 1.6
   hessianThreshold_SURF: 500
   nOctaves_SURF: 4
-  extended_SURF: false
-  upright_SURF: false
   nOctaveLayers: 3
 
   # FEATURE MATCHING PARAMETERS:
@@ -56,7 +52,7 @@ stereo_odometer:
   bucket_width: 50
   bucket_height: 50
   # LIBVISO2-ROS-Modified
-  enable_bucketing: false
+  enable_bucketing: true
 
   # MOTION ESTIMATION PARAMETERS:
   ransac_iters: 200

@@ -193,8 +193,8 @@ public:
 
   // BMNF: Function that implements a new feature and descriptor detection and a new circle match between four images using opencv.
   void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
-                           int nfeatures_SIFT, double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                           double hessianThreshold_SURF, int nOctaves_SURF, bool extended_SURF, bool upright_SURF, 
+                           double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
+                           double hessianThreshold_SURF, int nOctaves_SURF,
                            double homography_reprojThreshold, int epipolar_constrain) ; 
 
 private:

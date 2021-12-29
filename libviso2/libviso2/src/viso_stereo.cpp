@@ -33,8 +33,8 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 
 //BMNF
 bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int nOctaveLayers,
-                                      int nfeatures_SIFT, double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                                      double hessianThreshold_SURF, int nOctaves_SURF, bool extended_SURF, bool upright_SURF, 
+                                      double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
+                                      double hessianThreshold_SURF, int nOctaves_SURF,
                                       double homography_reprojThreshold, int epipolar_constrain) {
 
   /**********************************************************************************************************
@@ -60,8 +60,8 @@ bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace
   // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
   // new images becomes current images but the circle match is not calculated.
   matcher->new_matching_circle(left_img, right_img, replace, combination, nOctaveLayers,
-                               nfeatures_SIFT, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
-                               hessianThreshold_SURF, nOctaves_SURF, extended_SURF, upright_SURF, 
+                               contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
+                               hessianThreshold_SURF, nOctaves_SURF, 
                                homography_reprojThreshold, epipolar_constrain) ;
 
   if(bucketing == true){

@@ -158,7 +158,7 @@
     <node pkg="tf" type="static_transform_publisher" name="stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /turbot/stereo_down /turbot/stereo_down/left_optical 30" />
 
     <!-- Viso2 -->
-    <rosparam command="load" file="$(find viso2_ros)/config/viso2_parameters.yaml"/>
+    <rosparam command="load" file="$(find viso2_ros)/config/viso2_stereo_parameters.yaml"/>
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
         <remap from = "stereo" to = "$(arg camera)"/>
         <remap from = "image" to = "image_rect"/>
