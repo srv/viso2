@@ -25,6 +25,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 // BMNF 03/03/2021:
 #include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <opencv2/xfeatures2d/nonfree.hpp>
 #include <opencv2/calib3d.hpp>
 #include <opencv2/core/core.hpp>
@@ -41,6 +42,7 @@ using cv::KeyPoint ;
 
 using cv::xfeatures2d::SIFT ;
 using cv::xfeatures2d::SURF ;
+using cv::xfeatures2d::FREAK ;
 using cv::BRISK ;
 using cv::FastFeatureDetector ;
 
@@ -255,7 +257,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
   int i ;
 
   // Compute the matchings. Depending on the type of descriptor being used, Brute Force or FLANN are used.
-  if((combination == 3)){
+  if((combination == 3) || (combination == 4)){
  
     matcher = cv::BFMatcher::create(cv::NORM_HAMMING, false) ;
 
@@ -383,10 +385,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   // Pointers
   Ptr<SIFT> sift ;
   Ptr<SURF> surf ;
-  Ptr<FastFeatureDetector> fast ;
   Ptr<cv::xfeatures2d::SiftDescriptorExtractor> sift_descriptor = SIFT::create() ;
   Ptr<cv::BRISK> brisk_descriptor = BRISK::create() ;
-  Ptr<cv::ORB> orb_descriptor = cv::ORB::create() ;
+  Ptr<cv::xfeatures2d::FREAK> freak_descriptor = FREAK::create() ;
 
   // Descriptors matrix
   Mat l_curr_desc, r_curr_desc ;
@@ -451,6 +452,16 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       brisk_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       brisk_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SURF_BRISK " << std::endl ;
+      break ;
+
+    case 4:
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf->detect(left_img, l_curr_kpts) ;
+      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf->detect(right_img, r_curr_kpts) ;
+      freak_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
+      freak_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
+      std::cout << "Using SURF_FREAK " << std::endl ;
       break ;
 
     default:

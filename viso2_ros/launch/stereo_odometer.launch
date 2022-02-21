@@ -13,6 +13,9 @@
 
     <!-- BAGFILES -->
 
+    <!-- Colonia -->
+    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/images_2020-11-03-11-17-43_0.bag"/> -->
+
     <!-- Portals Vells -->
     <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
@@ -22,7 +25,7 @@
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/>
                                         <!-- /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
-    <!-- Portals Vells 3 -->
+    <!-- Portals Vells 2 -->
     <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-02-45_1.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-09-05_2.bag
@@ -30,58 +33,33 @@
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-21-43_4.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag"/> -->
 
-    <!-- Colonia 1 -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-46-15_0.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-52-34_1.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-16-58-54_2.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-17-05-13_3.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/images_2020-11-03-17-11-32_4.bag"/> -->
-                                        <!-- /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/16_46_15/topics_2020-11-03-16-46-16_0.bag" -->
-
-    <!-- Colonia 2 -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42/images_2020-11-03-11-17-43_0.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42/images_2020-11-03-11-25-22_1.bag"/> -->
-
-    <!-- Bendinat 1 -->
+    <!-- Bendinat -->
     <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-24-51_0.bag
                                     /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-31-10_1.bag
                                     /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-37-30_2.bag
                                     /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-43-49_3.bag
                                     /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-50-08_4.bag"/> -->
-
-    <!-- Bendinat 2 -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-07-16_0.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-13-36_1.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-19-55_2.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-26-14_3.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-32-34_4.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-38-53_5.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/14_07_15/images_2021-01-19-14-45-13_6.bag" /> -->
                                     
-    <!-- Cabrera 1: -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/cabrera/2020_10_09_santa_maria/14_28_58/images_2020-10-09-14-28-55_0.bag
-                                    /home/uib/bagfiles/cabrera/2020_10_09_santa_maria/14_28_58/images_2020-10-09-14-41-46_1.bag
-                                    /home/uib/bagfiles/cabrera/2020_10_09_santa_maria/14_28_58/images_2020-10-09-14-54-39_2.bag
-                                    /home/uib/bagfiles/cabrera/2020_10_09_santa_maria/14_28_58/images_2020-10-09-15-07-36_3.bag"/> -->
-
-
 
     <!-- Initial pose and orientation parameters -->
-    <!-- Portals Vells:     t_x = 74.568675009499998, t_y = 18.5392068604, t_z = 5.4271955410699997, 
-                            q_x = 0.02478365567, q_y = -0.08955947924, q_z = 0.5741207366, q_w = 0.8134803316-->
-    <!-- Portals Vells 2:   t_x = 81.0593097768, t_y = 34.4357307583, t_z = 0.205144019839, 
-                            q_x = -0.0481535353833, q_y = 0.0442631819891, q_z = -0.00995240896195, q_w = 0.997809078585-->
-    <!-- Portals Vells 3:   t_x = 97.6965422361, t_y = 25.8324100301, t_z = 0.203414582538, 
-                            q_x = 0.0548449445642, q_y = 0.0385333780243, q_z = -0.976740467062, q_w = 0.203679333361-->
-    <!-- Colonia 1:         t_x = 44.6347349852, t_y = -98.2854146474, t_z = 1.05341597965, 
-                            q_x = 0.0122981416421, q_y = -0.0586639639608, q_z = 0.974206472743, q_w = 0.217552392564-->
-    <!-- Colonia 2:         t_x = 2.0403521254, t_y = 25.5584474051, t_z = 0.155384412659, 
+    <!-- Colonia:           t_x = 2.0403521254, t_y = 25.5584474051, t_z = 0.155384412659, 
                             q_x = -0.0351823221144, q_y = 0.065756237088, q_z = -0.230633968362, q_w = 0.970178485709-->
+    <!-- Portals Vells 1:   t_x = 74.568675009499998, t_y = 18.5392068604, t_z = 5.4271955410699997, 
+                            q_x = 0.02478365567, q_y = -0.08955947924, q_z = 0.5741207366, q_w = 0.8134803316-->
+    <!-- Portals Vells 2:   t_x = 97.6965422361, t_y = 25.8324100301, t_z = 0.203414582538, 
+                            q_x = 0.0548449445642, q_y = 0.0385333780243, q_z = -0.976740467062, q_w = 0.203679333361-->
     <!-- Bendinat:          t_x = -36.9511828705, t_y = -37.2108482128, t_z = 0.177339153139, 
                             q_x = -0.083147032671, q_y = 0.0159652927472, q_z = 0.857352288273, q_w = 0.507719148918 -->
-    <!-- Bendinat 2:        t_x = -59.6920808786, t_y = -36.6612772904, t_z = 0.158675497649,
-                            q_x = 0.0491107639752, q_y = 0.0830569738298, q_z = -0.995237774524, q_w = 0.0138363333568 -->
     
+    <!-- Colonia: -->
+    <!-- <arg name = "t_x" default = "2.0403521254"/>
+    <arg name = "t_y" default = "25.5584474051"/>
+    <arg name = "t_z" default = "0.155384412659"/>
+    <arg name = "q_x" default = "-0.0351823221144"/>
+    <arg name = "q_y" default = "0.065756237088"/>
+    <arg name = "q_z" default = "-0.230633968362"/>
+    <arg name = "q_w" default = "0.970178485709"/> -->
+
     <!-- Portals Vells: -->
     <arg name = "t_x" default = "74.568675009499998"/>
     <arg name = "t_y" default = "18.5392068604"/>
@@ -91,7 +69,7 @@
     <arg name = "q_z" default = "0.5741207366"/>
     <arg name = "q_w" default = "0.8134803316"/>
 
-    <!-- Portals Vells 3: -->
+    <!-- Portals Vells 2: -->
     <!-- <arg name = "t_x" default = "97.6965422361"/>
     <arg name = "t_y" default = "25.8324100301"/>
     <arg name = "t_z" default = "0.203414582538"/>
@@ -109,35 +87,7 @@
     <arg name = "q_z" default = "0.857352288273"/>
     <arg name = "q_w" default = "0.507719148918"/> -->
 
-    <!-- Colonia 1: -->
-    <!-- <arg name = "t_x" default = "44.6347349852"/>
-    <arg name = "t_y" default = "-98.2854146474"/>
-    <arg name = "t_z" default = "1.05341597965"/>
-    <arg name = "q_x" default = "0.0122981416421"/>
-    <arg name = "q_y" default = "-0.0586639639608"/>
-    <arg name = "q_z" default = "0.974206472743"/>
-    <arg name = "q_w" default = "0.217552392564"/>  -->
-
-    <!-- Colonia 2: -->
-    <!-- <arg name = "t_x" default = "2.0403521254"/>
-    <arg name = "t_y" default = "25.5584474051"/>
-    <arg name = "t_z" default = "0.155384412659"/>
-    <arg name = "q_x" default = "-0.0351823221144"/>
-    <arg name = "q_y" default = "0.065756237088"/>
-    <arg name = "q_z" default = "-0.230633968362"/>
-    <arg name = "q_w" default = "0.970178485709"/> -->
-
-    <!-- Cabrera 1: -->
-    <!-- <arg name = "t_x" default = "-102.012855164"/>
-    <arg name = "t_y" default = "27.0590802868"/>
-    <arg name = "t_z" default = "1.0038340191"/>
-    <arg name = "q_x" default = "-0.0337406893935"/>
-    <arg name = "q_y" default = "0.00538637885332"/>
-    <arg name = "q_z" default = "0.0838285476113"/>
-    <arg name = "q_w" default = "0.995894235051"/> -->
-
     <!-- PLAY bagfile -->
-    <!-- <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 0.25 clock $(arg bagfile)" /> -->
     <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile)" />
 
     <!-- RUN stereo image proc -->
