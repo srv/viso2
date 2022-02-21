@@ -335,7 +335,26 @@ protected:
       info_msg.got_lost = !success;
       info_msg.change_reference_frame = !change_reference_frame_;
       info_msg.num_matches = visual_odometer_->getNumberOfMatches();
-      info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+      // info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+
+      if(visual_odometer_->getNumberOfMatches() != 0){
+
+        if(visual_odometer_->getNumberOfInliers() <= visual_odometer_->getNumberOfMatches()){
+
+          info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+
+        } else {
+
+          info_msg.num_inliers = 0 ;
+
+        }
+
+      } else {
+
+        info_msg.num_inliers = 0 ;
+
+      }
+      
       ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
       info_msg.runtime = time_elapsed.toSec();
       info_pub_.publish(info_msg);
