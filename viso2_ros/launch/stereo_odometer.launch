@@ -17,21 +17,25 @@
     <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/images_2020-11-03-11-17-43_0.bag"/> -->
 
     <!-- Portals Vells -->
-    <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
+    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-53-45_2.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-06-23_4.bag
-                                        /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag"/>
+                                        /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag
+                                        /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
                                         <!-- /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
+    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
+
     <!-- Portals Vells 2 -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
+    <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-02-45_1.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-09-05_2.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-15-24_3.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-21-43_4.bag
-                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag"/> -->
+                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag
+                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/>
 
     <!-- Bendinat -->
     <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-24-51_0.bag
@@ -61,22 +65,22 @@
     <arg name = "q_w" default = "0.970178485709"/> -->
 
     <!-- Portals Vells: -->
-    <arg name = "t_x" default = "74.568675009499998"/>
+    <!-- <arg name = "t_x" default = "74.568675009499998"/>
     <arg name = "t_y" default = "18.5392068604"/>
     <arg name = "t_z" default = "5.4271955410699997"/>
     <arg name = "q_x" default = "0.02478365567"/>
     <arg name = "q_y" default = "-0.08955947924"/>
     <arg name = "q_z" default = "0.5741207366"/>
-    <arg name = "q_w" default = "0.8134803316"/>
+    <arg name = "q_w" default = "0.8134803316"/> -->
 
     <!-- Portals Vells 2: -->
-    <!-- <arg name = "t_x" default = "97.6965422361"/>
+    <arg name = "t_x" default = "97.6965422361"/>
     <arg name = "t_y" default = "25.8324100301"/>
     <arg name = "t_z" default = "0.203414582538"/>
     <arg name = "q_x" default = "0.0548449445642"/>
     <arg name = "q_y" default = "0.0385333780243"/>
     <arg name = "q_z" default = "-0.976740467062"/>
-    <arg name = "q_w" default = "0.203679333361"/> -->
+    <arg name = "q_w" default = "0.203679333361"/>
 
     <!-- Bendinat: -->
     <!-- <arg name = "t_x" default = "-36.9511828705"/>
@@ -112,6 +116,7 @@
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
         <remap from = "stereo" to = "$(arg camera)"/>
         <remap from = "image" to = "image_rect"/>
+        <!-- <remap from = "/turbot/navigator/altitude_raw" to = "altitude"/> -->
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>
@@ -126,6 +131,7 @@
         <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x2/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x2/right/image_rect"/> 
         <remap from = "image" to = "image_rect"/>
+        <!-- <remap from = "/turbot/navigator/altitude_raw" to = "altitude"/> -->
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>
@@ -140,6 +146,7 @@
         <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x4/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x4/right/image_rect"/> 
         <remap from = "image" to = "image_rect"/>
+        <!-- <remap from = "/turbot/navigator/altitude_raw" to = "altitude"/> -->
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>

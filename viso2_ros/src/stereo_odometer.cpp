@@ -1,6 +1,7 @@
 #include <ros/ros.h>
 #include <ros/console.h>
 #include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/Range.h>
 #include <image_geometry/stereo_camera_model.h>
 #include <cv_bridge/cv_bridge.h>
 #include <pcl_ros/point_cloud.h>
@@ -55,6 +56,10 @@ private:
   ros::Publisher point_cloud_pub_;
   ros::Publisher info_pub_;
 
+  //BMNF
+  ros::Subscriber altitude_sub_ ;
+  float altitude_ = 10.0 ;
+
   bool got_lost_;
 
   // change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below
@@ -66,19 +71,22 @@ private:
 
   // BMNF: Parameter declaration
   // Version
-  int detection_and_tracking_version ;
+  int detection_and_tracking_version_ ;
   // Bucketing
-  bool enable_bucketing ;
+  bool enable_bucketing_ ;
   // Feature and descriptor detection
-  double contrastThreshold_SIFT ; 
-  double edgeThreshold_SIFT ; 
-  double sigma_SIFT ;                                
-  double hessianThreshold_SURF ; 
-  int nOctaves_SURF ; 
-  int nOctaveLayers ;
+  double contrastThreshold_SIFT_ ; 
+  double edgeThreshold_SIFT_ ; 
+  double sigma_SIFT_ ;                                
+  double hessianThreshold_SURF_ ; 
+  int nOctaves_SURF_ ; 
+  int nOctaveLayers_ ;
   // Outlier rejection
-  int epipolar_constrain ;
-  double homography_reprojThreshold ;
+  int epipolar_constrain_ ;
+  double homography_reprojThreshold_ ;
+  // Control
+  bool constant_altitude_ ;
+  double assigned_altitude_ ;
 
 public:
 
@@ -97,6 +105,27 @@ public:
     local_nh.param("ref_frame_motion_threshold", ref_frame_motion_threshold_, 5.0);
     local_nh.param("ref_frame_inlier_threshold", ref_frame_inlier_threshold_, 150);
 
+    // BMNF: Parameter definition
+    // Version
+    local_nh.param<int>("detection_and_tracking_version", detection_and_tracking_version_, 0) ;
+    // Bucketing
+    local_nh.param<bool>("enable_bucketing", enable_bucketing_, true) ;
+    // Feature and descriptor detection  
+    local_nh.param<double>("contrastThreshold_SIFT", contrastThreshold_SIFT_, 0.06) ; 
+    local_nh.param<double>("edgeThreshold_SIFT", edgeThreshold_SIFT_, 10.0) ; 
+    local_nh.param<double>("sigma_SIFT", sigma_SIFT_, 1.6) ; 
+    local_nh.param<double>("hessianThreshold_SURF", hessianThreshold_SURF_, 100.0) ; 
+    local_nh.param<int>("nOctaves_SURF", nOctaves_SURF_, 4) ;   
+    local_nh.param<int>("nOctaveLayers", nOctaveLayers_, 3) ;
+    // Outlier rejection
+    local_nh.param<double>("homography_reprojThreshold", homography_reprojThreshold_, 1.0) ; 
+    local_nh.param<int>("epipolar_constrain", epipolar_constrain_, 3) ;
+    // Control
+    local_nh.param<bool>("constant_altitude", constant_altitude_, true) ;
+    local_nh.param<double>("assinged_altitude", assigned_altitude_, 3.0) ;
+
+    altitude_sub_ = local_nh.subscribe("/turbot/navigator/altitude_raw", 1, &StereoOdometer::altitudeCB, this) ;
+
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
 
@@ -105,6 +134,12 @@ public:
   }
 
 protected:
+
+  void altitudeCB(const sensor_msgs::RangeConstPtr &msg){
+
+    altitude_ = msg->range ;
+
+  }
 
   void initOdometer(
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
@@ -116,22 +151,6 @@ protected:
     ros::NodeHandle local_nh("~");
     local_nh.param<int>("queue_size", queue_size, 10); // 10
     local_nh.param<bool>("approximate_sync", approximate_sync, false);
-
-    // BMNF: Parameter definition
-    // Version
-    local_nh.param<int>("detection_and_tracking_version", detection_and_tracking_version, 0) ;
-    // Bucketing
-    local_nh.param<bool>("enable_bucketing", enable_bucketing, true) ;
-    // Feature and descriptor detection  
-    local_nh.param<double>("contrastThreshold_SIFT", contrastThreshold_SIFT, 0.06) ; 
-    local_nh.param<double>("edgeThreshold_SIFT", edgeThreshold_SIFT, 10.0) ; 
-    local_nh.param<double>("sigma_SIFT", sigma_SIFT, 1.6) ; 
-    local_nh.param<double>("hessianThreshold_SURF", hessianThreshold_SURF, 100.0) ; 
-    local_nh.param<int>("nOctaves_SURF", nOctaves_SURF, 4) ;   
-    local_nh.param<int>("nOctaveLayers", nOctaveLayers, 3) ;
-    // Outlier rejection
-    local_nh.param<double>("homography_reprojThreshold", homography_reprojThreshold, 1.0) ; 
-    local_nh.param<int>("epipolar_constrain", epipolar_constrain, 3) ;
 
     // read calibration info from camera info message
     // to fill remaining parameters
@@ -151,16 +170,19 @@ protected:
                     "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<
                     "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl <<
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
-                    "  detection_and_tracking_version = " << detection_and_tracking_version << std::endl <<
-                    "  enable_bucketing = " << enable_bucketing << std::endl <<
-                    "  contrastThreshold_SIFT = " << contrastThreshold_SIFT << std::endl <<
-                    "  edgeThreshold_SIFT = " << edgeThreshold_SIFT << std::endl <<
-                    "  sigma_SIFT = " << sigma_SIFT << std::endl <<
-                    "  hessianThreshold_SURF = " << hessianThreshold_SURF << std::endl <<
-                    "  nOctaves_SURF = " << nOctaves_SURF << std::endl <<
-                    "  nOctaveLayers = " << nOctaveLayers << std::endl <<
-                    "  homography_reprojThreshold = " << homography_reprojThreshold << std::endl <<
-                    "  epipolar_constrain = " << epipolar_constrain);
+                    "  detection_and_tracking_version = " << detection_and_tracking_version_ << std::endl <<
+                    "  enable_bucketing = " << enable_bucketing_ << std::endl <<
+                    "  contrastThreshold_SIFT = " << contrastThreshold_SIFT_ << std::endl <<
+                    "  edgeThreshold_SIFT = " << edgeThreshold_SIFT_ << std::endl <<
+                    "  sigma_SIFT = " << sigma_SIFT_ << std::endl <<
+                    "  hessianThreshold_SURF = " << hessianThreshold_SURF_ << std::endl <<
+                    "  nOctaves_SURF = " << nOctaves_SURF_ << std::endl <<
+                    "  nOctaveLayers = " << nOctaveLayers_ << std::endl <<
+                    "  homography_reprojThreshold = " << homography_reprojThreshold_ << std::endl <<
+                    "  epipolar_constrain = " << epipolar_constrain_ << std::endl <<
+                    "  constant_altitude = " << constant_altitude_ << std::endl <<
+                    "  assigned_altitude = " << assigned_altitude_                   
+                    );
   }
 
   void imageCallback(
@@ -204,16 +226,16 @@ protected:
     if (first_run || got_lost_)
     {
       // BMNF
-      if(detection_and_tracking_version == 0){
+      if(detection_and_tracking_version_ == 0){
 
         visual_odometer_->process(l_image_data, r_image_data, dims);
 
       } else {
 
-        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing, detection_and_tracking_version, nOctaveLayers,
-                                      contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
-                                      hessianThreshold_SURF, nOctaves_SURF,
-                                      homography_reprojThreshold, epipolar_constrain) ; 
+        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_,
+                                      contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
+                                      hessianThreshold_SURF_, nOctaves_SURF_,
+                                      homography_reprojThreshold_, epipolar_constrain_) ; 
 
       }
       got_lost_ = false;
@@ -230,16 +252,16 @@ protected:
       bool success;
 
       // BMNF
-      if(detection_and_tracking_version == 0){
+      if(detection_and_tracking_version_ == 0){
 
         success = visual_odometer_->process(l_image_data, r_image_data, dims);
 
       } else {
 
-        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing, detection_and_tracking_version, nOctaveLayers, 
-                                                contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
-                                                hessianThreshold_SURF, nOctaves_SURF,
-                                                homography_reprojThreshold, epipolar_constrain) ; // BMNF 03/03/2021, true
+        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_, 
+                                                contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
+                                                hessianThreshold_SURF_, nOctaves_SURF_,
+                                                homography_reprojThreshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true
 
       }
 
@@ -275,7 +297,15 @@ protected:
         setPoseCovariance(STANDARD_POSE_COVARIANCE);
         setTwistCovariance(STANDARD_TWIST_COVARIANCE);
 
-        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+        if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 1)) ){
+
+          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+        } else if(constant_altitude_== false) {
+
+          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+        }
 
         if (point_cloud_pub_.getNumSubscribers() > 0)
         {
@@ -290,7 +320,17 @@ protected:
         setTwistCovariance(BAD_COVARIANCE);
         tf::Transform delta_transform;
         delta_transform.setIdentity();
-        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+        if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 0.5)) ){
+
+          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+        } else if(constant_altitude_== false) {
+
+          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+        }
+        // integrateAndPublish(delta_transform, l_image_msg->header.stamp);
 
         ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
         ROS_WARN_THROTTLE(10.0, "Visual Odometer got lost!");
