@@ -59,6 +59,6 @@ stereo_odometer:
   inlier_threshold: 1
 
   # Altitude control:
-  constant_altitude: true
+  constant_altitude: false
   assinged_altitude: 2.0
   

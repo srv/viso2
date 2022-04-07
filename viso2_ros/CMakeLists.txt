@@ -1,8 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(viso2_ros)
+set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
+
+set(OpenCV_DIR /usr/local/share/OpenCV)
+set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
+
+message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
+message(STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
+message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
 
 find_package(catkin REQUIRED COMPONENTS
-  #OpenCV REQUIRED
+  OpenCV REQUIRED
   libviso2
   roscpp
   sensor_msgs
@@ -17,114 +26,7 @@ find_package(catkin REQUIRED COMPONENTS
   message_generation
 )
 
-set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
-set(OpenCV_INCLUDE_DIRS
-  /usr/local/include
-  /usr/local/include/opencv2
-)
-
-set(OpenCV_LIB_DIR
-  /usr/local/lib/
-)
-
-set(OpenCV_LIBS
-  opencv_calib3d
-  opencv_core
-  opencv_features2d
-  opencv_flann
-  opencv_highgui
-  opencv_imgcodecs
-  opencv_imgproc
-  opencv_ml
-  opencv_objdetect
-  opencv_photo
-  opencv_shape
-  opencv_stitching
-  opencv_superres
-  opencv_video
-  opencv_videoio
-  opencv_videostab
-  opencv_viz
-  opencv_aruco
-  opencv_bgsegm
-  opencv_bioinspired
-  opencv_ccalib
-  opencv_datasets
-  opencv_dpm
-  opencv_face
-  opencv_freetype
-  opencv_fuzzy
-  opencv_hdf
-  opencv_line_descriptor
-  opencv_optflow
-  opencv_phase_unwrapping
-  opencv_plot
-  opencv_reg
-  opencv_rgbd
-  opencv_saliency
-  opencv_stereo
-  opencv_structured_light
-  opencv_surface_matching
-  opencv_text
-  opencv_ximgproc
-  opencv_xobjdetect
-  opencv_xphoto
-  opencv_xfeatures2d
-)
-
-set(OpenCV_LIBRARIES
-  opencv_calib3d
-  opencv_core
-  opencv_features2d
-  opencv_flann
-  opencv_highgui
-  opencv_imgcodecs
-  opencv_imgproc
-  opencv_ml
-  opencv_objdetect
-  opencv_photo
-  opencv_shape
-  opencv_stitching
-  opencv_superres
-  opencv_video
-  opencv_videoio
-  opencv_videostab
-  opencv_viz
-  opencv_aruco
-  opencv_bgsegm
-  opencv_bioinspired
-  opencv_ccalib
-  opencv_datasets
-  opencv_dpm
-  opencv_face
-  opencv_freetype
-  opencv_fuzzy
-  opencv_hdf
-  opencv_line_descriptor
-  opencv_optflow
-  opencv_phase_unwrapping
-  opencv_plot
-  opencv_reg
-  opencv_rgbd
-  opencv_saliency
-  opencv_stereo
-  opencv_structured_light
-  opencv_surface_matching
-  opencv_text
-  opencv_ximgproc
-  opencv_xobjdetect
-  opencv_xphoto
-  opencv_xfeatures2d
-)
-
-#find_package(OpenCV REQUIRED)
-message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
-message(STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
-message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
-
 link_directories(${OpenCV_LIBRARY_DIRS})
-
 
 find_package(PCL REQUIRED)
 
@@ -164,18 +66,6 @@ add_executable(testORB src/testORB.cpp) # BMNF(04/01/2021): MODIFIED
 add_dependencies(testORB ${catkin_EXPORTED_TARGETS}) # BMNF(04/01/2021): MODIFIED 
 add_dependencies(testORB ${PROJECT_NAME}_gencpp) # BMNF(04/01/2021): MODIFIED 
 
-add_executable(testSIFT src/testSIFT.cpp) # BMNF(30/11/2020): NEW 
-add_dependencies(testSIFT ${catkin_EXPORTED_TARGETS}) # BMNF(30/11/2020): NEW 
-add_dependencies(testSIFT ${PROJECT_NAME}_gencpp) # BMNF(30/11/2020): NEW 
-
-add_executable(testSIFT2 src/testSIFT2.cpp) # BMNF(19/03/2021): NEW 
-add_dependencies(testSIFT2 ${catkin_EXPORTED_TARGETS}) # BMNF(19/03/2021): NEW 
-add_dependencies(testSIFT2 ${PROJECT_NAME}_gencpp) # BMNF(19/03/2021): NEW 
-
-add_executable(testSIFT3 src/testSIFT3.cpp) # BMNF(12/04/2021): NEW 
-add_dependencies(testSIFT3 ${catkin_EXPORTED_TARGETS}) # BMNF(12/04/2021): NEW 
-add_dependencies(testSIFT3 ${PROJECT_NAME}_gencpp) # BMNF(12/04/2021): NEW 
-
 add_executable(testSIFT4 src/testSIFT4.cpp) # BMNF(16/04/2021): NEW 
 add_dependencies(testSIFT4 ${catkin_EXPORTED_TARGETS}) # BMNF(16/04/2021): NEW 
 add_dependencies(testSIFT4 ${PROJECT_NAME}_gencpp) # BMNF(16/04/2021): NEW 
@@ -192,9 +82,6 @@ target_link_libraries(stereo_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${Boost_
 target_link_libraries(mono_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(testORB ${OpenCV_LIB} ${catkin_LIBRARIES}) # BMNF(16/11/2020): MODIFIED
-target_link_libraries(testSIFT ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(30/11/2020): NEW
-target_link_libraries(testSIFT2 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(19/03/2021): NEW 
-target_link_libraries(testSIFT3 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(12/04/2021): NEW 
 target_link_libraries(testSIFT4 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(16/04/2021): NEW 
 target_link_libraries(testFAST1 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(03/06/2021): NEW 
 

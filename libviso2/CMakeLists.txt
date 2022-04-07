@@ -1,8 +1,17 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libviso2)
+set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
+
+set(OpenCV_DIR /usr/local/share/OpenCV)
+set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
+
+message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
+message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
+message(STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
+message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
 
 find_package(catkin REQUIRED COMPONENTS
-  #OpenCV REQUIRED
+  OpenCV REQUIRED
   cv_bridge
 )
 
@@ -20,113 +29,11 @@ catkin_package(
   LIBRARIES viso2
 )
 
-set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
-
 if(OPENCV_ENABLE_NONFREE)
     message("  Non-free algorithms are enabled")
 else()
     message("  Non-free algorithms are NOT enabled")
 endif()
-
-
-set(OpenCV_INCLUDE_DIRS
-  /usr/local/include
-  /usr/local/include/opencv2
-)
-
-set(OpenCV_LIB_DIR
-  /usr/local/lib
-)
-
-set(OpenCV_LIBS
-  opencv_calib3d
-  opencv_core
-  opencv_features2d
-  opencv_flann
-  opencv_highgui
-  opencv_imgcodecs
-  opencv_imgproc
-  opencv_ml
-  opencv_objdetect
-  opencv_photo
-  opencv_shape
-  opencv_stitching
-  opencv_superres
-  opencv_video
-  opencv_videoio
-  opencv_videostab
-  opencv_viz
-  opencv_aruco
-  opencv_bgsegm
-  opencv_bioinspired
-  opencv_ccalib
-  opencv_datasets
-  opencv_dpm
-  opencv_face
-  opencv_freetype
-  opencv_fuzzy
-  opencv_hdf
-  opencv_line_descriptor
-  opencv_optflow
-  opencv_phase_unwrapping
-  opencv_plot
-  opencv_reg
-  opencv_rgbd
-  opencv_saliency
-  opencv_stereo
-  opencv_structured_light
-  opencv_surface_matching
-  opencv_text
-  opencv_ximgproc
-  opencv_xobjdetect
-  opencv_xphoto
-  opencv_xfeatures2d
-)
-
-set(OpenCV_LIBRARIES
-  opencv_calib3d
-  opencv_core
-  opencv_features2d
-  opencv_flann
-  opencv_highgui
-  opencv_imgcodecs
-  opencv_imgproc
-  opencv_ml
-  opencv_objdetect
-  opencv_photo
-  opencv_shape
-  opencv_stitching
-  opencv_superres
-  opencv_video
-  opencv_videoio
-  opencv_videostab
-  opencv_viz
-  opencv_aruco
-  opencv_bgsegm
-  opencv_bioinspired
-  opencv_ccalib
-  opencv_datasets
-  opencv_dpm
-  opencv_face
-  opencv_freetype
-  opencv_fuzzy
-  opencv_hdf
-  opencv_line_descriptor
-  opencv_optflow
-  opencv_phase_unwrapping
-  opencv_plot
-  opencv_reg
-  opencv_rgbd
-  opencv_saliency
-  opencv_stereo
-  opencv_structured_light
-  opencv_surface_matching
-  opencv_text
-  opencv_ximgproc
-  opencv_xobjdetect
-  opencv_xphoto
-  opencv_xfeatures2d
-)
 
 include_directories(libviso2/src
   ${catkin_INCLUDE_DIRS}
