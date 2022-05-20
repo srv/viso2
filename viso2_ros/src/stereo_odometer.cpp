@@ -239,7 +239,7 @@ protected:
 
       }
       got_lost_ = false;
-      // on first run publish zero once
+      // The first run publishes the starting point. Be careful with the synchronization of the images and if the vehicle is submerging.
       if (first_run)
       {
         tf::Transform delta_transform;
@@ -297,7 +297,7 @@ protected:
         setPoseCovariance(STANDARD_POSE_COVARIANCE);
         setTwistCovariance(STANDARD_TWIST_COVARIANCE);
 
-        if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 1)) ){
+        if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 0.5)) ){
 
           integrateAndPublish(delta_transform, l_image_msg->header.stamp);
 
