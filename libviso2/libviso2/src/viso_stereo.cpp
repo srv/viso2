@@ -72,8 +72,8 @@ bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace
                        
   p_matched = matcher->getMatches();
 
-  std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl ;
-  std::cout << "***********************************************" << std::endl ;
+  // std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl ;
+  // std::cout << "***********************************************" << std::endl ;
 
   return updateMotion(0.0,false);
 }

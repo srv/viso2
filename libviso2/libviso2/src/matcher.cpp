@@ -297,7 +297,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
     } catch (cv::Exception& e) {
 
-      std::cout << "cv exception: %s" << e.what() << std::endl ;
+      // std::cout << "cv exception: %s" << e.what() << std::endl ;
       s.correct = false ;
       return s ;
 
@@ -311,7 +311,7 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
     } catch (cv::Exception& e) {
 
-      std::cout << "cv exception: %s" << e.what() << std::endl ;
+      // std::cout << "cv exception: %s" << e.what() << std::endl ;
       s.correct = false ;
       return s ;
 
@@ -648,15 +648,15 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
         }
       }
 
-      std::cout << "Accountant: " << cont << std::endl ;
-      std::cout << "Time between process: " << ((Time_ImageCurrent - Time_ImagePrevious) / (double)CLOCKS_PER_SEC) << std::endl ;
-      std::cout << "***********************************************" << std::endl ;
+      // std::cout << "Accountant: " << cont << std::endl ;
+      // std::cout << "Time between process: " << ((Time_ImageCurrent - Time_ImagePrevious) / (double)CLOCKS_PER_SEC) << std::endl ;
+      // std::cout << "***********************************************" << std::endl ;
 
     } else {
 
       p_matched_2.clear() ;
-      std::cout << "There isn't enough keypoints" << std::endl ;
-      std::cout << "***********************************************" << std::endl ;
+      // std::cout << "There isn't enough keypoints" << std::endl ;
+      // std::cout << "***********************************************" << std::endl ;
 
     }
   }
