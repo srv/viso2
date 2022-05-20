@@ -55,10 +55,9 @@ stereo_odometer:
   enable_bucketing: false
 
   # MOTION ESTIMATION PARAMETERS:
-  ransac_iters: 200
+  ransac_iters: 300
   inlier_threshold: 1
 
   # Altitude control:
   constant_altitude: false
   assinged_altitude: 2.0
-  
