@@ -23,28 +23,16 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 #include "triangle.h"
 #include "filter.h"
 
-// BMNF 03/03/2021:
-#include <opencv2/features2d.hpp>
-#include <opencv2/xfeatures2d.hpp>
-#include <opencv2/xfeatures2d/nonfree.hpp>
-#include <opencv2/calib3d.hpp>
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <iostream>
-
-
 using namespace std;
 
 // BMNF 03/03/2021:
 using cv::Mat ;
 using cv::Ptr ;
 using cv::KeyPoint ;
-
 using cv::xfeatures2d::SIFT ;
 using cv::xfeatures2d::SURF ;
 using cv::xfeatures2d::FREAK ;
 using cv::BRISK ;
-using cv::FastFeatureDetector ;
 
 //////////////////////
 // PUBLIC FUNCTIONS //
@@ -211,50 +199,36 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
 }
 
 
-
-
 // BMNF 
-Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, int combination, int k, double homography_reprojThreshold, int epipolar_constrain) {
-  
-  /**********************************************************************************************************
-  Auxiliar function to compute matchings between two images using opencv libraries.
+/**********************************************************************************************************/
+Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, 
+                                               int combination, int k, double homography_reprojThreshold, int epipolar_constrain) 
+{
+  /////////////////////////////////////////////////////////////////
+  /////////////////Local variable declaration//////////////////////
+  /////////////////////////////////////////////////////////////////
 
-  Parameters:
-  @kpts1: Opencv key point vector that contains the key points of the first image.
-  @kpts2: Opencv key point vector that contains the key points of the second image.
-  @desc1: Opencv matrix that contains the descriptors of the first image key points.
-  @desc2: Opencv matrix that contains the descriptors of the second image key points.
-  @homography: Boolean that allows to select whether the homography or the fundamental matrix is calculated.
-  @combination: Integer that defines which combination of feature detector and descriptors detector is being used.
-  @k: Integer that defines the number of nearest neighbors required for the knnMatch.
+  auxiliar_return s ;
 
-  Returns:
-  @s: structure with the information of the matching.
-  ***********************************************************************************************************/
-
-  // Structure
-  Struct s ;
-
-  // Pointers
   Ptr<cv::DescriptorMatcher> matcher ;
 
-  // Vectors
   vector<vector<cv::DMatch>> matches ;
   vector<KeyPoint> kpts1_aft_match, kpts2_aft_match ;
   vector<KeyPoint> kpts1_aft_RANSAC, kpts2_aft_RANSAC ;
- 
-  // Matrix
+
   Mat desc1_aft_match, desc2_aft_match ;
   Mat H, F ;
   Mat RANSACinliersMask ;
   Mat desc1_aft_RANSAC, desc2_aft_RANSAC ;
 
-  // Point2f
   vector<cv::Point2f> coord1_aft_match, coord2_aft_match ;
   vector<cv::Point2f> coord1_aft_RANSAC, coord2_aft_RANSAC ;
 
-  // Iterators
   int i ;
+
+  /////////////////////////////////////////////////////////////////
+  //////////////////////////Matching///////////////////////////////
+  /////////////////////////////////////////////////////////////////
 
   // Compute the matchings. Depending on the type of descriptor being used, Brute Force or FLANN are used.
   if((combination == 3) || (combination == 4)){
@@ -267,13 +241,11 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 
   }
 
-  // Compute the matchings with the descriptors of the two set of keypoints using Match. 
+  // Compute the matchings with the descriptors of the two set of keypoints using knnMatch. 
   matcher->knnMatch(desc1, desc2, matches, k, cv::noArray(), true) ;
 
   // Obtaining key points, descriptors and key points coordinates after matching 
   for(i = 0; i < matches.size(); i++){
-
-    // std::cout << "Jar jar " << i << std::endl ;
 
     kpts1_aft_match.push_back(kpts1[matches[i][0].queryIdx]) ;
     desc1_aft_match.push_back(desc1.row(matches[i][0].queryIdx)) ;
@@ -352,23 +324,8 @@ Matcher::Struct Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> k
 void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
                                   double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
                                   double hessianThreshold_SURF, int nOctaves_SURF,
-                                  double homography_reprojThreshold, int epipolar_constrain){
-
-  /**********************************************************************************************************
-  Function that implements a new push back and compute the new circle match between four images using opencv.
-
-  Parameters:
-  @left_img: Opencv matrix that contains the left image.
-  @right_img: Opencv matrix that contains the right image.
-  @odometer_lost: Boolean that allows to calculated the circle match if its value is "false". If its value is 
-                "true" the information of current images is transformed to information of previous images.
-  @combination: Integer that defines which combination of feature detector and descriptors detector is being used.
-  @epipolar_constrain: Constraint to calculate the fundamental matrix
-  @contrast_threshold: Parameter for SIFT feature detector
-  @min_hessian: Parameter for SURF feature detector
-  ***********************************************************************************************************/
-
-  
+                                  double homography_reprojThreshold, int epipolar_constrain)
+{  
   /////////////////////////////////////////////////////////////////
   /////////////////Local variable declaration//////////////////////
   /////////////////////////////////////////////////////////////////
@@ -393,7 +350,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   Mat l_curr_desc, r_curr_desc ;
 
   // Structures to store matching information
-  Struct left_matching, previous_matching, right_matching, current_matching ;
+  struct auxiliar_return left_matching, previous_matching, right_matching, current_matching ;
 
   // Floats to save key points coordinates
   float l_pre_coord_aft_RANSAC_x ;
@@ -412,30 +369,25 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   // Booleans to know if previous key points have been found.
   bool save = false ;
 
-
   /////////////////////////////////////////////////////////////////
   /////////////////Image feature computation///////////////////////
   /////////////////////////////////////////////////////////////////
 
-  // Image features are calculated with the selected feature tracker 
+  // Image features are calculated with the selected combination of feature detector and descriptor
   switch(combination) {
 
     case 1:
       sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
-      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
       sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
-      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
 
     case 2:
       surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
-      // surf = SURF::create(min_hessian) ;
       surf->detect(left_img, l_curr_kpts) ;
       surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
-      // surf = SURF::create(min_hessian) ;
       surf->detect(right_img, r_curr_kpts) ;
       sift_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       sift_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
@@ -444,10 +396,8 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
     case 3:
       surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
-      // surf = SURF::create(min_hessian) ;
       surf->detect(left_img, l_curr_kpts) ;
       surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
-      // surf = SURF::create(min_hessian) ;
       surf->detect(right_img, r_curr_kpts) ;
       brisk_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       brisk_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
@@ -466,10 +416,8 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
     default:
       sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
-      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
       sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
-      // sift = SIFT::create(0, 3, contrast_threshold, 10, 1.6) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
@@ -578,10 +526,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       /////////////////////Matching circle/////////////////////////////
       /////////////////////////////////////////////////////////////////
 
-      // The key points of the left image that are present in the "current matching" and in the "left matching" are searched. When a key point
-      // belonging to the two sets is found, it is searched, using "left matching", its correspondence in the previous left image.
-      // Thus, the key points of the left images that meet the requirement of the matching circle are obtained. The same is done for the 
-      // keypoints of the right images. If the 4 key points are found, their coordinates and indices are saved in "p_matched_2" vector.
+      // Assembling the four matching sets
       p_matched_2.clear() ;
 
       int i, j, k, l ;
@@ -672,6 +617,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   // The time of current images become the time of previous image
   Time_ImagePrevious = Time_ImageCurrent ;
 }
+/**********************************************************************************************************/
 
 
 
