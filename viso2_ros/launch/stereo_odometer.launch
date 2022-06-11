@@ -5,7 +5,6 @@
 
     <!-- Image parameters -->
     <arg name = "resolution" default = "full"/>
-    <arg name = "stereo" default = "stereo_down"/>
     <arg name = "camera" default = "/stereo_down"/>
     <arg name = "enable_decimate_x1" default = "false"/>
     <arg name = "enable_decimate_x2" default = "false"/>
@@ -33,27 +32,9 @@
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-15-24_3.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-21-43_4.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag
-                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/> -->
+                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/> -->                                    
 
-    <!-- Bendinat -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-24-51_0.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-31-10_1.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-37-30_2.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-43-49_3.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/images_2021-01-19-12-50-08_4.bag
-                                    /home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/topics_2021-01-19-12-24-52_0.bag"/> -->
-                                    
-
-    <!-- Initial pose and orientation parameters -->
-    <!-- Colonia:           t_x = 2.0403521254, t_y = 25.5584474051, t_z = 0.155384412659, 
-                            q_x = -0.0351823221144, q_y = 0.065756237088, q_z = -0.230633968362, q_w = 0.970178485709-->
-    <!-- Portals Vells 1:   t_x = 74.568675009499998, t_y = 18.5392068604, t_z = 5.4271955410699997, 
-                            q_x = 0.02478365567, q_y = -0.08955947924, q_z = 0.5741207366, q_w = 0.8134803316-->
-    <!-- Portals Vells 2:   t_x = 97.6965422361, t_y = 25.8324100301, t_z = 0.203414582538, 
-                            q_x = 0.0548449445642, q_y = 0.0385333780243, q_z = -0.976740467062, q_w = 0.203679333361-->
-    <!-- Bendinat:          t_x = -36.9511828705, t_y = -37.2108482128, t_z = 0.177339153139, 
-                            q_x = -0.083147032671, q_y = 0.0159652927472, q_z = 0.857352288273, q_w = 0.507719148918 -->
-    
+    <!-- Initial pose and orientation parameters -->   
     <!-- Colonia: -->
     <!-- <arg name = "t_x" default = "2.0403521254"/>
     <arg name = "t_y" default = "25.5584474051"/>
@@ -81,28 +62,27 @@
     <arg name = "q_z" default = "-0.994832118604264"/>
     <arg name = "q_w" default = "0.064440901478744"/> -->
 
-    <!-- Bendinat: -->
-    <!-- <arg name = "t_x" default = "-49.686109318521140"/>
-    <arg name = "t_y" default = "-27.412590995258114"/>
-    <arg name = "t_z" default = "4.543497289598515"/>
-    <arg name = "q_x" default = "-0.014645486939744"/>
-    <arg name = "q_y" default = "-0.038294967955170"/>
-    <arg name = "q_z" default = "0.746212704181745"/>
-    <arg name = "q_w" default = "0.664443831530836"/> -->
-
     <!-- PLAY bagfile -->
     <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile)" required="true" />
 
     <!-- RUN stereo image proc -->
-    <group>
-        <include file="/home/uib/catkin_ws/src/image_pipeline/stereo_image_proc/launch/stereo_proc.launch">
-        <arg name = "stereo" value = "$(arg stereo)" />
+    <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x1 == true)">
+        <arg name = "stereo" value = "$(arg camera)" />
+        <arg name = "decimation" value = "1" />
         <arg name = "resolution" value = "$(arg resolution)" />
-        <arg name = "enable_decimate_x1" value = "$(arg enable_decimate_x1)" />
-        <arg name = "enable_decimate_x2" value = "$(arg enable_decimate_x2)" />
-        <arg name = "enable_decimate_x4" value = "$(arg enable_decimate_x4)" />
-        </include>
-    </group>
+    </include>
+
+    <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x2 == true)">
+        <arg name = "stereo" value = "$(arg camera)" />
+        <arg name = "decimation" value = "2" />
+        <arg name = "resolution" value = "$(arg resolution)" />
+    </include>
+
+    <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x4 == true)">
+        <arg name = "stereo" value = "$(arg camera)" />
+        <arg name = "decimation" value = "4" />
+        <arg name = "resolution" value = "$(arg resolution)" />
+    </include>
 
     <!-- Static TF's -->
     <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
@@ -112,10 +92,10 @@
 
     <!-- Viso2 -->
     <rosparam command="load" file="$(find viso2_ros)/config/viso2_stereo_parameters.yaml"/>
-    <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "log" if = "$(eval enable_decimate_x1 == true)">
-        <remap from = "stereo" to = "$(arg camera)"/>
-        <remap from = "image" to = "image_rect"/>
-        <!-- <remap from = "/turbot/navigator/altitude_raw" to = "altitude"/> -->
+    <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
+        <remap from = "stereo" to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image" to = "image_rect"/>  <!-- Image type -->
+        <remap from = "/altitude_control" to = "/turbot/navigator/altitude_raw"/>
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>
@@ -126,11 +106,13 @@
     </node>
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
-        <remap from = "stereo" to = "$(arg camera)"/>
+        <remap from = "stereo" to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image" to = "image_rect"/> <!-- Image type -->
         <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x2/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x2/right/image_rect"/> 
-        <remap from = "image" to = "image_rect"/>
-        <!-- <remap from = "/turbot/navigator/altitude_raw" to = "altitude"/> -->
+        <remap from = "/stereo_down/left/camera_info" to = "/stereo_down/scaled_x2/left/camera_info" />
+        <remap from = "/stereo_down/right/camera_info" to = "/stereo_down/scaled_x2/right/camera_info" />
+        <remap from = "/altitude_control" to = "/turbot/navigator/altitude_raw"/>
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>
@@ -141,11 +123,13 @@
     </node>
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
-        <remap from = "stereo" to = "$(arg camera)"/>
+        <remap from = "stereo" to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image" to = "image_rect"/> <!-- Image type -->
         <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x4/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x4/right/image_rect"/> 
-        <remap from = "image" to = "image_rect"/>
-        <!-- <remap from = "/turbot/navigator/altitude_raw" to = "altitude"/> -->
+        <remap from = "/stereo_down/left/camera_info" to = "/stereo_down/scaled_x4/left/camera_info" />
+        <remap from = "/stereo_down/right/camera_info" to = "/stereo_down/scaled_x4/right/camera_info" />
+        <remap from = "/altitude_control" to = "/turbot/navigator/altitude_raw"/>
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>

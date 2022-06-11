@@ -11,12 +11,12 @@ stereo_odometer:
 
   # FRAME PARAMETERS:
   # LIBVISO2-ROS
-  base_link_frame_id: 'turbot/base_link'
-  sensor_frame_id: 'turbot/stereo_down/left_optical'
+  base_link_frame_id: '/turbot/base_link'
+  sensor_frame_id: '/turbot/stereo_down/left_optical'
 
   # VERSION PARAMETERS:
   # LIBVISO2-ROS-Modified
-  detection_and_tracking_version: 4 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
+  detection_and_tracking_version: 1 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
 
   # FEATURE DETECTION PARAMETERS:
   # Original LIBVISO2
@@ -58,6 +58,5 @@ stereo_odometer:
   ransac_iters: 300
   inlier_threshold: 1
 
-  # Altitude control:
-  constant_altitude: false
-  assinged_altitude: 2.0
+  # ALTITUDE CONTROL:
+  assinged_altitude: 2.5 # Altitude from which movement calculation is to be started 

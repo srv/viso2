@@ -1,0 +1,9 @@
+prefilter_size: 9
+prefilter_cap: 19
+correlation_window_size: 23
+min_disparity: 6
+disparity_range: 96
+uniqueness_ratio: 5
+texture_threshold: 5
+speckle_size: 200
+speckle_range: 4

@@ -1,10 +1,9 @@
 stereo_odometer:
   approximate_sync: true
-  assinged_altitude: 2.0
-  base_link_frame_id: turbot/base_link
+  assinged_altitude: 2.5 # Altitude from which movement calculation is to be started 
+  base_link_frame_id: /turbot/base_link
   bucket_height: 50
   bucket_width: 50
-  constant_altitude: true
   contrastThreshold_SIFT: 0.03
   detection_and_tracking_version: 4
   edgeThreshold_SIFT: 10
@@ -28,5 +27,5 @@ stereo_odometer:
   queue_size: 5
   ransac_iters: 300
   refinement: 1
-  sensor_frame_id: turbot/stereo_down/left_optical
+  sensor_frame_id: /turbot/stereo_down/left_optical
   sigma_SIFT: 1.6
