@@ -1,4 +1,3 @@
-
 #ifndef ODOMETER_BASE_H_
 #define ODOMETER_BASE_H_
 
@@ -167,7 +166,7 @@ protected:
 
     tf::Transform base_transform = base_to_sensor * integrated_pose_ * base_to_sensor.inverse();
 
-    // BMNF: transform between NED origin and initial position of the robot when odometer starts.
+    // BMNF: Add initial offset
     base_transform = initial_pose_ * base_transform ;
 
     nav_msgs::Odometry odometry_msg;

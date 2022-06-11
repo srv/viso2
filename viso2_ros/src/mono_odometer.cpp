@@ -19,7 +19,6 @@ namespace viso2_ros
 class MonoOdometer : public OdometerBase
 {
 
-/* BMNF: Variables declaration */
 private:
 
   boost::shared_ptr<VisualOdometryMono> visual_odometer_;
@@ -35,25 +34,16 @@ private:
 
 public:
 
-  /* BMNF: First calls OdometerBase () from odometer_base.h and then initializes the node, 
-  loads the local parameters, subscribes to the relevant altitude and camera topics.
-  Finally publish a message VisoInfo type. */
   MonoOdometer(const std::string& transport) : OdometerBase(), replace_(false)
   {
-
-    /* BMNF: Read & load local parameters. */
     ros::NodeHandle local_nh("~");
     odometry_params::loadParams(local_nh, visual_odometer_params_);
 
     ros::NodeHandle nh;
     image_transport::ImageTransport it(nh);
 
-    /* BMNF: Subscriber to image topic. */
-    /* BMNF: Per que la coa es d'1? */
     camera_sub_ = it.subscribeCamera("image", 1, &MonoOdometer::imageCallback, this, transport);
 
-    /* BMNF: Subscriber to altitude topic. */
-    /* BMNF: Per que la coa es d'2? */
     altitude_sub = nh.subscribe("altitude", 2, &MonoOdometer::altitudeCallback, this);
 
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
@@ -62,8 +52,6 @@ public:
 
 protected:
 
-  /* BMNF: When the program receives an altitude topic, it enters to this callback and prints the value of the
-  range of the altitude message. */
   void altitudeCallback (const sensor_msgs::RangeConstPtr& altitudemsg)
     {
         cameraHeight= altitudemsg->range;
@@ -71,7 +59,6 @@ protected:
 
     }
 
-  /* BMNF: When the program receives an image topic it enters to this callback. */
   void imageCallback(
       const sensor_msgs::ImageConstPtr& image_msg,
       const sensor_msgs::CameraInfoConstPtr& info_msg)
@@ -85,8 +72,6 @@ protected:
     {
       first_run = true;
 
-      /* BMNF: Read calibration information from camera info and obtain the focal point and the principals points of 
-      the camera to fill in the remaining odometer parameters. In addition it also gets the frame id of the camera. */
       image_geometry::PinholeCameraModel model;
       model.fromCameraInfo(info_msg);
       visual_odometer_params_.calib.f  = model.fx();
@@ -99,30 +84,21 @@ protected:
                       visual_odometer_params_);
     }
 
-    /* BMNF: Convert image if necessary. If the image is encoded in MONO8 the program obtain 
-    the pointer to rectified image. If the image is not in MONO8 the program transforms 
-    it to this encoding and then obtains the pointer to rectified image. */
     uint8_t *image_data;
     int step; 
     cv_bridge::CvImageConstPtr cv_ptr; 
     if (image_msg->encoding == sensor_msgs::image_encodings::MONO8)
     {
       image_data = const_cast<uint8_t*>(&(image_msg->data[0]));
-      step = image_msg->step; // BMNF:???
+      step = image_msg->step;
     }
     else
     {
       cv_ptr = cv_bridge::toCvShare(image_msg, sensor_msgs::image_encodings::MONO8); 
       image_data = cv_ptr->image.data;
-      step = cv_ptr->image.step[0]; // BMNF:???
+      step = cv_ptr->image.step[0];
     }
 
-    /* BMNF: Run the odometer. On first run, only feed the odometer with first image pair without retrieving data.
-       If it is not the first iteration there are two possibilities. That the program is able to process 
-       the image or not. If the program is able to process it, the program can calculate the translation and rotation 
-       matrix to obtain the distance between the camera and the image. Otherwise it only computes an identity matrix.
-       In both cases the information is published.
-     */
     int32_t dims[] = {image_msg->width, image_msg->height, step};
   
     if (first_run)
@@ -139,7 +115,7 @@ protected:
       }else{
         std::cout << "Replace is FALSE" << std::endl;
       }
-      bool success = visual_odometer_->process(image_data, dims, replace_, cameraHeight, true); // BMNF: Aquiiiiiiiiiiiiiiiiiiiiiii!!!!
+      bool success = visual_odometer_->process(image_data, dims, replace_, cameraHeight, true); 
       if(success)
       {
         ROS_INFO("SUCCESS");
@@ -168,7 +144,6 @@ protected:
         integrateAndPublish(delta_transform, image_msg->header.stamp);
       }
 
-      /* BMNF: Create and publish viso2 info msg. Topic: /mono_odometer/info. */
       VisoInfo info_msg;
       info_msg.header.stamp = image_msg->header.stamp;
       info_msg.got_lost = !success;

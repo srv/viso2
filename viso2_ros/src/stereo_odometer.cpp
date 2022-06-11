@@ -56,10 +56,6 @@ private:
   ros::Publisher point_cloud_pub_;
   ros::Publisher info_pub_;
 
-  //BMNF
-  ros::Subscriber altitude_sub_ ;
-  float altitude_ = 10.0 ;
-
   bool got_lost_;
   bool first_run_;
 
@@ -69,6 +65,10 @@ private:
   double ref_frame_motion_threshold_; // method 1. Change the reference frame if last motion is small
   int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low
   Matrix reference_motion_;
+
+  //BMNF: Altitude control
+  ros::Subscriber altitude_sub_ ;
+  float altitude_ = MAXFLOAT ;
 
   // BMNF: Parameter declaration
   // Version
@@ -85,8 +85,7 @@ private:
   // Outlier rejection
   int epipolar_constrain_ ;
   double homography_reprojThreshold_ ;
-  // Control
-  bool constant_altitude_ ;
+  // Altitude control
   double assigned_altitude_ ;
 
 public:
@@ -122,10 +121,9 @@ public:
     local_nh.param<double>("homography_reprojThreshold", homography_reprojThreshold_, 1.0) ; 
     local_nh.param<int>("epipolar_constrain", epipolar_constrain_, 3) ;
     // Control
-    local_nh.param<bool>("constant_altitude", constant_altitude_, true) ;
     local_nh.param<double>("assinged_altitude", assigned_altitude_, 3.0) ;
 
-    altitude_sub_ = local_nh.subscribe("/turbot/navigator/altitude_raw", 1, &StereoOdometer::altitudeCB, this) ;
+    altitude_sub_ = local_nh.subscribe("/altitude_control", 1, &StereoOdometer::altitudeCB, this) ;
 
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
@@ -181,7 +179,6 @@ protected:
                     "  nOctaveLayers = " << nOctaveLayers_ << std::endl <<
                     "  homography_reprojThreshold = " << homography_reprojThreshold_ << std::endl <<
                     "  epipolar_constrain = " << epipolar_constrain_ << std::endl <<
-                    "  constant_altitude = " << constant_altitude_ << std::endl <<
                     "  assigned_altitude = " << assigned_altitude_                   
                     );
   }
@@ -221,7 +218,7 @@ protected:
 
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
 
-    if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 0.5)) ){
+    if(altitude_ < assigned_altitude_){
       // on first run or when odometer got lost, only feed the odometer with
       // images without retrieving data
       if (first_run_ || got_lost_)
