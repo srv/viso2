@@ -57,18 +57,6 @@ add_executable(mono_odometer_omnidirectional src/mono_odometer_omnidirectional.c
 add_dependencies(mono_odometer_omnidirectional ${catkin_EXPORTED_TARGETS})
 add_dependencies(mono_odometer_omnidirectional ${PROJECT_NAME}_gencpp)
 
-add_executable(testORB src/testORB.cpp) # BMNF(04/01/2021): MODIFIED
-add_dependencies(testORB ${catkin_EXPORTED_TARGETS}) # BMNF(04/01/2021): MODIFIED 
-add_dependencies(testORB ${PROJECT_NAME}_gencpp) # BMNF(04/01/2021): MODIFIED 
-
-add_executable(testSIFT4 src/testSIFT4.cpp) # BMNF(16/04/2021): NEW 
-add_dependencies(testSIFT4 ${catkin_EXPORTED_TARGETS}) # BMNF(16/04/2021): NEW 
-add_dependencies(testSIFT4 ${PROJECT_NAME}_gencpp) # BMNF(16/04/2021): NEW 
-
-add_executable(testFAST1 src/testFAST1.cpp) # BMNF(03/06/2021): NEW 
-add_dependencies(testFAST1 ${catkin_EXPORTED_TARGETS}) # BMNF(03/06/2021): NEW 
-add_dependencies(testFAST1 ${PROJECT_NAME}_gencpp) # BMNF(03/06/2021): NEW 
-
 add_executable(get_first_point src/get_first_point.cpp) # BMNF(07/04/2022): NEW 
 add_dependencies(get_first_point ${catkin_EXPORTED_TARGETS}) # BMNF(07/04/2022): NEW 
 add_dependencies(get_first_point ${PROJECT_NAME}_gencpp) # BMNF(07/04/2022): NEW 
@@ -80,9 +68,6 @@ include_directories(${Boost_INCLUDE_DIRS})
 target_link_libraries(stereo_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
 target_link_libraries(mono_odometer_omnidirectional ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-target_link_libraries(testORB ${OpenCV_LIB} ${catkin_LIBRARIES}) # BMNF(16/11/2020): MODIFIED
-target_link_libraries(testSIFT4 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(16/04/2021): NEW 
-target_link_libraries(testFAST1 ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(03/06/2021): NEW 
 target_link_libraries(get_first_point ${Boost_LIBRARIES} ${catkin_LIBRARIES}) # BMNF(07/04/2022): NEW 
 
 
