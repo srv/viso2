@@ -14,14 +14,14 @@ http://www.ros.org/wiki/viso2 for the list of contained packages.
 6. Compile the repository
 
 ## User guide
-# Simple mode
+### Simple mode
 
 1. Modify stereo_odometer.launch (change the path to the bagfiles or delete them if you are not going to use them, change the name of the cameras to the name of your cameras and change the remap of the topicals).
 2. Modify viso2_parameters.yaml
 3. Change the disparity parameters to yours
 4. Run the stereo odometer using: roslaunch viso2_ros stereo_odometer.launch
 
-# Automatic mode
+### Automatic mode
 
 1. Modify stereo_odometer_auto.launch (change the path to the bagfiles or delete them if you are not going to use them, change the name of the cameras to the name of your cameras and change the remap of the topicals).
 2. Modify viso2_parameters_auto.yaml
