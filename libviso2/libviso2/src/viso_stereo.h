@@ -66,7 +66,34 @@ public:
   // output: returns false if an error occured
   bool process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace=false);
   
-  //BMNF: Process a new images, push the images back, compute the new match circle, do a bucketing if is required and updates motion.
+  //BMNF: 
+  /**********************************************************************************************************
+  Process a new images, push the images back, compute the new match circle, do a bucketing if is required and
+  updates motion.
+
+  Parameters:
+  @left_img:  Opencv matrix that contains the left image.
+  @right_img: Opencv matrix that contains the right image.
+  @replace: Boolean that allows to calculated the circle match if its value is "false". If its value is 
+            "true" the information of current images is transformed to information of previous images.
+  @bucketing: Boolean that allows the bucketing
+  @combination: Integer that defines which combination of feature detector and descriptor is being used.
+  @nOctaveLayers: Number of layers per octave.
+  @contrastThreshold_SIFT: The contrast threshold used to filter out weak features in semi-uniform
+                           (low-contrast) regions. The larger the threshold, the less features are produced by the detector.
+  @edgeThreshold_SIFT: The threshold used to filter out edge-like features. Note that the its meaning is
+                       different from the contrastThreshold, i.e. the larger the edgeThreshold, the less features are filtered
+                       out (more features are retained).
+  @sigma_SIFT: The sigma of the Gaussian applied to the input image at the octave #0. 
+  @hessianThreshold_SURF: Threshold for hessian keypoint detector used in SURF.
+  @nOctaves_SURF: Number of pyramid octaves the keypoint detector will use. 
+  @homography_reprojThreshold: Constrain to calculate the homography.
+  @epipolar_constrain: Constraint to calculate the fundamental matrix.
+  @contrast_threshold: Parameter for SIFT feature detector
+
+  Returns:
+  @updateMotion: Boolean that returns if the motion update is correct or if an error occured.
+  ***********************************************************************************************************/
   bool new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int nOctaveLayers,
                   double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
                   double hessianThreshold_SURF, int nOctaves_SURF, 
