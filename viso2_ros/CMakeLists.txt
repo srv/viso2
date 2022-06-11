@@ -5,11 +5,6 @@ set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 set(OpenCV_DIR /usr/local/share/OpenCV)
 set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
 
-message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
-message(STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
-message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
-
 find_package(catkin REQUIRED COMPONENTS
   OpenCV REQUIRED
   libviso2
@@ -32,7 +27,7 @@ find_package(PCL REQUIRED)
 
 option(ARM_CROSS_COMPILATION "ARM Cross Compilation" OFF)
 
-add_message_files( DIRECTORY msg FILES VisoInfo.msg)
+add_message_files(DIRECTORY msg FILES VisoInfo.msg)
 
 generate_messages(
   DEPENDENCIES

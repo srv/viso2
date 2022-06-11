@@ -19,6 +19,7 @@ void callback(const nav_msgs::Odometry::ConstPtr& map_msg, const sensor_msgs::Ra
 
     if (altitude_msg->range < max_altitude_)
     {
+        ros::Time timestamp = map_msg->header.stamp ;
         double tx = map_msg->pose.pose.position.x ;
         double ty = map_msg->pose.pose.position.y ;
         double tz = map_msg->pose.pose.position.z ;
@@ -30,7 +31,8 @@ void callback(const nav_msgs::Odometry::ConstPtr& map_msg, const sensor_msgs::Ra
         fstream fout ;
         fout.open(outfile_, ios::out | ios::app) ;
 
-        fout << fixed << setprecision(15)
+        fout << fixed << setprecision(15) 
+             << timestamp << ";"
              << tx << ";" << ty << ";" << tz << ";"
              << qx << ";" << qy << ";" << qz << ";" << qw << "\n" ;
 

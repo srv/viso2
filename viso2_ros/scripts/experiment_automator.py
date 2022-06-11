@@ -5,7 +5,6 @@
 import subprocess
 import time
 import os
-from turtle import up
 import yaml
 import argparse
 from pathlib import Path
@@ -33,7 +32,8 @@ def rostopic_creator(t, loc, ver, path, i):
 
 def experiment_automator(output_path, location, upper_limit):
 
-    versions = {'LIBVISO2': 0, 
+    versions = {'ORB_tracker': 0,
+                'LIBVISO2': 0, 
                 'SIFT_SIFT': 1, 
                 'SIFT_SIFTNoBuck': 1, 
                 'SURF_SIFT': 2, 
@@ -42,7 +42,7 @@ def experiment_automator(output_path, location, upper_limit):
                 'SURF_BRISKNoBuck': 3,
                 'SURF_FREAK': 4,
                 'SURF_FREAKNoBuck': 4}
- 
+
     with open('/home/uib/catkin_ws/src/viso2/viso2_ros/config/viso2_stereo_parameters_auto.yaml', 'r') as file:
         configs = yaml.safe_load(file)
 
@@ -81,8 +81,14 @@ def experiment_automator(output_path, location, upper_limit):
         for iter in range(lower_limit, upper_limit, 1):
             print(iter)
 
-            rostopic_creator("/stereo_odometer/odometry", location, version, version_result_storage, iter)
-            rostopic_creator("/stereo_odometer/info", location, version, version_result_storage, iter)
+            if "ORB_tracker" in version:
+                namespace = "/orb_tracker"
+            
+            else:
+                namespace = "/stereo_odometer"
+
+            rostopic_creator(namespace + "/odometry", location, version, version_result_storage, iter)
+            rostopic_creator(namespace + "/info", location, version, version_result_storage, iter)
 
             print("Topics created")
 
@@ -90,7 +96,11 @@ def experiment_automator(output_path, location, upper_limit):
 
             still_running = True
             
-            subprocess.Popen("roslaunch viso2_ros stereo_odometer_auto.launch", shell=True)
+            if "ORB_tracker" in version:
+                subprocess.Popen("roslaunch orb_tracker orb_tracker_auto.launch", shell=True)
+            
+            else:
+                subprocess.Popen("roslaunch viso2_ros stereo_odometer_auto.launch", shell=True)
 
             while still_running:
                 print("I'm going tu sleep!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
@@ -120,7 +130,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="")
     parser.add_argument("--out_path", default = os.getcwd(), help = "Path ot save results")
     parser.add_argument("--location", default = "Portals", help = "Phisical location of the mission")
-    parser.add_argument("--num_experiment", default = 20, help = "Number of experiments per version")
+    parser.add_argument("--num_experiment", default = 20, help = "Number of experiments per version") # 20
     args = parser.parse_args()
 
     experiment_automator(args.out_path, args.location, args.num_experiment)

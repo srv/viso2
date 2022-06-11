@@ -3,7 +3,7 @@
     <!-- PARAMETERS -->
     <param name="/use_sim_time" value = "true"/>
 
-    <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/topics_2021-01-19-12-24-52_0.bag"/>
+    <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/topics_2020-11-03-11-17-53_0.bag"/>
 
     <!-- PLAY bagfile -->
     <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile)" />
@@ -12,8 +12,8 @@
     <node pkg = "viso2_ros" type = "get_first_point" name = "get_first_point" output = "screen">
         <param name = "map_topic" value = "/turbot/navigator/ekf_map/odometry"/>
         <param name = "altitude_topic" value = "/turbot/navigator/altitude_raw"/>
-        <param name = "outfile" value = "/home/uib/bagfiles/bendinat/2021_01_19_new/12_24_51/first_point.csv"/>
-        <param name = "max_altitude" value = "3.9"/>
+        <param name = "outfile" value = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/first_point.csv"/>
+        <param name = "max_altitude" value = "2.5"/>
     </node>
 <!-- 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">

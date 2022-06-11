@@ -61,6 +61,7 @@ private:
   float altitude_ = 10.0 ;
 
   bool got_lost_;
+  bool first_run_;
 
   // change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below
   int ref_frame_change_method_;
@@ -192,11 +193,10 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
     ros::WallTime start_time = ros::WallTime::now();
-    bool first_run = false;
     // create odometer if not exists
     if (!visual_odometer_)
     {
-      first_run = true;
+      first_run_ = true;
       initOdometer(l_info_msg, r_info_msg);
     }
 
@@ -221,183 +221,168 @@ protected:
 
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
 
-    // on first run or when odometer got lost, only feed the odometer with
-    // images without retrieving data
-    if (first_run || got_lost_)
-    {
-      // BMNF
-      if(detection_and_tracking_version_ == 0){
-
-        visual_odometer_->process(l_image_data, r_image_data, dims);
-
-      } else {
-
-        visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_,
-                                      contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
-                                      hessianThreshold_SURF_, nOctaves_SURF_,
-                                      homography_reprojThreshold_, epipolar_constrain_) ; 
-
-      }
-      got_lost_ = false;
-      // The first run publishes the starting point. Be careful with the synchronization of the images and if the vehicle is submerging.
-      if (first_run)
+    if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 0.5)) ){
+      // on first run or when odometer got lost, only feed the odometer with
+      // images without retrieving data
+      if (first_run_ || got_lost_)
       {
-        tf::Transform delta_transform;
-        delta_transform.setIdentity();
-        integrateAndPublish(delta_transform, l_image_msg->header.stamp);
-      }
-    }
-    else
-    {
-      bool success;
+        // BMNF
+        if(detection_and_tracking_version_ == 0){
 
-      // BMNF
-      if(detection_and_tracking_version_ == 0){
+          visual_odometer_->process(l_image_data, r_image_data, dims);
 
-        success = visual_odometer_->process(l_image_data, r_image_data, dims);
+        } else {
 
-      } else {
+          visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_,
+                                        contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
+                                        hessianThreshold_SURF_, nOctaves_SURF_,
+                                        homography_reprojThreshold_, epipolar_constrain_) ; 
 
-        success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_, 
-                                                contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
-                                                hessianThreshold_SURF_, nOctaves_SURF_,
-                                                homography_reprojThreshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true
-
-      }
-
-      if (success)
-      {
-        Matrix motion = Matrix::inv(visual_odometer_->getMotion());
-        ROS_DEBUG("Found %i matches with %i inliers.",
-                  visual_odometer_->getNumberOfMatches(),
-                  visual_odometer_->getNumberOfInliers());
-        ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << motion);
-        Matrix camera_motion;
-
-        // if image was replaced due to small motion we have to subtract the
-        // last motion to get the increment
-        if (change_reference_frame_)
+        }
+        got_lost_ = false;
+        if (first_run_)
         {
-          camera_motion = Matrix::inv(reference_motion_) * motion;
+          first_run_ = false;
+          tf::Transform delta_transform;
+          delta_transform.setIdentity();
+          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+        }
+      }
+      else
+      {
+        bool success;
+
+        // BMNF
+        if(detection_and_tracking_version_ == 0){
+
+          success = visual_odometer_->process(l_image_data, r_image_data, dims);
+
+        } else {
+
+          success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_, 
+                                                  contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
+                                                  hessianThreshold_SURF_, nOctaves_SURF_,
+                                                  homography_reprojThreshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true
+
+        }
+
+        if (success)
+        {
+          Matrix motion = Matrix::inv(visual_odometer_->getMotion());
+          ROS_DEBUG("Found %i matches with %i inliers.",
+                    visual_odometer_->getNumberOfMatches(),
+                    visual_odometer_->getNumberOfInliers());
+          ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << motion);
+          Matrix camera_motion;
+
+          // if image was replaced due to small motion we have to subtract the
+          // last motion to get the increment
+          if (change_reference_frame_)
+          {
+            camera_motion = Matrix::inv(reference_motion_) * motion;
+          }
+          else
+          {
+            // image was not replaced, report full motion from odometer
+            camera_motion = motion;
+          }
+          reference_motion_ = motion; // store last motion as reference
+
+          tf::Matrix3x3 rot_mat(
+            camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
+            camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
+            camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
+          tf::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
+          tf::Transform delta_transform(rot_mat, t);
+
+          setPoseCovariance(STANDARD_POSE_COVARIANCE);
+          setTwistCovariance(STANDARD_TWIST_COVARIANCE);
+
+          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
+
+          if (point_cloud_pub_.getNumSubscribers() > 0)
+          {
+            computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg,
+                                        visual_odometer_->getMatches(),
+                                        visual_odometer_->getInlierIndices());
+          }
         }
         else
         {
-          // image was not replaced, report full motion from odometer
-          camera_motion = motion;
-        }
-        reference_motion_ = motion; // store last motion as reference
-
-        tf::Matrix3x3 rot_mat(
-          camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
-          camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
-          camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
-        tf::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
-        tf::Transform delta_transform(rot_mat, t);
-
-        setPoseCovariance(STANDARD_POSE_COVARIANCE);
-        setTwistCovariance(STANDARD_TWIST_COVARIANCE);
-
-        if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 0.5)) ){
+          setPoseCovariance(BAD_COVARIANCE);
+          setTwistCovariance(BAD_COVARIANCE);
+          tf::Transform delta_transform;
+          delta_transform.setIdentity();
 
           integrateAndPublish(delta_transform, l_image_msg->header.stamp);
 
-        } else if(constant_altitude_== false) {
-
-          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
-
+          ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
+          ROS_WARN_THROTTLE(10.0, "Visual Odometer got lost!");
+          got_lost_ = true;
         }
 
-        if (point_cloud_pub_.getNumSubscribers() > 0)
+        if(success)
         {
-          computeAndPublishPointCloud(l_info_msg, l_image_msg, r_info_msg,
-                                      visual_odometer_->getMatches(),
-                                      visual_odometer_->getInlierIndices());
-        }
-      }
-      else
-      {
-        setPoseCovariance(BAD_COVARIANCE);
-        setTwistCovariance(BAD_COVARIANCE);
-        tf::Transform delta_transform;
-        delta_transform.setIdentity();
 
-        if((constant_altitude_== true) && (altitude_ < (assigned_altitude_ + 0.5)) ){
-
-          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
-
-        } else if(constant_altitude_== false) {
-
-          integrateAndPublish(delta_transform, l_image_msg->header.stamp);
-
-        }
-        // integrateAndPublish(delta_transform, l_image_msg->header.stamp);
-
-        ROS_DEBUG("Call to VisualOdometryStereo::process() failed.");
-        ROS_WARN_THROTTLE(10.0, "Visual Odometer got lost!");
-        got_lost_ = true;
-      }
-
-      if(success)
-      {
-
-        // Proceed depending on the reference frame change method
-        switch ( ref_frame_change_method_ )
-        {
-          case 1:
+          // Proceed depending on the reference frame change method
+          switch ( ref_frame_change_method_ )
           {
-            // calculate current feature flow
-            double feature_flow = computeFeatureFlow(visual_odometer_->getMatches());
-            change_reference_frame_ = (feature_flow < ref_frame_motion_threshold_);
-            ROS_DEBUG_STREAM("Feature flow is " << feature_flow
-                << ", marking last motion as "
-                << (change_reference_frame_ ? "small." : "normal."));
-            break;
+            case 1:
+            {
+              // calculate current feature flow
+              double feature_flow = computeFeatureFlow(visual_odometer_->getMatches());
+              change_reference_frame_ = (feature_flow < ref_frame_motion_threshold_);
+              ROS_DEBUG_STREAM("Feature flow is " << feature_flow
+                  << ", marking last motion as "
+                  << (change_reference_frame_ ? "small." : "normal."));
+              break;
+            }
+            case 2:
+            {
+              change_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
+              break;
+            }
+            default:
+              change_reference_frame_ = false;
           }
-          case 2:
-          {
-            change_reference_frame_ = (visual_odometer_->getNumberOfInliers() > ref_frame_inlier_threshold_);
-            break;
-          }
-          default:
-            change_reference_frame_ = false;
+
         }
+        else
+          change_reference_frame_ = false;
 
-      }
-      else
-        change_reference_frame_ = false;
+        if(!change_reference_frame_)
+          ROS_DEBUG_STREAM("Changing reference frame");
 
-      if(!change_reference_frame_)
-        ROS_DEBUG_STREAM("Changing reference frame");
+        // create and publish viso2 info msg
+        VisoInfo info_msg;
+        info_msg.header.stamp = l_image_msg->header.stamp;
+        info_msg.got_lost = !success;
+        info_msg.change_reference_frame = !change_reference_frame_;
+        info_msg.num_matches = visual_odometer_->getNumberOfMatches();
+        // info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
 
-      // create and publish viso2 info msg
-      VisoInfo info_msg;
-      info_msg.header.stamp = l_image_msg->header.stamp;
-      info_msg.got_lost = !success;
-      info_msg.change_reference_frame = !change_reference_frame_;
-      info_msg.num_matches = visual_odometer_->getNumberOfMatches();
-      // info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+        if(visual_odometer_->getNumberOfMatches() != 0){
 
-      if(visual_odometer_->getNumberOfMatches() != 0){
+          if(visual_odometer_->getNumberOfInliers() <= visual_odometer_->getNumberOfMatches()){
 
-        if(visual_odometer_->getNumberOfInliers() <= visual_odometer_->getNumberOfMatches()){
+            info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
 
-          info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+          } else {
+
+            info_msg.num_inliers = 0 ;
+
+          }
 
         } else {
 
           info_msg.num_inliers = 0 ;
 
         }
-
-      } else {
-
-        info_msg.num_inliers = 0 ;
-
+        
+        ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
+        info_msg.runtime = time_elapsed.toSec();
+        info_pub_.publish(info_msg);
       }
-      
-      ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
-      info_msg.runtime = time_elapsed.toSec();
-      info_pub_.publish(info_msg);
     }
   }
 
