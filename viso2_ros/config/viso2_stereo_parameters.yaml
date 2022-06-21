@@ -16,7 +16,7 @@ stereo_odometer:
 
   # VERSION PARAMETERS:
   # LIBVISO2-ROS-Modified
-  detection_and_tracking_version: 1 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
+  detection_and_matching_version: 1 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
 
   # FEATURE DETECTION PARAMETERS:
   # Original LIBVISO2

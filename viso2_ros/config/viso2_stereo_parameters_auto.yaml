@@ -1,11 +1,11 @@
 stereo_odometer:
   approximate_sync: true
-  assinged_altitude: 2.5 # Altitude from which movement calculation is to be started 
+  assinged_altitude: 2.5
   base_link_frame_id: /turbot/base_link
   bucket_height: 50
   bucket_width: 50
   contrastThreshold_SIFT: 0.03
-  detection_and_tracking_version: 4
+  detection_and_matching_version: 4
   edgeThreshold_SIFT: 10
   enable_bucketing: false
   epipolar_constrain: 1

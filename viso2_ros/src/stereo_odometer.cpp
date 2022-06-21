@@ -72,7 +72,7 @@ private:
 
   // BMNF: Parameter declaration
   // Version
-  int detection_and_tracking_version_ ;
+  int detection_and_matching_version_ ;
   // Bucketing
   bool enable_bucketing_ ;
   // Feature and descriptor detection
@@ -107,7 +107,7 @@ public:
 
     // BMNF: Parameter definition
     // Version
-    local_nh.param<int>("detection_and_tracking_version", detection_and_tracking_version_, 0) ;
+    local_nh.param<int>("detection_and_matching_version", detection_and_matching_version_, 0) ;
     // Bucketing
     local_nh.param<bool>("enable_bucketing", enable_bucketing_, true) ;
     // Feature and descriptor detection  
@@ -169,7 +169,7 @@ protected:
                     "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<
                     "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl <<
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
-                    "  detection_and_tracking_version = " << detection_and_tracking_version_ << std::endl <<
+                    "  detection_and_matching_version = " << detection_and_matching_version_ << std::endl <<
                     "  enable_bucketing = " << enable_bucketing_ << std::endl <<
                     "  contrastThreshold_SIFT = " << contrastThreshold_SIFT_ << std::endl <<
                     "  edgeThreshold_SIFT = " << edgeThreshold_SIFT_ << std::endl <<
@@ -224,13 +224,13 @@ protected:
       if (first_run_ || got_lost_)
       {
         // BMNF
-        if(detection_and_tracking_version_ == 0){
+        if(detection_and_matching_version_ == 0){
 
           visual_odometer_->process(l_image_data, r_image_data, dims);
 
         } else {
 
-          visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_,
+          visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, nOctaveLayers_,
                                         contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
                                         hessianThreshold_SURF_, nOctaves_SURF_,
                                         homography_reprojThreshold_, epipolar_constrain_) ; 
@@ -250,13 +250,13 @@ protected:
         bool success;
 
         // BMNF
-        if(detection_and_tracking_version_ == 0){
+        if(detection_and_matching_version_ == 0){
 
           success = visual_odometer_->process(l_image_data, r_image_data, dims);
 
         } else {
 
-          success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_tracking_version_, nOctaveLayers_, 
+          success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, nOctaveLayers_, 
                                                   contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
                                                   hessianThreshold_SURF_, nOctaves_SURF_,
                                                   homography_reprojThreshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true

@@ -66,8 +66,6 @@ int main(int argc, char** argv){
                     "  max_altitude = " << max_altitude_            
                     );
 
-    
-    
     message_filters::Subscriber<nav_msgs::Odometry> map_sub;
     message_filters::Subscriber<sensor_msgs::Range> altitude_sub;
 
