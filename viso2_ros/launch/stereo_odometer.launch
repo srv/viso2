@@ -12,10 +12,6 @@
 
     <!-- BAGFILES -->
 
-    <!-- Colonia -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/images_2020-11-03-11-17-43_0.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/topics_2020-11-03-11-17-53_0.bag"/> -->
-
     <!-- Portals Vells -->
     <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
@@ -34,16 +30,7 @@
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/> -->                                    
 
-    <!-- Initial pose and orientation parameters -->   
-    <!-- Colonia: -->
-    <!-- <arg name = "t_x" default = "2.0403521254"/>
-    <arg name = "t_y" default = "25.5584474051"/>
-    <arg name = "t_z" default = "0.155384412659"/>
-    <arg name = "q_x" default = "-0.0351823221144"/>
-    <arg name = "q_y" default = "0.065756237088"/>
-    <arg name = "q_z" default = "-0.230633968362"/>
-    <arg name = "q_w" default = "0.970178485709"/> -->
-
+    <!-- Initial pose and orientation parameters -->  
     <!-- Portals Vells: -->
     <arg name = "t_x" default = "74.568675009499998"/>
     <arg name = "t_y" default = "18.5392068604"/>

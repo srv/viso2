@@ -12,10 +12,6 @@
 
     <!-- BAGFILES -->
 
-    <!-- Colonia -->
-    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/images_2020-11-03-11-17-43_0.bag
-                                        /home/uib/bagfiles/colonia_sant_jordi/2020_11_03/11_17_42_2/12_25_27/topics_2020-11-03-11-17-53_0.bag"/> -->
-
     <!-- Portals Vells -->
     <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
@@ -26,24 +22,25 @@
                                         /home/uib/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/> -->
 
     <!-- Portals Vells 2 -->
-    <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
+    <!-- <arg name = "bagfile" default = "/home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-02-45_1.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-09-05_2.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-15-24_3.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-21-43_4.bag
                                         /home/uib/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag
-                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/>
-    
-    <!-- Initial pose and orientation parameters -->   
-    <!-- Colonia: -->
-    <!-- <arg name = "t_x" default = "2.0403521254"/>
-    <arg name = "t_y" default = "25.5584474051"/>
-    <arg name = "t_z" default = "0.155384412659"/>
-    <arg name = "q_x" default = "-0.0351823221144"/>
-    <arg name = "q_y" default = "0.065756237088"/>
-    <arg name = "q_z" default = "-0.230633968362"/>
-    <arg name = "q_w" default = "0.970178485709"/> -->
+                                        /home/uib/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/> -->
 
+    <!-- Bendinat -->
+    <arg name = "bagfile" default = "/home/uib/bagfiles/bendinat/2022_03_09/13_42_58/images_2022-03-09-13-43-00_0.bag
+                                    /home/uib/bagfiles/bendinat/2022_03_09/13_42_58/images_2022-03-09-13-49-33_1.bag
+                                    /home/uib/bagfiles/bendinat/2022_03_09/13_42_58/images_2022-03-09-13-55-50_2.bag
+                                    /home/uib/bagfiles/bendinat/2022_03_09/13_42_58/images_2022-03-09-14-01-51_3.bag
+                                    /home/uib/bagfiles/bendinat/2022_03_09/13_42_58/images_2022-03-09-14-07-44_4.bag
+                                    /home/uib/bagfiles/bendinat/2022_03_09/13_42_58/images_2022-03-09-14-13-36_5.bag
+                                    /home/uib/bagfiles/bendinat/2022_03_09/13_42_58/topics_2022-03-09-13-43-18_0.bag"/>
+                                    
+    
+    <!-- Initial pose and orientation parameters --> 
     <!-- Portals Vells: -->
     <!-- <arg name = "t_x" default = "74.568675009499998"/>
     <arg name = "t_y" default = "18.5392068604"/>
@@ -54,13 +51,22 @@
     <arg name = "q_w" default = "0.8134803316"/> -->
 
     <!-- Portals Vells 2: -->
-    <arg name = "t_x" default = "96.497500509414621"/>
+    <!-- <arg name = "t_x" default = "96.497500509414621"/>
     <arg name = "t_y" default = "27.471066082539075"/>
     <arg name = "t_z" default = "4.972077494610835"/>
     <arg name = "q_x" default = "0.069248291848890"/>
     <arg name = "q_y" default = "0.061946236427001"/>
     <arg name = "q_z" default = "-0.993023205573187"/>
-    <arg name = "q_w" default = "0.072610268293763"/>
+    <arg name = "q_w" default = "0.072610268293763"/> -->
+
+    <!-- Bendinat -->
+    <arg name = "t_x" default = "-66.419351273180681"/>
+    <arg name = "t_y" default = "-29.903308700275506"/>
+    <arg name = "t_z" default = "5.766571155961311"/>
+    <arg name = "q_x" default = "-0.015187373774701"/>
+    <arg name = "q_y" default = "-0.022959484854823"/>
+    <arg name = "q_z" default = "0.977732016779521"/>
+    <arg name = "q_w" default = "0.208044007597621"/>
 
     <!-- PLAY bagfile -->
     <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile)" required="true" />
