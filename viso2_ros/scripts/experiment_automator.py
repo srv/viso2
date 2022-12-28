@@ -32,16 +32,27 @@ def rostopic_creator(t, loc, ver, path, i):
 
 def experiment_automator(output_path, location, upper_limit):
 
-    versions = {'ORB_tracker': 0,
+    versions = {'SURF_BRISK': 3,
+                'SURF_BRISKNoBuck': 3,
+                'ORB_tracker': 0,
                 'LIBVISO2': 0, 
                 'SIFT_SIFT': 1, 
                 'SIFT_SIFTNoBuck': 1, 
                 'SURF_SIFT': 2, 
                 'SURF_SIFTNoBuck': 2, 
-                'SURF_BRISK': 3,
-                'SURF_BRISKNoBuck': 3,
                 'SURF_FREAK': 4,
                 'SURF_FREAKNoBuck': 4}
+
+    # versions = {'ORB_tracker': 0,
+    #             'LIBVISO2': 0, 
+    #             'SIFT_SIFT': 1, 
+    #             'SIFT_SIFTNoBuck': 1, 
+    #             'SURF_SIFT': 2, 
+    #             'SURF_SIFTNoBuck': 2, 
+    #             'SURF_BRISK': 3,
+    #             'SURF_BRISKNoBuck': 3,
+    #             'SURF_FREAK': 4,
+    #             'SURF_FREAKNoBuck': 4}
     
     # versions = {'LIBVISO2': 0, 
     #             'SIFT_SIFT': 1, 
@@ -53,7 +64,7 @@ def experiment_automator(output_path, location, upper_limit):
     #             'SURF_FREAK': 4,
     #             'SURF_FREAKNoBuck': 4}
 
-    with open('/home/uib/catkin_ws/src/viso2/viso2_ros/config/viso2_stereo_parameters_auto.yaml', 'r') as file:
+    with open('/home/bomiquel/catkin_ws/src/viso2/viso2_ros/config/viso2_stereo_parameters_auto.yaml', 'r') as file:
         configs = yaml.safe_load(file)
 
     for version, version_value in versions.items():
@@ -62,7 +73,7 @@ def experiment_automator(output_path, location, upper_limit):
 
         for tag1, value1 in configs['stereo_odometer'].items():
 
-            if tag1 == "detection_and_tracking_version":
+            if tag1 == "detection_and_matching_version":
                 configs['stereo_odometer'][tag1] = version_value
 
             if tag1 == "enable_bucketing":
@@ -73,7 +84,7 @@ def experiment_automator(output_path, location, upper_limit):
                 else:
                     configs['stereo_odometer'][tag1] = True
 
-        with open('/home/uib/catkin_ws/src/viso2/viso2_ros/config/viso2_stereo_parameters_auto.yaml', 'w') as file:
+        with open('/home/bomiquel/catkin_ws/src/viso2/viso2_ros/config/viso2_stereo_parameters_auto.yaml', 'w') as file:
             yaml.dump(configs, file)
 
         version_result_storage = Path(os.path.join(output_path, version))
@@ -107,7 +118,7 @@ def experiment_automator(output_path, location, upper_limit):
             still_running = True
             
             if "ORB_tracker" in version:
-                subprocess.Popen("roslaunch orb_tracker orb_tracker_auto.launch", shell=True)
+                subprocess.Popen("roslaunch orb_tracker stereo_odometer_auto.launch", shell=True)
             
             else:
                 subprocess.Popen("roslaunch viso2_ros stereo_odometer_auto.launch", shell=True)

@@ -1,31 +1,8 @@
-stereo_odometer:
-  approximate_sync: true
-  assinged_altitude: 2.5
-  base_link_frame_id: /turbot/base_link
-  bucket_height: 50
-  bucket_width: 50
-  contrastThreshold_SIFT: 0.03
-  detection_and_matching_version: 4
-  edgeThreshold_SIFT: 10
-  enable_bucketing: false
-  epipolar_constrain: 1
-  half_resolution: 0
-  hessianThreshold_SURF: 500
-  homography_reprojThreshold: 3
-  inlier_threshold: 1
-  match_binsize: 50
-  match_disp_tolerance: 1
-  match_radius: 200
-  max_features: 2
-  multi_stage: 1
-  nOctaveLayers: 3
-  nOctaves_SURF: 4
-  nms_n: 3
-  nms_tau: 3
-  outlier_disp_tolerance: 5
-  outlier_flow_tolerance: 5
-  queue_size: 5
-  ransac_iters: 300
-  refinement: 1
-  sensor_frame_id: /turbot/stereo_down/left_optical
-  sigma_SIFT: 1.6
+stereo_odometer: {approximate_sync: true, assinged_altitude: 2.5, base_link_frame_id: /turbot/base_link,
+  bucket_height: 50, bucket_width: 50, contrastThreshold_SIFT: 0.03, detection_and_matching_version: 3,
+  edgeThreshold_SIFT: 10, enable_bucketing: true, epipolar_constrain: 1, half_resolution: 0,
+  hessianThreshold_SURF: 500, homography_reprojThreshold: 3, inlier_threshold: 1,
+  match_binsize: 50, match_disp_tolerance: 1, match_radius: 200, max_features: 2,
+  multi_stage: 1, nOctaveLayers: 3, nOctaves_SURF: 4, nms_n: 3, nms_tau: 3, outlier_disp_tolerance: 5,
+  outlier_flow_tolerance: 5, queue_size: 5, ransac_iters: 300, refinement: 1, sensor_frame_id: /turbot/stereo_down/left_optical,
+  sigma_SIFT: 1.6}
