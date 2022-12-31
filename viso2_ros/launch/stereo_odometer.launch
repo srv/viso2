@@ -32,9 +32,9 @@
 
     <!-- Initial pose and orientation parameters -->  
     <!-- Portals Vells: -->
-    <arg name = "t_x" default = "74.568675009499998"/>
-    <arg name = "t_y" default = "18.5392068604"/>
-    <arg name = "t_z" default = "2.20875"/>
+    <arg name = "t_x" default = "74.568675009499998"/> <!-- N -->
+    <arg name = "t_y" default = "18.5392068604"/> <!-- E -->
+    <arg name = "t_z" default = "2.20875"/> <!-- A -->
     <arg name = "q_x" default = "0.02478365567"/>
     <arg name = "q_y" default = "-0.08955947924"/>
     <arg name = "q_z" default = "0.5741207366"/>
