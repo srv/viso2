@@ -43,7 +43,7 @@
     <!-- Portals Vells 2: -->
     <!-- <arg name = "t_x" default = "96.823447300184483"/>
     <arg name = "t_y" default = "27.634088959622893"/>
-    <arg name = "t_z" default = "4.580937746883074"/>
+    <arg name = "t_z" default = "2.46875"/>
     <arg name = "q_x" default = "0.047096642579956"/>
     <arg name = "q_y" default = "0.062756133307070"/>
     <arg name = "q_z" default = "-0.994832118604264"/>
