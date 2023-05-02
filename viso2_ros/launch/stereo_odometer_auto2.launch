@@ -1,0 +1,94 @@
+<launch>
+
+    <!-- PARAMETERS -->
+    <param name="/use_sim_time"      value = "true"/>
+
+    <!-- Image parameters -->
+    <arg name = "camera"             default = ""/>
+    <arg name = "resolution"         default = ""/>
+    <arg name = "enable_decimate_x1" default = "false"/>
+    <arg name = "enable_decimate_x2" default = "false"/>
+    <arg name = "enable_decimate_x4" default = "false"/>
+    
+    <!-- Initial pose -->
+    <arg name = "trans_x" default = "0"/> <!-- N -->
+    <arg name = "trans_y" default = "0"/> <!-- E -->
+    <arg name = "trans_z" default = "0"/> <!-- A -->
+    <arg name = "rot_x"   default = "0"/>
+    <arg name = "rot_y"   default = "0"/>
+    <arg name = "rot_z"   default = "0"/>
+    <arg name = "rot_w"   default = "0"/>
+
+    <!-- RUN stereo image proc -->
+    <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x1 == true)">
+        <arg name = "stereo"     value = "$(arg camera)" />
+        <arg name = "decimation" value = "1" />
+        <arg name = "resolution" value = "$(arg resolution)" />
+    </include>
+
+    <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x2 == true)">
+        <arg name = "stereo"     value = "$(arg camera)" />
+        <arg name = "decimation" value = "2" />
+        <arg name = "resolution" value = "$(arg resolution)" />
+    </include>
+
+    <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x4 == true)">
+        <arg name = "stereo"     value = "$(arg camera)" />
+        <arg name = "decimation" value = "4" />
+        <arg name = "resolution" value = "$(arg resolution)" />
+    </include>
+
+    <!-- Static TF's -->
+    <!-- <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
+    <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
+    <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
+    <node pkg="tf" type="static_transform_publisher" name="stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /turbot/stereo_down /turbot/stereo_down/left_optical 30" /> -->
+
+    <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
+        <remap from = "stereo"                to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image"                 to = "/image_rect"/>  <!-- Image type -->
+        <remap from = "/altitude_control"     to = "/turbot/navigator/altitude_raw"/>
+        <param name = "initial_translation_x" value = "$(arg trans_x)"/>
+        <param name = "initial_translation_y" value = "$(arg trans_y)"/>
+        <param name = "initial_translation_z" value = "$(arg trans_z)"/>
+        <param name = "initial_rotation_x"    value = "$(arg rot_x)"/>
+        <param name = "initial_rotation_y"    value = "$(arg rot_y)"/>
+        <param name = "initial_rotation_z"    value = "$(arg rot_z)"/>
+        <param name = "initial_rotation_w"    value = "$(arg rot_w)"/>
+    </node>
+
+    <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
+        <remap from = "stereo"                         to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image"                          to = "/image_rect"/> <!-- Image type -->
+        <remap from = "/stereo_down/left/image_rect"   to = "/stereo_down/scaled_x2/left/image_rect"/>
+        <remap from = "/stereo_down/right/image_rect"  to = "/stereo_down/scaled_x2/right/image_rect"/> 
+        <remap from = "/stereo_down/left/camera_info"  to = "/stereo_down/scaled_x2/left/camera_info" />
+        <remap from = "/stereo_down/right/camera_info" to = "/stereo_down/scaled_x2/right/camera_info" />
+        <remap from = "/altitude_control"              to = "/turbot/navigator/altitude_raw"/>
+        <param name = "initial_translation_x"          value = "$(arg trans_x)"/>
+        <param name = "initial_translation_y"          value = "$(arg trans_y)"/>
+        <param name = "initial_translation_z"          value = "$(arg trans_z)"/>
+        <param name = "initial_rotation_x"             value = "$(arg rot_x)"/>
+        <param name = "initial_rotation_y"             value = "$(arg rot_y)"/>
+        <param name = "initial_rotation_z"             value = "$(arg rot_z)"/>
+        <param name = "initial_rotation_w"             value = "$(arg rot_w)"/>
+    </node>
+
+    <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
+        <remap from = "stereo"                         to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image"                          to = "/image_rect"/> <!-- Image type -->
+        <remap from = "/stereo_down/left/image_rect"   to = "/stereo_down/scaled_x4/left/image_rect"/>
+        <remap from = "/stereo_down/right/image_rect"  to = "/stereo_down/scaled_x4/right/image_rect"/> 
+        <remap from = "/stereo_down/left/camera_info"  to = "/stereo_down/scaled_x4/left/camera_info" />
+        <remap from = "/stereo_down/right/camera_info" to = "/stereo_down/scaled_x4/right/camera_info" />
+        <remap from = "/altitude_control"              to = "/turbot/navigator/altitude_raw"/>
+        <param name = "initial_translation_x"          value = "$(arg trans_x)"/>
+        <param name = "initial_translation_y"          value = "$(arg trans_y)"/>
+        <param name = "initial_translation_z"          value = "$(arg trans_z)"/>
+        <param name = "initial_rotation_x"             value = "$(arg rot_x)"/>
+        <param name = "initial_rotation_y"             value = "$(arg rot_y)"/>
+        <param name = "initial_rotation_z"             value = "$(arg rot_z)"/>
+        <param name = "initial_rotation_w"             value = "$(arg rot_w)"/>
+    </node>
+
+</launch>

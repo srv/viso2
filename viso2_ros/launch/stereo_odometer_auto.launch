@@ -1,11 +1,11 @@
 <launch>
 
     <!-- PARAMETERS -->
-    <param name="/use_sim_time" value = "true"/>
+    <param name="/use_sim_time"      value = "true"/>
 
     <!-- Image parameters -->
-    <arg name = "resolution" default = "full"/>
-    <arg name = "camera" default = "/stereo_down"/>
+    <arg name = "resolution"         default = "full"/>
+    <arg name = "camera"             default = "/stereo_down"/>
     <arg name = "enable_decimate_x1" default = "false"/>
     <arg name = "enable_decimate_x2" default = "false"/>
     <arg name = "enable_decimate_x4" default = "true"/>
@@ -30,7 +30,6 @@
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_corrected/images_2021-02-25-16-28-03_5.bag
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_corrected/topics_2021-02-25-15-56-37_0.bag"/> -->
                                     
-    
     <!-- Initial pose and orientation parameters --> 
     <!-- Portals Vells: -->
     <arg name = "t_x" default = "74.568675009499998"/> <!-- N -->
@@ -55,19 +54,19 @@
 
     <!-- RUN stereo image proc -->
     <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x1 == true)">
-        <arg name = "stereo" value = "$(arg camera)" />
+        <arg name = "stereo"     value = "$(arg camera)" />
         <arg name = "decimation" value = "1" />
         <arg name = "resolution" value = "$(arg resolution)" />
     </include>
 
     <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x2 == true)">
-        <arg name = "stereo" value = "$(arg camera)" />
+        <arg name = "stereo"     value = "$(arg camera)" />
         <arg name = "decimation" value = "2" />
         <arg name = "resolution" value = "$(arg resolution)" />
     </include>
 
     <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x4 == true)">
-        <arg name = "stereo" value = "$(arg camera)" />
+        <arg name = "stereo"     value = "$(arg camera)" />
         <arg name = "decimation" value = "4" />
         <arg name = "resolution" value = "$(arg resolution)" />
     </include>
@@ -81,50 +80,50 @@
     <!-- Viso2 -->
     <rosparam command="load" file="$(find viso2_ros)/config/viso2_stereo_parameters_auto.yaml"/>
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
-        <remap from = "stereo" to = "$(arg camera)"/> <!-- Namespace -->
-        <remap from = "image" to = "image_rect"/>  <!-- Image type -->
-        <remap from = "/altitude_control" to = "/turbot/navigator/altitude_raw"/>
+        <remap from = "stereo"                to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image"                 to = "/image_rect"/>  <!-- Image type -->
+        <remap from = "/altitude_control"     to = "/turbot/navigator/altitude_raw"/>
         <param name = "initial_translation_x" value = "$(arg t_x)"/>
         <param name = "initial_translation_y" value = "$(arg t_y)"/>
         <param name = "initial_translation_z" value = "$(arg t_z)"/>
-        <param name = "initial_rotation_x" value = "$(arg q_x)"/>
-        <param name = "initial_rotation_y" value = "$(arg q_y)"/>
-        <param name = "initial_rotation_z" value = "$(arg q_z)"/>
-        <param name = "initial_rotation_w" value = "$(arg q_w)"/>
+        <param name = "initial_rotation_x"    value = "$(arg q_x)"/>
+        <param name = "initial_rotation_y"    value = "$(arg q_y)"/>
+        <param name = "initial_rotation_z"    value = "$(arg q_z)"/>
+        <param name = "initial_rotation_w"    value = "$(arg q_w)"/>
     </node>
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
-        <remap from = "stereo" to = "$(arg camera)"/> <!-- Namespace -->
-        <remap from = "image" to = "image_rect"/> <!-- Image type -->
-        <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x2/left/image_rect"/>
-        <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x2/right/image_rect"/> 
-        <remap from = "/stereo_down/left/camera_info" to = "/stereo_down/scaled_x2/left/camera_info" />
+        <remap from = "stereo"                         to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image"                          to = "/image_rect"/> <!-- Image type -->
+        <remap from = "/stereo_down/left/image_rect"   to = "/stereo_down/scaled_x2/left/image_rect"/>
+        <remap from = "/stereo_down/right/image_rect"  to = "/stereo_down/scaled_x2/right/image_rect"/> 
+        <remap from = "/stereo_down/left/camera_info"  to = "/stereo_down/scaled_x2/left/camera_info" />
         <remap from = "/stereo_down/right/camera_info" to = "/stereo_down/scaled_x2/right/camera_info" />
-        <remap from = "/altitude_control" to = "/turbot/navigator/altitude_raw"/>
-        <param name = "initial_translation_x" value = "$(arg t_x)"/>
-        <param name = "initial_translation_y" value = "$(arg t_y)"/>
-        <param name = "initial_translation_z" value = "$(arg t_z)"/>
-        <param name = "initial_rotation_x" value = "$(arg q_x)"/>
-        <param name = "initial_rotation_y" value = "$(arg q_y)"/>
-        <param name = "initial_rotation_z" value = "$(arg q_z)"/>
-        <param name = "initial_rotation_w" value = "$(arg q_w)"/>
+        <remap from = "/altitude_control"              to = "/turbot/navigator/altitude_raw"/>
+        <param name = "initial_translation_x"          value = "$(arg t_x)"/>
+        <param name = "initial_translation_y"          value = "$(arg t_y)"/>
+        <param name = "initial_translation_z"          value = "$(arg t_z)"/>
+        <param name = "initial_rotation_x"             value = "$(arg q_x)"/>
+        <param name = "initial_rotation_y"             value = "$(arg q_y)"/>
+        <param name = "initial_rotation_z"             value = "$(arg q_z)"/>
+        <param name = "initial_rotation_w"             value = "$(arg q_w)"/>
     </node>
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
-        <remap from = "stereo" to = "$(arg camera)"/> <!-- Namespace -->
-        <remap from = "image" to = "image_rect"/> <!-- Image type -->
-        <remap from = "/stereo_down/left/image_rect" to = "/stereo_down/scaled_x4/left/image_rect"/>
-        <remap from = "/stereo_down/right/image_rect" to = "/stereo_down/scaled_x4/right/image_rect"/> 
-        <remap from = "/stereo_down/left/camera_info" to = "/stereo_down/scaled_x4/left/camera_info" />
+        <remap from = "stereo"                         to = "$(arg camera)"/> <!-- Namespace -->
+        <remap from = "image"                          to = "image_rect"/> <!-- Image type -->
+        <remap from = "/stereo_down/left/image_rect"   to = "/stereo_down/scaled_x4/left/image_rect"/>
+        <remap from = "/stereo_down/right/image_rect"  to = "/stereo_down/scaled_x4/right/image_rect"/> 
+        <remap from = "/stereo_down/left/camera_info"  to = "/stereo_down/scaled_x4/left/camera_info" />
         <remap from = "/stereo_down/right/camera_info" to = "/stereo_down/scaled_x4/right/camera_info" />
-        <remap from = "/altitude_control" to = "/turbot/navigator/altitude_raw"/>
-        <param name = "initial_translation_x" value = "$(arg t_x)"/>
-        <param name = "initial_translation_y" value = "$(arg t_y)"/>
-        <param name = "initial_translation_z" value = "$(arg t_z)"/>
-        <param name = "initial_rotation_x" value = "$(arg q_x)"/>
-        <param name = "initial_rotation_y" value = "$(arg q_y)"/>
-        <param name = "initial_rotation_z" value = "$(arg q_z)"/>
-        <param name = "initial_rotation_w" value = "$(arg q_w)"/>
+        <remap from = "/altitude_control"              to = "/turbot/navigator/altitude_raw"/>
+        <param name = "initial_translation_x"          value = "$(arg t_x)"/>
+        <param name = "initial_translation_y"          value = "$(arg t_y)"/>
+        <param name = "initial_translation_z"          value = "$(arg t_z)"/>
+        <param name = "initial_rotation_x"             value = "$(arg q_x)"/>
+        <param name = "initial_rotation_y"             value = "$(arg q_y)"/>
+        <param name = "initial_rotation_z"             value = "$(arg q_z)"/>
+        <param name = "initial_rotation_w"             value = "$(arg q_w)"/>
     </node>
 
 </launch>
