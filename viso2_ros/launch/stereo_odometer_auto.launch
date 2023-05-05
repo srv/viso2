@@ -111,7 +111,7 @@
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
         <remap from = "stereo"                         to = "$(arg camera)"/> <!-- Namespace -->
-        <remap from = "image"                          to = "image_rect"/> <!-- Image type -->
+        <remap from = "image"                          to = "/image_rect"/> <!-- Image type -->
         <remap from = "/stereo_down/left/image_rect"   to = "/stereo_down/scaled_x4/left/image_rect"/>
         <remap from = "/stereo_down/right/image_rect"  to = "/stereo_down/scaled_x4/right/image_rect"/> 
         <remap from = "/stereo_down/left/camera_info"  to = "/stereo_down/scaled_x4/left/camera_info" />
