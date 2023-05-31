@@ -9,14 +9,9 @@ stereo_odometer:
   queue_size: 5
   approximate_sync: true
 
-  # FRAME PARAMETERS:
-  # LIBVISO2-ROS
-  base_link_frame_id: '/turbot/base_link'
-  sensor_frame_id: '/turbot/stereo_down/left_optical'
-
   # VERSION PARAMETERS:
   # LIBVISO2-ROS-Modified
-  detection_and_matching_version: 0 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
+  detection_and_matching_version: 3 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
 
   # FEATURE DETECTION PARAMETERS:
   # Original LIBVISO2

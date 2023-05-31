@@ -9,6 +9,11 @@
     <arg name = "enable_decimate_x1" default = "false"/>
     <arg name = "enable_decimate_x2" default = "false"/>
     <arg name = "enable_decimate_x4" default = "false"/>
+
+    <!-- Frame parameters -->
+    <arg name = "odom_frame_name"      default = "/odom"/>
+    <arg name = "sensor_frame_name"    default = "/turbot/stereo_down/left_optical"/>
+    <arg name = "base_link_frame_name" default = "/turbot/base_link"/>
     
     <!-- Initial pose -->
     <arg name = "trans_x" default = "0"/> <!-- N -->
@@ -38,12 +43,6 @@
         <arg name = "resolution" value = "$(arg resolution)" />
     </include>
 
-    <!-- Static TF's -->
-    <!-- <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
-    <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
-    <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
-    <node pkg="tf" type="static_transform_publisher" name="stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /turbot/stereo_down /turbot/stereo_down/left_optical 30" /> -->
-
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
         <remap from = "stereo"                to = "$(arg camera)"/> <!-- Namespace -->
         <remap from = "image"                 to = "/image_rect"/>  <!-- Image type -->
@@ -55,6 +54,9 @@
         <param name = "initial_rotation_y"    value = "$(arg rot_y)"/>
         <param name = "initial_rotation_z"    value = "$(arg rot_z)"/>
         <param name = "initial_rotation_w"    value = "$(arg rot_w)"/>
+        <param name = "odom_frame_id"         value = "$(arg odom_frame_name)"/>
+        <param name = "sensor_frame_id"       value = "$(arg sensor_frame_name)"/>
+        <param name = "base_link_frame_id"    value = "$(arg base_link_frame_name)"/>
     </node>
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
@@ -72,6 +74,9 @@
         <param name = "initial_rotation_y"             value = "$(arg rot_y)"/>
         <param name = "initial_rotation_z"             value = "$(arg rot_z)"/>
         <param name = "initial_rotation_w"             value = "$(arg rot_w)"/>
+        <param name = "odom_frame_id"                  value = "$(arg odom_frame_name)"/>
+        <param name = "sensor_frame_id"                value = "$(arg sensor_frame_name)"/>
+        <param name = "base_link_frame_id"             value = "$(arg base_link_frame_name)"/>
     </node>
 
     <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
@@ -89,6 +94,9 @@
         <param name = "initial_rotation_y"             value = "$(arg rot_y)"/>
         <param name = "initial_rotation_z"             value = "$(arg rot_z)"/>
         <param name = "initial_rotation_w"             value = "$(arg rot_w)"/>
+        <param name = "odom_frame_id"                  value = "$(arg odom_frame_name)"/>
+        <param name = "sensor_frame_id"                value = "$(arg sensor_frame_name)"/>
+        <param name = "base_link_frame_id"             value = "$(arg base_link_frame_name)"/>
     </node>
 
 </launch>
