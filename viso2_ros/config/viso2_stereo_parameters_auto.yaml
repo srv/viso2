@@ -1,7 +1,7 @@
 stereo_odometer: {approximate_sync: true, assinged_altitude: 2.5, bucket_height: 50,
-  bucket_width: 50, contrastThreshold_SIFT: 0.03, detection_and_matching_version: 3,
-  edgeThreshold_SIFT: 10, enable_bucketing: false, epipolar_constrain: 1, half_resolution: 0,
-  hessianThreshold_SURF: 500, homography_reprojThreshold: 3, inlier_threshold: 1,
+  bucket_width: 50, contrast_threshold_sift: 0.03, detection_and_matching_version: 3,
+  edge_threshold_sift: 10, enable_bucketing: false, epipolar_constrain: 1, half_resolution: 0,
+  hessian_threshold_surf: 500, homography_reprojection_threshold: 3, inlier_threshold: 1,
   match_binsize: 50, match_disp_tolerance: 1, match_radius: 200, max_features: 2,
-  multi_stage: 1, nOctaveLayers: 3, nOctaves_SURF: 4, nms_n: 3, nms_tau: 3, outlier_disp_tolerance: 5,
-  outlier_flow_tolerance: 5, queue_size: 5, ransac_iters: 300, refinement: 1, sigma_SIFT: 1.6}
+  multi_stage: 1, n_octave_layers: 3, n_octaves_surf: 4, nms_n: 3, nms_tau: 3, outlier_disp_tolerance: 5,
+  outlier_flow_tolerance: 5, queue_size: 5, ransac_iters: 300, refinement: 1, sigma_sift: 1.6}

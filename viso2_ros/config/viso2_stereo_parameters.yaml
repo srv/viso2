@@ -18,12 +18,12 @@ stereo_odometer:
   nms_n: 3
   nms_tau: 3
   # LIBVISO2-ROS-Modified
-  contrastThreshold_SIFT: 0.03
-  edgeThreshold_SIFT: 10
-  sigma_SIFT: 1.6
-  hessianThreshold_SURF: 500
-  nOctaves_SURF: 4
-  nOctaveLayers: 3
+  contrast_threshold_sift: 0.03
+  edge_threshold_sift: 10
+  sigma_sift: 1.6
+  hessian_threshold_surf: 500
+  n_octaves_surf: 4
+  n_octave_layers: 3
 
   # FEATURE MATCHING PARAMETERS:
   # Original LIBVISO2
@@ -38,7 +38,7 @@ stereo_odometer:
   outlier_disp_tolerance: 5
   outlier_flow_tolerance: 5
   # LIBVISO2-ROS-Modified
-  homography_reprojThreshold: 3
+  homography_reprojection_threshold: 3
   epipolar_constrain: 1
 
   # BUCKETING PARAMETERS:

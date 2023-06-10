@@ -33,18 +33,18 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 
 //BMNF:
 /**********************************************************************************************************/
-bool VisualOdometryStereo::new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int nOctaveLayers,
-                                      double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                                      double hessianThreshold_SURF, int nOctaves_SURF,
-                                      double homography_reprojThreshold, int epipolar_constrain) {
+bool VisualOdometryStereo::newProcess(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int n_octave_layers,
+                                      double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
+                                      double hessian_threshold_surf, int n_octaves_surf,
+                                      double homography_reprojection_threshold, int epipolar_constrain) {
 
   // If "replace" is "false" current images becomes previous images and new images becomes current images.
   // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
   // new images becomes current images but the circle match is not calculated.
-  matcher->new_matching_circle(left_img, right_img, replace, combination, nOctaveLayers,
-                               contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT, 
-                               hessianThreshold_SURF, nOctaves_SURF, 
-                               homography_reprojThreshold, epipolar_constrain) ;
+  matcher->newMatchingCircle(left_img, right_img, replace, combination, n_octave_layers,
+                               contrast_threshold_sift, edge_threshold_sift, sigma_sift, 
+                               hessian_threshold_surf, n_octaves_surf, 
+                               homography_reprojection_threshold, epipolar_constrain) ;
 
   if(bucketing == true){
 

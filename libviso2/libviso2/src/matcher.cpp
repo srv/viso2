@@ -25,7 +25,6 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 using namespace std;
 
-// BMNF 03/03/2021:
 using cv::Mat ;
 using cv::Ptr ;
 using cv::KeyPoint ;
@@ -100,16 +99,7 @@ Matcher::~Matcher() {
   if (I2c_du_full)  _mm_free(I2c_du_full);
   if (I2c_dv_full)  _mm_free(I2c_dv_full);
 }
-/* BMNF: There are three images: New (n), Current (c) and Previous (p) (the new is passed 
-as a parameter to the function, the current and previous are already saved in the ringbuffer). 
-First, the function, stores the dimensions of n, passed by parameter to the function, within 
-local variables. Then if replace is true delete the current image. If replace is false it
-deletes the data from the previous image and then puts the data from the current images 
-into the variables in the previous images. Regardless of whether replace is true or false, 
-the function takes the dimensions of the new image and fills, with the relevant information,
-all the current image variables. Finally computeFeatures is called with the data from the 
-current image.
-*/
+
 void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace) {
 
   // image dimensions
@@ -201,8 +191,8 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
 
 // BMNF 
 /**********************************************************************************************************/
-Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, 
-                                               int combination, int k, double homography_reprojThreshold, int epipolar_constrain) 
+Matcher::auxiliar_return Matcher::newMatching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, 
+                                               int combination, int k, double homography_reprojection_threshold, int epipolar_constrain) 
 {
   /////////////////////////////////////////////////////////////////
   /////////////////Local variable declaration//////////////////////
@@ -214,15 +204,15 @@ Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<Ke
 
   vector<vector<cv::DMatch>> matches ;
   vector<KeyPoint> kpts1_aft_match, kpts2_aft_match ;
-  vector<KeyPoint> kpts1_aft_RANSAC, kpts2_aft_RANSAC ;
+  vector<KeyPoint> kpts1_aft_ransac, kpts2_aft_ransac ;
 
   Mat desc1_aft_match, desc2_aft_match ;
   Mat H, F ;
-  Mat RANSACinliersMask ;
-  Mat desc1_aft_RANSAC, desc2_aft_RANSAC ;
+  Mat ransac_inliers_mask ;
+  Mat desc1_aft_ransac, desc2_aft_ransac ;
 
   vector<cv::Point2f> coord1_aft_match, coord2_aft_match ;
-  vector<cv::Point2f> coord1_aft_RANSAC, coord2_aft_RANSAC ;
+  vector<cv::Point2f> coord1_aft_ransac, coord2_aft_ransac ;
 
   int i ;
 
@@ -265,7 +255,7 @@ Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<Ke
 
     try{
 
-      H = cv::findHomography(coord1_aft_match, coord2_aft_match, CV_RANSAC, homography_reprojThreshold, RANSACinliersMask) ;
+      H = cv::findHomography(coord1_aft_match, coord2_aft_match, CV_RANSAC, homography_reprojection_threshold, ransac_inliers_mask) ;
 
     } catch (cv::Exception& e) {
 
@@ -279,7 +269,7 @@ Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<Ke
 
     try{
 
-      F = cv::findFundamentalMat(coord1_aft_match, coord2_aft_match, RANSACinliersMask, CV_RANSAC, epipolar_constrain) ;
+      F = cv::findFundamentalMat(coord1_aft_match, coord2_aft_match, ransac_inliers_mask, CV_RANSAC, epipolar_constrain) ;
 
     } catch (cv::Exception& e) {
 
@@ -292,27 +282,27 @@ Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<Ke
   }
 
   // Obtaining key points, descriptors and key points coordinates after homography or fundamental matrix.
-  for(i = 0; i < RANSACinliersMask.rows; i++){
-    if(RANSACinliersMask.at<bool>(i, 0) == 1){
+  for(i = 0; i < ransac_inliers_mask.rows; i++){
+    if(ransac_inliers_mask.at<bool>(i, 0) == 1){
 
-      kpts1_aft_RANSAC.push_back(kpts1_aft_match[i]) ;
-      desc1_aft_RANSAC.push_back(desc1_aft_match.row(i)) ;
-      coord1_aft_RANSAC.push_back(coord1_aft_match[i]) ;
+      kpts1_aft_ransac.push_back(kpts1_aft_match[i]) ;
+      desc1_aft_ransac.push_back(desc1_aft_match.row(i)) ;
+      coord1_aft_ransac.push_back(coord1_aft_match[i]) ;
 
-      kpts2_aft_RANSAC.push_back(kpts2_aft_match[i]) ;
-      desc2_aft_RANSAC.push_back(desc2_aft_match.row(i)) ;
-      coord2_aft_RANSAC.push_back(coord2_aft_match[i]) ;
+      kpts2_aft_ransac.push_back(kpts2_aft_match[i]) ;
+      desc2_aft_ransac.push_back(desc2_aft_match.row(i)) ;
+      coord2_aft_ransac.push_back(coord2_aft_match[i]) ;
 
     }
   }
 
   // Saving key points, descriptors and key points coordinates on the structure to return all this information.
-  s.kpts1 = kpts1_aft_RANSAC ;
-  s.kpts2 = kpts2_aft_RANSAC ;
-  s.desc1 = desc1_aft_RANSAC ;
-  s.desc2 = desc2_aft_RANSAC ;
-  s.coord1 = coord1_aft_RANSAC ;
-  s.coord2 = coord2_aft_RANSAC ;
+  s.kpts1 = kpts1_aft_ransac ;
+  s.kpts2 = kpts2_aft_ransac ;
+  s.desc1 = desc1_aft_ransac ;
+  s.desc2 = desc2_aft_ransac ;
+  s.coord1 = coord1_aft_ransac ;
+  s.coord2 = coord2_aft_ransac ;
   s.correct = true ;
   
   return s ;
@@ -321,16 +311,16 @@ Matcher::auxiliar_return Matcher::new_matching(vector<KeyPoint> kpts1, vector<Ke
 
 
 //BMNF
-void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
-                                  double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                                  double hessianThreshold_SURF, int nOctaves_SURF,
-                                  double homography_reprojThreshold, int epipolar_constrain)
+void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int n_octave_layers,
+                                  double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
+                                  double hessian_threshold_surf, int n_octaves_surf,
+                                  double homography_reprojection_threshold, int epipolar_constrain)
 {  
   /////////////////////////////////////////////////////////////////
   /////////////////Local variable declaration//////////////////////
   /////////////////////////////////////////////////////////////////
 
-  clock_t Time_ImageCurrent = clock() ;
+  clock_t time_current_image = clock() ;
 
   // Current key point vectors
   vector<KeyPoint> l_curr_kpts, r_curr_kpts ;
@@ -353,10 +343,10 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   struct auxiliar_return left_matching, previous_matching, right_matching, current_matching ;
 
   // Floats to save key points coordinates
-  float l_pre_coord_aft_RANSAC_x ;
-  float l_pre_coord_aft_RANSAC_y ;
-  float r_pre_coord_aft_RANSAC_x ;
-  float r_pre_coord_aft_RANSAC_y ;
+  float l_pre_coord_aft_ransac_x ;
+  float l_pre_coord_aft_ransac_y ;
+  float r_pre_coord_aft_ransac_x ;
+  float r_pre_coord_aft_ransac_y ;
 
   // Integers
   int k = 1 ;
@@ -377,17 +367,17 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   switch(combination) {
 
     case 1:
-      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, n_octave_layers, contrast_threshold_sift, edge_threshold_sift, sigma_sift) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
-      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, n_octave_layers, contrast_threshold_sift, edge_threshold_sift, sigma_sift) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
 
     case 2:
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf = SURF::create(hessian_threshold_surf, n_octaves_surf, n_octave_layers, false, false) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf = SURF::create(hessian_threshold_surf, n_octaves_surf, n_octave_layers, false, false) ;
       surf->detect(right_img, r_curr_kpts) ;
       sift_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       sift_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
@@ -395,9 +385,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       break ;
 
     case 3:
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf = SURF::create(hessian_threshold_surf, n_octaves_surf, n_octave_layers, false, false) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf = SURF::create(hessian_threshold_surf, n_octaves_surf, n_octave_layers, false, false) ;
       surf->detect(right_img, r_curr_kpts) ;
       brisk_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       brisk_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
@@ -405,9 +395,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       break ;
 
     case 4:
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf = SURF::create(hessian_threshold_surf, n_octaves_surf, n_octave_layers, false, false) ;
       surf->detect(left_img, l_curr_kpts) ;
-      surf = SURF::create(hessianThreshold_SURF, nOctaves_SURF, nOctaveLayers, false, false) ;
+      surf = SURF::create(hessian_threshold_surf, n_octaves_surf, n_octave_layers, false, false) ;
       surf->detect(right_img, r_curr_kpts) ;
       freak_descriptor->compute(left_img, l_curr_kpts, l_curr_desc) ;
       freak_descriptor->compute(right_img, r_curr_kpts, r_curr_desc) ;
@@ -415,9 +405,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       break ;
 
     default:
-      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, n_octave_layers, contrast_threshold_sift, edge_threshold_sift, sigma_sift) ;
       sift->detectAndCompute(left_img, Mat(), l_curr_kpts, l_curr_desc) ;
-      sift = SIFT::create(0, nOctaveLayers, contrastThreshold_SIFT, edgeThreshold_SIFT, sigma_SIFT) ;
+      sift = SIFT::create(0, n_octave_layers, contrast_threshold_sift, edge_threshold_sift, sigma_sift) ;
       sift->detectAndCompute(right_img, Mat(), r_curr_kpts, r_curr_desc) ;
       std::cout << "Using SIFT_SIFT " << std::endl ;
       break ;
@@ -434,9 +424,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
     // It's necessary k features in all images to do the matching circle.
     if ((l_curr_kpts.size() >= k) && (l_pre_kpts.size() >= k) && (r_curr_kpts.size() >= k) && (r_pre_kpts.size() >= k)){
 
-      // Matching between current left image and previous left image using the function "new_matching" to do the matching. 
+      // Matching between current left image and previous left image using the function "newMatching" to do the matching. 
       // In this matching the homography is computed.
-      left_matching = new_matching(l_curr_kpts, l_pre_kpts, l_curr_desc, l_pre_desc, true, combination, k, homography_reprojThreshold, epipolar_constrain) ;
+      left_matching = newMatching(l_curr_kpts, l_pre_kpts, l_curr_desc, l_pre_desc, true, combination, k, homography_reprojection_threshold, epipolar_constrain) ;
 
       // If in the "left matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -448,7 +438,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
         r_pre_kpts = r_curr_kpts ;
         r_pre_desc = r_curr_desc ;
 
-        Time_ImagePrevious = Time_ImageCurrent ;
+        time_previous_image = time_current_image ;
 
         p_matched_2.clear() ;
 
@@ -456,9 +446,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       }
 
-      // Matching between previous left image and previous right image using the function "new_matching" to do the matching. 
+      // Matching between previous left image and previous right image using the function "newMatching" to do the matching. 
       // In this matching the fundamental matrix is computed.
-      previous_matching = new_matching(left_matching.kpts2, r_pre_kpts, left_matching.desc2, r_pre_desc, false, combination, k, homography_reprojThreshold, epipolar_constrain) ;
+      previous_matching = newMatching(left_matching.kpts2, r_pre_kpts, left_matching.desc2, r_pre_desc, false, combination, k, homography_reprojection_threshold, epipolar_constrain) ;
 
       // If in the "previous matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -470,7 +460,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
         r_pre_kpts = r_curr_kpts ;
         r_pre_desc = r_curr_desc ;
 
-        Time_ImagePrevious = Time_ImageCurrent ;
+        time_previous_image = time_current_image ;
 
         p_matched_2.clear() ;
 
@@ -478,9 +468,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       }
 
-      // Matching between previous right image and current right image using the function "new_matching" to do the matching. 
+      // Matching between previous right image and current right image using the function "newMatching" to do the matching. 
       // In this matching the homography is computed.
-      right_matching = new_matching(previous_matching.kpts2, r_curr_kpts, previous_matching.desc2, r_curr_desc, true, combination, k, homography_reprojThreshold, epipolar_constrain) ;
+      right_matching = newMatching(previous_matching.kpts2, r_curr_kpts, previous_matching.desc2, r_curr_desc, true, combination, k, homography_reprojection_threshold, epipolar_constrain) ;
 
       // If in the "right matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -492,7 +482,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
         r_pre_kpts = r_curr_kpts ;
         r_pre_desc = r_curr_desc ;
 
-        Time_ImagePrevious = Time_ImageCurrent ;
+        time_previous_image = time_current_image ;
 
         p_matched_2.clear() ;
 
@@ -500,9 +490,9 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
 
       }
 
-      // Matching between current right image and current left image using the function "new_matching" to do the matching. 
+      // Matching between current right image and current left image using the function "newMatching" to do the matching. 
       // In this matching the fundamental matrix is computed.
-      current_matching = new_matching(right_matching.kpts2, left_matching.kpts1, right_matching.desc2, left_matching.desc1, false, combination, k, homography_reprojThreshold, epipolar_constrain) ;
+      current_matching = newMatching(right_matching.kpts2, left_matching.kpts1, right_matching.desc2, left_matching.desc1, false, combination, k, homography_reprojection_threshold, epipolar_constrain) ;
 
       // If in the "current matching" there is any problem current keypoints and descriptors turns into previous keypoints and descriptors.
       // Current time becomes previous time too. Then p_matched_2 vector is cleared and, finally, the program returns because with 
@@ -514,7 +504,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
         r_pre_kpts = r_curr_kpts ;
         r_pre_desc = r_curr_desc ;
 
-        Time_ImagePrevious = Time_ImageCurrent ;
+        time_previous_image = time_current_image ;
 
         p_matched_2.clear() ;
 
@@ -541,12 +531,12 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
                   if((previous_matching.coord2[l].x == right_matching.coord1[k].x) && (previous_matching.coord2[l].y == right_matching.coord1[k].y)){
                     if((previous_matching.coord1[l].x == left_matching.coord2[j].x) && (previous_matching.coord1[l].y == left_matching.coord2[j].y)){
                       save = true ;
-                      l_pre_coord_aft_RANSAC_x = left_matching.coord2[j].x ;
-                      l_pre_coord_aft_RANSAC_y = left_matching.coord2[j].y ;
+                      l_pre_coord_aft_ransac_x = left_matching.coord2[j].x ;
+                      l_pre_coord_aft_ransac_y = left_matching.coord2[j].y ;
                       l_pre_index = j ;
                       l_curr_index = i ;
-                      r_pre_coord_aft_RANSAC_x = right_matching.coord1[k].x ;
-                      r_pre_coord_aft_RANSAC_y = right_matching.coord1[k].y ;
+                      r_pre_coord_aft_ransac_x = right_matching.coord1[k].x ;
+                      r_pre_coord_aft_ransac_y = right_matching.coord1[k].y ;
                       r_pre_index = k ;
                       r_curr_index = i ;
                       getout = true ;
@@ -574,11 +564,11 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
           cont++ ;
           save = false ;
           getout = false ;
-          p_matched_2.push_back(Matcher::p_match(l_pre_coord_aft_RANSAC_x,
-                                                l_pre_coord_aft_RANSAC_y,
+          p_matched_2.push_back(Matcher::p_match(l_pre_coord_aft_ransac_x,
+                                                l_pre_coord_aft_ransac_y,
                                                 l_pre_index,
-                                                r_pre_coord_aft_RANSAC_x,
-                                                r_pre_coord_aft_RANSAC_y,
+                                                r_pre_coord_aft_ransac_x,
+                                                r_pre_coord_aft_ransac_y,
                                                 r_pre_index,
                                                 current_matching.coord2[i].x,
                                                 current_matching.coord2[i].y,
@@ -594,7 +584,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
       }
 
       // std::cout << "Accountant: " << cont << std::endl ;
-      // std::cout << "Time between process: " << ((Time_ImageCurrent - Time_ImagePrevious) / (double)CLOCKS_PER_SEC) << std::endl ;
+      // std::cout << "Time between process: " << ((time_current_image - time_previous_image) / (double)CLOCKS_PER_SEC) << std::endl ;
       // std::cout << "***********************************************" << std::endl ;
 
     } else {
@@ -615,7 +605,7 @@ void Matcher::new_matching_circle(Mat left_img, Mat right_img, bool odometer_los
   r_pre_desc = r_curr_desc ;
 
   // The time of current images become the time of previous image
-  Time_ImagePrevious = Time_ImageCurrent ;
+  time_previous_image = time_current_image ;
 }
 /**********************************************************************************************************/
 
