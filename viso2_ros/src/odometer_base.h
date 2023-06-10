@@ -25,7 +25,7 @@ private:
 
   // publisher
   ros::Publisher odom_pub_;
-  ros::Publisher pose_pub_;
+  ros::Publisher pub_pose_;
 
   ros::ServiceServer reset_service_;
 
@@ -91,7 +91,7 @@ public:
 
     // advertise
     odom_pub_ = local_nh.advertise<nav_msgs::Odometry>("odometry", 1);
-    pose_pub_ = local_nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
+    pub_pose_ = local_nh.advertise<geometry_msgs::PoseStamped>("pose", 1);
 
     reset_service_ = local_nh.advertiseService("reset_pose", &OdometerBase::resetPose, this);
 
@@ -203,7 +203,7 @@ protected:
     pose_msg.header.frame_id = odometry_msg.header.frame_id;
     pose_msg.pose = odometry_msg.pose.pose;
 
-    pose_pub_.publish(pose_msg);
+    pub_pose_.publish(pose_msg);
 
     if (publish_tf_)
     {

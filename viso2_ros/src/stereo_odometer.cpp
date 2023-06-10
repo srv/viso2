@@ -76,15 +76,15 @@ private:
   // Bucketing
   bool enable_bucketing_ ;
   // Feature and descriptor detection
-  double contrastThreshold_SIFT_ ; 
-  double edgeThreshold_SIFT_ ; 
-  double sigma_SIFT_ ;                                
-  double hessianThreshold_SURF_ ; 
-  int nOctaves_SURF_ ; 
-  int nOctaveLayers_ ;
+  double contrast_threshold_sift_ ; 
+  double edge_threshold_sift_ ; 
+  double sigma_sift_ ;                                
+  double hessian_threshold_surf_ ; 
+  int n_octaves_surf_ ; 
+  int n_octave_layers_ ;
   // Outlier rejection
   int epipolar_constrain_ ;
-  double homography_reprojThreshold_ ;
+  double homography_reprojection_threshold_ ;
   // Altitude control
   double assigned_altitude_ ;
 
@@ -111,14 +111,14 @@ public:
     // Bucketing
     local_nh.param<bool>("enable_bucketing", enable_bucketing_, true) ;
     // Feature and descriptor detection  
-    local_nh.param<double>("contrastThreshold_SIFT", contrastThreshold_SIFT_, 0.06) ; 
-    local_nh.param<double>("edgeThreshold_SIFT", edgeThreshold_SIFT_, 10.0) ; 
-    local_nh.param<double>("sigma_SIFT", sigma_SIFT_, 1.6) ; 
-    local_nh.param<double>("hessianThreshold_SURF", hessianThreshold_SURF_, 100.0) ; 
-    local_nh.param<int>("nOctaves_SURF", nOctaves_SURF_, 4) ;   
-    local_nh.param<int>("nOctaveLayers", nOctaveLayers_, 3) ;
+    local_nh.param<double>("contrast_threshold_sift", contrast_threshold_sift_, 0.06) ; 
+    local_nh.param<double>("edge_threshold_sift", edge_threshold_sift_, 10.0) ; 
+    local_nh.param<double>("sigma_sift", sigma_sift_, 1.6) ; 
+    local_nh.param<double>("hessian_threshold_surf", hessian_threshold_surf_, 100.0) ; 
+    local_nh.param<int>("n_octaves_surf", n_octaves_surf_, 4) ;   
+    local_nh.param<int>("n_octave_layers", n_octave_layers_, 3) ;
     // Outlier rejection
-    local_nh.param<double>("homography_reprojThreshold", homography_reprojThreshold_, 1.0) ; 
+    local_nh.param<double>("homography_reprojection_threshold", homography_reprojection_threshold_, 1.0) ; 
     local_nh.param<int>("epipolar_constrain", epipolar_constrain_, 3) ;
     // Control
     local_nh.param<double>("assinged_altitude", assigned_altitude_, 3.0) ;
@@ -171,13 +171,13 @@ protected:
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_ << std::endl <<
                     "  detection_and_matching_version = " << detection_and_matching_version_ << std::endl <<
                     "  enable_bucketing = " << enable_bucketing_ << std::endl <<
-                    "  contrastThreshold_SIFT = " << contrastThreshold_SIFT_ << std::endl <<
-                    "  edgeThreshold_SIFT = " << edgeThreshold_SIFT_ << std::endl <<
-                    "  sigma_SIFT = " << sigma_SIFT_ << std::endl <<
-                    "  hessianThreshold_SURF = " << hessianThreshold_SURF_ << std::endl <<
-                    "  nOctaves_SURF = " << nOctaves_SURF_ << std::endl <<
-                    "  nOctaveLayers = " << nOctaveLayers_ << std::endl <<
-                    "  homography_reprojThreshold = " << homography_reprojThreshold_ << std::endl <<
+                    "  contrast_threshold_sift = " << contrast_threshold_sift_ << std::endl <<
+                    "  edge_threshold_sift = " << edge_threshold_sift_ << std::endl <<
+                    "  sigma_sift = " << sigma_sift_ << std::endl <<
+                    "  hessian_threshold_surf = " << hessian_threshold_surf_ << std::endl <<
+                    "  n_octaves_surf = " << n_octaves_surf_ << std::endl <<
+                    "  n_octave_layers = " << n_octave_layers_ << std::endl <<
+                    "  homography_reprojection_threshold = " << homography_reprojection_threshold_ << std::endl <<
                     "  epipolar_constrain = " << epipolar_constrain_ << std::endl <<
                     "  assigned_altitude = " << assigned_altitude_                   
                     );
@@ -230,10 +230,10 @@ protected:
 
         } else {
 
-          visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, nOctaveLayers_,
-                                        contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
-                                        hessianThreshold_SURF_, nOctaves_SURF_,
-                                        homography_reprojThreshold_, epipolar_constrain_) ; 
+          visual_odometer_->newProcess(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, n_octave_layers_,
+                                        contrast_threshold_sift_, edge_threshold_sift_, sigma_sift_, 
+                                        hessian_threshold_surf_, n_octaves_surf_,
+                                        homography_reprojection_threshold_, epipolar_constrain_) ; 
 
         }
         got_lost_ = false;
@@ -256,10 +256,10 @@ protected:
 
         } else {
 
-          success = visual_odometer_->new_process(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, nOctaveLayers_, 
-                                                  contrastThreshold_SIFT_, edgeThreshold_SIFT_, sigma_SIFT_, 
-                                                  hessianThreshold_SURF_, nOctaves_SURF_,
-                                                  homography_reprojThreshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true
+          success = visual_odometer_->newProcess(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, n_octave_layers_, 
+                                                  contrast_threshold_sift_, edge_threshold_sift_, sigma_sift_, 
+                                                  hessian_threshold_surf_, n_octaves_surf_,
+                                                  homography_reprojection_threshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true
 
         }
 

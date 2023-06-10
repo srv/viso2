@@ -9,26 +9,21 @@ stereo_odometer:
   queue_size: 5
   approximate_sync: true
 
-  # FRAME PARAMETERS:
-  # LIBVISO2-ROS
-  base_link_frame_id: '/turbot/base_link'
-  sensor_frame_id: '/turbot/stereo_down/left_optical'
-
   # VERSION PARAMETERS:
   # LIBVISO2-ROS-Modified
-  detection_and_matching_version: 0 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
+  detection_and_matching_version: 3 # 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK
 
   # FEATURE DETECTION PARAMETERS:
   # Original LIBVISO2
   nms_n: 3
   nms_tau: 3
   # LIBVISO2-ROS-Modified
-  contrastThreshold_SIFT: 0.03
-  edgeThreshold_SIFT: 10
-  sigma_SIFT: 1.6
-  hessianThreshold_SURF: 500
-  nOctaves_SURF: 4
-  nOctaveLayers: 3
+  contrast_threshold_sift: 0.03
+  edge_threshold_sift: 10
+  sigma_sift: 1.6
+  hessian_threshold_surf: 500
+  n_octaves_surf: 4
+  n_octave_layers: 3
 
   # FEATURE MATCHING PARAMETERS:
   # Original LIBVISO2
@@ -43,7 +38,7 @@ stereo_odometer:
   outlier_disp_tolerance: 5
   outlier_flow_tolerance: 5
   # LIBVISO2-ROS-Modified
-  homography_reprojThreshold: 3
+  homography_reprojection_threshold: 3
   epipolar_constrain: 1
 
   # BUCKETING PARAMETERS:

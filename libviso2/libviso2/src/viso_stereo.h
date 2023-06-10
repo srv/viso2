@@ -78,26 +78,26 @@ public:
             "true" the information of current images is transformed to information of previous images.
   @bucketing: Boolean that allows the bucketing
   @combination: Integer that defines which combination of feature detector and descriptor is being used.
-  @nOctaveLayers: Number of layers per octave.
-  @contrastThreshold_SIFT: The contrast threshold used to filter out weak features in semi-uniform
+  @n_octave_layers: Number of layers per octave.
+  @contrast_threshold_sift: The contrast threshold used to filter out weak features in semi-uniform
                            (low-contrast) regions. The larger the threshold, the less features are produced by the detector.
-  @edgeThreshold_SIFT: The threshold used to filter out edge-like features. Note that the its meaning is
+  @edge_threshold_sift: The threshold used to filter out edge-like features. Note that the its meaning is
                        different from the contrastThreshold, i.e. the larger the edgeThreshold, the less features are filtered
                        out (more features are retained).
-  @sigma_SIFT: The sigma of the Gaussian applied to the input image at the octave #0. 
-  @hessianThreshold_SURF: Threshold for hessian keypoint detector used in SURF.
-  @nOctaves_SURF: Number of pyramid octaves the keypoint detector will use. 
-  @homography_reprojThreshold: Constrain to calculate the homography.
+  @sigma_sift: The sigma of the Gaussian applied to the input image at the octave #0. 
+  @hessian_threshold_surf: Threshold for hessian keypoint detector used in SURF.
+  @n_octaves_surf: Number of pyramid octaves the keypoint detector will use. 
+  @homography_reprojection_threshold: Constrain to calculate the homography.
   @epipolar_constrain: Constraint to calculate the fundamental matrix.
   @contrast_threshold: Parameter for SIFT feature detector
 
   Returns:
   @updateMotion: Boolean that returns if the motion update is correct or if an error occured.
   ***********************************************************************************************************/
-  bool new_process(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int nOctaveLayers,
-                  double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                  double hessianThreshold_SURF, int nOctaves_SURF, 
-                  double homography_reprojThreshold, int epipolar_constrain) ; 
+  bool newProcess(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int n_octave_layers,
+                  double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
+                  double hessian_threshold_surf, int n_octaves_surf, 
+                  double homography_reprojection_threshold, int epipolar_constrain) ; 
 
   using VisualOdometry::process;
 

@@ -175,25 +175,25 @@ public:
   @odometer_lost: Boolean that allows to calculated the circle match if its value is "false". If its value is 
                 "true" the information of current images is transformed to information of previous images.
   @combination: Integer that defines which combination of feature detector and descriptor is being used.
-  @nOctaveLayers: OpenCV parameter. Number of layers per octave.
-  @contrastThreshold_SIFT: OpenCV parameter. The contrast threshold used to filter out weak features in semi-uniform
+  @n_octave_layers: OpenCV parameter. Number of layers per octave.
+  @contrast_threshold_sift: OpenCV parameter. The contrast threshold used to filter out weak features in semi-uniform
                            (low-contrast) regions. The larger the threshold, the less features are produced by the detector.
-  @edgeThreshold_SIFT: OpenCV parameter. The threshold used to filter out edge-like features. Note that the its meaning is
+  @edge_threshold_sift: OpenCV parameter. The threshold used to filter out edge-like features. Note that the its meaning is
                        different from the contrastThreshold, i.e. the larger the edgeThreshold, the less features are filtered
                        out (more features are retained).
-  @sigma_SIFT: OpenCV parameter. The sigma of the Gaussian applied to the input image at the octave #0. 
-  @hessianThreshold_SURF: OpenCV parameter. Threshold for hessian keypoint detector used in SURF.
-  @nOctaves_SURF: OpenCV parameter. Number of pyramid octaves the keypoint detector will use. 
-  @homography_reprojThreshold: OpenCV parameter. Constrain to calculate the homography.
+  @sigma_sift: OpenCV parameter. The sigma of the Gaussian applied to the input image at the octave #0. 
+  @hessian_threshold_surf: OpenCV parameter. Threshold for hessian keypoint detector used in SURF.
+  @n_octaves_surf: OpenCV parameter. Number of pyramid octaves the keypoint detector will use. 
+  @homography_reprojection_threshold: OpenCV parameter. Constrain to calculate the homography.
   @epipolar_constrain: OpenCV parameter. Constraint to calculate the fundamental matrix.
 
   Output:
   @p_matched_2 filled
   ***********************************************************************************************************/
-  void new_matching_circle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int nOctaveLayers,
-                           double contrastThreshold_SIFT, double edgeThreshold_SIFT, double sigma_SIFT, 
-                           double hessianThreshold_SURF, int nOctaves_SURF,
-                           double homography_reprojThreshold, int epipolar_constrain) ; 
+  void newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int n_octave_layers,
+                           double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
+                           double hessian_threshold_surf, int n_octaves_surf,
+                           double homography_reprojection_threshold, int epipolar_constrain) ; 
 
 private:
 
@@ -231,7 +231,7 @@ private:
   vector<KeyPoint> l_pre_kpts, r_pre_kpts ;
   Mat l_pre_desc, r_pre_desc ;
 
-  clock_t Time_ImagePrevious ;
+  clock_t time_previous_image ;
 
   // Structure to store matching information 
   struct auxiliar_return {
@@ -339,15 +339,15 @@ private:
   @combination: Integer that determines the combination of feature detector and descriptor.
   @homography: Boolean that allows to select whether the homography or the fundamental matrix is calculated.
   @combination: Integer that defines which combination of feature detector and descriptors detector is being used.
-  @homography_reprojThreshold: OpenCV parameter. Constrain to calculate the homography.
+  @homography_reprojection_threshold: OpenCV parameter. Constrain to calculate the homography.
   @epipolar_constrain: OpenCV parameter. Constraint to calculate the fundamental matrix.
   @k: Integer that defines the number of nearest neighbors required for the knnMatch.
 
   Returns:
   @s: structure with the information of the matching.
   ***********************************************************************************************************/
-  auxiliar_return new_matching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography,
-                               int combination, int k, double homography_reprojThreshold, int epipolar_constrain) ; 
+  auxiliar_return newMatching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography,
+                               int combination, int k, double homography_reprojection_threshold, int epipolar_constrain) ; 
 
 };
 
