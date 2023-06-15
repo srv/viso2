@@ -36,7 +36,10 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 bool VisualOdometryStereo::newProcess(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int n_octave_layers,
                                       double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
                                       double hessian_threshold_surf, int n_octaves_surf,
-                                      double homography_reprojection_threshold, int epipolar_constrain) {
+                                      double homography_reprojection_threshold, int epipolar_constrain) 
+{
+
+  Matcher::elapsed_time delta_time;
 
   // If "replace" is "false" current images becomes previous images and new images becomes current images.
   // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
@@ -44,18 +47,21 @@ bool VisualOdometryStereo::newProcess(Mat left_img, Mat right_img, bool replace,
   matcher->newMatchingCircle(left_img, right_img, replace, combination, n_octave_layers,
                                contrast_threshold_sift, edge_threshold_sift, sigma_sift, 
                                hessian_threshold_surf, n_octaves_surf, 
-                               homography_reprojection_threshold, epipolar_constrain) ;
+                               homography_reprojection_threshold, epipolar_constrain, delta_time);
+
+  std::cout << "Feature detection elapsed time: " << delta_time.feature_detection << std::endl;
+  std::cout << "Feature matching elapsed time: " << delta_time.feature_matching << std::endl;
 
   if(bucketing == true){
 
-    matcher->bucketFeatures(param.bucket.max_features, param.bucket.bucket_width, param.bucket.bucket_height) ; 
+    matcher->bucketFeatures(param.bucket.max_features, param.bucket.bucket_width, param.bucket.bucket_height); 
 
   }
                        
   p_matched = matcher->getMatches();
 
-  // std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl ;
-  // std::cout << "***********************************************" << std::endl ;
+  // std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl;
+  // std::cout << "***********************************************" << std::endl;
 
   return updateMotion(0.0,false);
 }

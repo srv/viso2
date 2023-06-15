@@ -47,10 +47,10 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 #include <opencv2/calib3d.hpp>
 
 //BMNF 11/03/2021:
-using cv::KeyPoint ;
-using cv::Mat ;
-using std::vector ;
-using namespace std ;
+using cv::KeyPoint;
+using cv::Mat;
+using std::vector;
+using namespace std;
 
 
 class Matcher {
@@ -84,6 +84,12 @@ public:
       half_resolution        = 1;
       refinement             = 1;
     }
+  };
+
+  struct elapsed_time
+  {
+    double feature_detection;
+    double feature_matching;
   };
 
   // constructor (with default parameters)
@@ -186,14 +192,12 @@ public:
   @n_octaves_surf: OpenCV parameter. Number of pyramid octaves the keypoint detector will use. 
   @homography_reprojection_threshold: OpenCV parameter. Constrain to calculate the homography.
   @epipolar_constrain: OpenCV parameter. Constraint to calculate the fundamental matrix.
-
-  Output:
-  @p_matched_2 filled
   ***********************************************************************************************************/
   void newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int n_octave_layers,
-                           double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
-                           double hessian_threshold_surf, int n_octaves_surf,
-                           double homography_reprojection_threshold, int epipolar_constrain) ; 
+                         double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
+                         double hessian_threshold_surf, int n_octaves_surf,
+                         double homography_reprojection_threshold, int epipolar_constrain,
+                         elapsed_time& delta_time); 
 
 private:
 
@@ -228,21 +232,19 @@ private:
   //BMNF New atributes
   /**********************************************************************************************************/
   // Previous keypoints and descriptors
-  vector<KeyPoint> l_pre_kpts, r_pre_kpts ;
-  Mat l_pre_desc, r_pre_desc ;
-
-  clock_t time_previous_image ;
+  vector<KeyPoint> l_pre_kpts, r_pre_kpts;
+  Mat l_pre_desc, r_pre_desc;
 
   // Structure to store matching information 
-  struct auxiliar_return {
-
-    vector<KeyPoint> kpts1 ;
-    vector<KeyPoint> kpts2 ;
-    Mat desc1 ;
-    Mat desc2 ;
-    vector<cv::Point2f> coord1 ;
-    vector<cv::Point2f> coord2 ;
-    bool correct ;
+  struct auxiliar_return 
+  {
+    vector<KeyPoint> kpts1;
+    vector<KeyPoint> kpts2;
+    Mat desc1;
+    Mat desc2;
+    vector<cv::Point2f> coord1;
+    vector<cv::Point2f> coord2;
+    bool correct;
 
   };
   /**********************************************************************************************************/
@@ -347,7 +349,7 @@ private:
   @s: structure with the information of the matching.
   ***********************************************************************************************************/
   auxiliar_return newMatching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography,
-                               int combination, int k, double homography_reprojection_threshold, int epipolar_constrain) ; 
+                               int combination, int k, double homography_reprojection_threshold, int epipolar_constrain); 
 
 };
 

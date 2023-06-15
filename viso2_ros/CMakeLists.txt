@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.3)
 project(viso2_ros)
 set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 
-set(OpenCV_DIR /usr/local/share/OpenCV)
+set(OpenCV_DIR /home/bomiquel/OpenCV/OpenCV320/build)
 set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
 
 find_package(catkin REQUIRED COMPONENTS

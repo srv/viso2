@@ -24,7 +24,7 @@ Street, Fifth Floor, Boston, MA 02110-1301, USA
 
 #include "viso.h"
 
-#include </usr/local/include/opencv2/core/core.hpp>
+#include <opencv2/core/core.hpp>
 using cv::Mat ;
 
 
