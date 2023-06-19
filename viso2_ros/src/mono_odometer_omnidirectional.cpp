@@ -53,6 +53,7 @@ protected:
   void imageCallback(const sensor_msgs::ImageConstPtr& image_msg)
   {
     ros::WallTime start_time = ros::WallTime::now();
+    Matcher::visual_odometry_elapsed_time vo_elapsed_time;
  
     bool first_run = false;
     // create odometer if not exists
@@ -88,14 +89,14 @@ protected:
     // retrieving data
     if (first_run)
     {
-      visual_odometer_->process(image_data, dims);
+      visual_odometer_->process(image_data, dims, vo_elapsed_time);
       tf::Transform delta_transform;
       delta_transform.setIdentity();
       integrateAndPublish(delta_transform, image_msg->header.stamp);
     }
     else
     {
-      bool success = visual_odometer_->process(image_data, dims);
+      bool success = visual_odometer_->process(image_data, dims, vo_elapsed_time);
       if(success)
       {
         replace_ = false;
@@ -130,8 +131,11 @@ protected:
       info_msg.change_reference_frame = false;
       info_msg.num_matches = visual_odometer_->getNumberOfMatches();
       info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+      info_msg.feature_detection_runtime = vo_elapsed_time.feature_detection;
+      info_msg.feature_matching_runtime = vo_elapsed_time.feature_matching;
+      info_msg.motion_estimation_runtime = vo_elapsed_time.motion_estimation;
       ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
-      info_msg.runtime = time_elapsed.toSec();
+      info_msg.vo_runtime = time_elapsed.toSec();
       info_pub_.publish(info_msg);
     }
   }
