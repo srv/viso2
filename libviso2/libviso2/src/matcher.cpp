@@ -100,12 +100,14 @@ Matcher::~Matcher() {
   if (I2c_dv_full)  _mm_free(I2c_dv_full);
 }
 
-void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace) {
+void Matcher::pushBack (uint8_t *I1, uint8_t* I2, int32_t* dims, const bool replace, Matcher::visual_odometry_elapsed_time& vo_elapsed_time) {
 
   // image dimensions
   int32_t width  = dims[0];
   int32_t height = dims[1];
   int32_t bpl    = dims[2];
+
+  clock_t feature_detection_start_time, feature_detection_end_time;
 
   // sanity check
   if (width<=0 || height<=0 || bpl<width || I1==0) {
@@ -183,16 +185,26 @@ void Matcher::pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace
   }
 
   // compute new features for current frame
+  feature_detection_start_time = clock();
   computeFeatures(I1c,dims_c,m1c1,n1c1,m1c2,n1c2,I1c_du,I1c_dv,I1c_du_full,I1c_dv_full);
   if (I2!=0)
     computeFeatures(I2c,dims_c,m2c1,n2c1,m2c2,n2c2,I2c_du,I2c_dv,I2c_du_full,I2c_dv_full);
+  feature_detection_end_time = clock();
+  vo_elapsed_time.feature_detection = ((feature_detection_end_time - feature_detection_start_time) / (double)CLOCKS_PER_SEC);
 }
 
 
 // BMNF 
 /**********************************************************************************************************/
-Matcher::auxiliar_return Matcher::newMatching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography, 
-                                               int combination, int k, double homography_reprojection_threshold, int epipolar_constrain) 
+Matcher::auxiliar_return Matcher::newMatching(vector<KeyPoint> kpts1, 
+                                              vector<KeyPoint> kpts2, 
+                                              Mat desc1, 
+                                              Mat desc2, 
+                                              bool homography, 
+                                              int combination, 
+                                              int k, 
+                                              double homography_reprojection_threshold, 
+                                              int epipolar_constrain) 
 {
   /////////////////////////////////////////////////////////////////
   /////////////////Local variable declaration//////////////////////
@@ -311,11 +323,19 @@ Matcher::auxiliar_return Matcher::newMatching(vector<KeyPoint> kpts1, vector<Key
 
 
 //BMNF
-void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int n_octave_layers,
-                                        double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
-                                        double hessian_threshold_surf, int n_octaves_surf,
-                                        double homography_reprojection_threshold, int epipolar_constrain,
-                                        elapsed_time& delta_time)
+void Matcher::newMatchingCircle(Mat left_img, 
+                                Mat right_img, 
+                                bool odometer_lost, 
+                                int combination, 
+                                int n_octave_layers,
+                                double contrast_threshold_sift, 
+                                double edge_threshold_sift, 
+                                double sigma_sift, 
+                                double hessian_threshold_surf, 
+                                int n_octaves_surf,
+                                double homography_reprojection_threshold, 
+                                int epipolar_constrain,
+                                visual_odometry_elapsed_time& vo_elapsed_time)
 {  
   /////////////////////////////////////////////////////////////////
   /////////////////Local variable declaration//////////////////////
@@ -417,7 +437,7 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
   }
   feature_detection_end_time = clock();
 
-  delta_time.feature_detection = ((feature_detection_end_time - feature_detection_start_time) / (double)CLOCKS_PER_SEC);
+  vo_elapsed_time.feature_detection = ((feature_detection_end_time - feature_detection_start_time) / (double)CLOCKS_PER_SEC);
 
   /////////////////////////////////////////////////////////////////
   /////////////////////////Matchings///////////////////////////////
@@ -447,7 +467,7 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
         p_matched_2.clear();
 
         feature_matching_end_time = clock();
-        delta_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
+        vo_elapsed_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
 
         return;
 
@@ -470,7 +490,7 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
         p_matched_2.clear();
 
         feature_matching_end_time = clock();
-        delta_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
+        vo_elapsed_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
 
         return;
 
@@ -493,7 +513,7 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
         p_matched_2.clear();
 
         feature_matching_end_time = clock();
-        delta_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
+        vo_elapsed_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
 
         return;
 
@@ -516,7 +536,7 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
         p_matched_2.clear();
 
         feature_matching_end_time = clock();
-        delta_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
+        vo_elapsed_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
 
         return;
 
@@ -575,17 +595,17 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
           save = false;
           getout = false;
           p_matched_2.push_back(Matcher::p_match(l_pre_coord_aft_ransac_x,
-                                                l_pre_coord_aft_ransac_y,
-                                                l_pre_index,
-                                                r_pre_coord_aft_ransac_x,
-                                                r_pre_coord_aft_ransac_y,
-                                                r_pre_index,
-                                                current_matching.coord2[i].x,
-                                                current_matching.coord2[i].y,
-                                                l_curr_index,
-                                                current_matching.coord1[i].x,
-                                                current_matching.coord1[i].y,
-                                                r_curr_index));
+                                                 l_pre_coord_aft_ransac_y,
+                                                 l_pre_index,
+                                                 r_pre_coord_aft_ransac_x,
+                                                 r_pre_coord_aft_ransac_y,
+                                                 r_pre_index,
+                                                 current_matching.coord2[i].x,
+                                                 current_matching.coord2[i].y,
+                                                 l_curr_index,
+                                                 current_matching.coord1[i].x,
+                                                 current_matching.coord1[i].y,
+                                                 r_curr_index));
         } else {
 
           getout = false;
@@ -593,20 +613,15 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
         }
       }
 
-      // std::cout << "Accountant: " << cont << std::endl;
-      // std::cout << "Time between process: " << ((time_current_image - time_previous_image) / (double)CLOCKS_PER_SEC) << std::endl;
-      // std::cout << "***********************************************" << std::endl;
-
     } else {
 
       p_matched_2.clear();
-      // std::cout << "There isn't enough keypoints" << std::endl;
-      // std::cout << "***********************************************" << std::endl;
 
     }
   }
+
   feature_matching_end_time = clock();
-  delta_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
+  vo_elapsed_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
 
   // Current keypoints and descriptors turns into previous keypoints and descriptors. 
   l_pre_kpts = l_curr_kpts;
@@ -618,8 +633,10 @@ void Matcher::newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost,
 
 
 
-void Matcher::matchFeatures(int32_t method, Matrix *Tr_delta) {
+void Matcher::matchFeatures(int32_t method, Matcher::visual_odometry_elapsed_time& vo_elapsed_time, Matrix *Tr_delta) {
   
+  clock_t feature_matching_start_time, feature_matching_end_time;
+
   //////////////////
   // sanity check //
   //////////////////
@@ -649,6 +666,8 @@ void Matcher::matchFeatures(int32_t method, Matrix *Tr_delta) {
         return;    
   }
 
+  feature_matching_start_time = clock();
+
   // clear old matches
   p_matched_1.clear();
   p_matched_2.clear();
@@ -676,6 +695,9 @@ void Matcher::matchFeatures(int32_t method, Matrix *Tr_delta) {
       refinement(p_matched_2,method);
     removeOutliers(p_matched_2,method);
   }
+
+  feature_matching_end_time = clock();
+  vo_elapsed_time.feature_matching = ((feature_matching_end_time - feature_matching_start_time) / (double)CLOCKS_PER_SEC);
 }
 
 void Matcher::bucketFeatures(int32_t max_features,float bucket_width,float bucket_height) {

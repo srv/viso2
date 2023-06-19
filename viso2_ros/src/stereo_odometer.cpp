@@ -16,7 +16,7 @@
 #include "odometry_params.h"
 
 //BMNF
-using cv::Mat ;
+using cv::Mat;
 
 namespace viso2_ros
 {
@@ -67,26 +67,26 @@ private:
   Matrix reference_motion_;
 
   //BMNF: Altitude control
-  ros::Subscriber altitude_sub_ ;
-  float altitude_ = MAXFLOAT ;
+  ros::Subscriber altitude_sub_;
+  float altitude_ = MAXFLOAT;
 
   // BMNF: Parameter declaration
   // Version
-  int detection_and_matching_version_ ;
+  int detection_and_matching_version_;
   // Bucketing
-  bool enable_bucketing_ ;
+  bool enable_bucketing_;
   // Feature and descriptor detection
-  double contrast_threshold_sift_ ; 
-  double edge_threshold_sift_ ; 
-  double sigma_sift_ ;                                
-  double hessian_threshold_surf_ ; 
-  int n_octaves_surf_ ; 
-  int n_octave_layers_ ;
+  double contrast_threshold_sift_; 
+  double edge_threshold_sift_; 
+  double sigma_sift_;                                
+  double hessian_threshold_surf_; 
+  int n_octaves_surf_; 
+  int n_octave_layers_;
   // Outlier rejection
-  int epipolar_constrain_ ;
-  double homography_reprojection_threshold_ ;
+  int epipolar_constrain_;
+  double homography_reprojection_threshold_;
   // Altitude control
-  double assigned_altitude_ ;
+  double assigned_altitude_;
 
 public:
 
@@ -107,23 +107,23 @@ public:
 
     // BMNF: Parameter definition
     // Version
-    local_nh.param<int>("detection_and_matching_version", detection_and_matching_version_, 0) ;
+    local_nh.param<int>("detection_and_matching_version", detection_and_matching_version_, 0);
     // Bucketing
-    local_nh.param<bool>("enable_bucketing", enable_bucketing_, true) ;
+    local_nh.param<bool>("enable_bucketing", enable_bucketing_, true);
     // Feature and descriptor detection  
-    local_nh.param<double>("contrast_threshold_sift", contrast_threshold_sift_, 0.06) ; 
-    local_nh.param<double>("edge_threshold_sift", edge_threshold_sift_, 10.0) ; 
-    local_nh.param<double>("sigma_sift", sigma_sift_, 1.6) ; 
-    local_nh.param<double>("hessian_threshold_surf", hessian_threshold_surf_, 100.0) ; 
-    local_nh.param<int>("n_octaves_surf", n_octaves_surf_, 4) ;   
-    local_nh.param<int>("n_octave_layers", n_octave_layers_, 3) ;
+    local_nh.param<double>("contrast_threshold_sift", contrast_threshold_sift_, 0.06); 
+    local_nh.param<double>("edge_threshold_sift", edge_threshold_sift_, 10.0); 
+    local_nh.param<double>("sigma_sift", sigma_sift_, 1.6); 
+    local_nh.param<double>("hessian_threshold_surf", hessian_threshold_surf_, 100.0); 
+    local_nh.param<int>("n_octaves_surf", n_octaves_surf_, 4);   
+    local_nh.param<int>("n_octave_layers", n_octave_layers_, 3);
     // Outlier rejection
-    local_nh.param<double>("homography_reprojection_threshold", homography_reprojection_threshold_, 1.0) ; 
-    local_nh.param<int>("epipolar_constrain", epipolar_constrain_, 3) ;
+    local_nh.param<double>("homography_reprojection_threshold", homography_reprojection_threshold_, 1.0); 
+    local_nh.param<int>("epipolar_constrain", epipolar_constrain_, 3);
     // Control
-    local_nh.param<double>("assinged_altitude", assigned_altitude_, 3.0) ;
+    local_nh.param<double>("assinged_altitude", assigned_altitude_, 3.0);
 
-    altitude_sub_ = local_nh.subscribe("/altitude_control", 1, &StereoOdometer::altitudeCB, this) ;
+    altitude_sub_ = local_nh.subscribe("/altitude_control", 1, &StereoOdometer::altitudeCB, this);
 
     point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
     info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
@@ -136,7 +136,7 @@ protected:
 
   void altitudeCB(const sensor_msgs::RangeConstPtr &msg){
 
-    altitude_ = msg->range ;
+    altitude_ = msg->range;
 
   }
 
@@ -189,7 +189,10 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
+
     ros::WallTime start_time = ros::WallTime::now();
+    Matcher::visual_odometry_elapsed_time vo_elapsed_time;
+
     // create odometer if not exists
     if (!visual_odometer_)
     {
@@ -208,9 +211,8 @@ protected:
     r_image_data = r_cv_ptr->image.data;
     r_step = r_cv_ptr->image.step[0];
 
-    //BMNF: Save image into opencv matrix
-    Mat lef_img_new = l_cv_ptr -> image ;
-    Mat rig_img_new = r_cv_ptr -> image ;
+    Mat lef_img_new = l_cv_ptr -> image;
+    Mat rig_img_new = r_cv_ptr -> image;
 
     ROS_ASSERT(l_step == r_step);
     ROS_ASSERT(l_image_msg->width == r_image_msg->width);
@@ -223,17 +225,26 @@ protected:
       // images without retrieving data
       if (first_run_ || got_lost_)
       {
-        // BMNF
         if(detection_and_matching_version_ == 0){
 
-          visual_odometer_->process(l_image_data, r_image_data, dims);
+          visual_odometer_->process(l_image_data, r_image_data, dims, vo_elapsed_time);
 
         } else {
 
-          visual_odometer_->newProcess(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, n_octave_layers_,
-                                        contrast_threshold_sift_, edge_threshold_sift_, sigma_sift_, 
-                                        hessian_threshold_surf_, n_octaves_surf_,
-                                        homography_reprojection_threshold_, epipolar_constrain_) ; 
+          visual_odometer_->newProcess(lef_img_new, 
+                                       rig_img_new, 
+                                       change_reference_frame_, 
+                                       enable_bucketing_, 
+                                       detection_and_matching_version_, 
+                                       n_octave_layers_,
+                                       contrast_threshold_sift_, 
+                                       edge_threshold_sift_, 
+                                       sigma_sift_, 
+                                       hessian_threshold_surf_, 
+                                       n_octaves_surf_,
+                                       homography_reprojection_threshold_, 
+                                       epipolar_constrain_,
+                                       vo_elapsed_time); 
 
         }
         got_lost_ = false;
@@ -249,17 +260,26 @@ protected:
       {
         bool success;
 
-        // BMNF
-        if(detection_and_matching_version_ == 0){
+        if(detection_and_matching_version_ == 0)
+        {
 
-          success = visual_odometer_->process(l_image_data, r_image_data, dims);
+          success = visual_odometer_->process(l_image_data, r_image_data, dims, vo_elapsed_time);
 
         } else {
-
-          success = visual_odometer_->newProcess(lef_img_new, rig_img_new, change_reference_frame_, enable_bucketing_, detection_and_matching_version_, n_octave_layers_, 
-                                                  contrast_threshold_sift_, edge_threshold_sift_, sigma_sift_, 
-                                                  hessian_threshold_surf_, n_octaves_surf_,
-                                                  homography_reprojection_threshold_, epipolar_constrain_) ; // BMNF 03/03/2021, true
+          success = visual_odometer_->newProcess(lef_img_new, 
+                                                 rig_img_new,
+                                                 change_reference_frame_, 
+                                                 enable_bucketing_, 
+                                                 detection_and_matching_version_, 
+                                                 n_octave_layers_, 
+                                                 contrast_threshold_sift_,
+                                                 edge_threshold_sift_, 
+                                                 sigma_sift_, 
+                                                 hessian_threshold_surf_, 
+                                                 n_octaves_surf_,
+                                                 homography_reprojection_threshold_,
+                                                 epipolar_constrain_,
+                                                 vo_elapsed_time); 
 
         }
 
@@ -351,6 +371,9 @@ protected:
           ROS_DEBUG_STREAM("Changing reference frame");
 
         // create and publish viso2 info msg
+        // ROS_INFO_STREAM("Feature detection elapsed time: " << vo_elapsed_time.feature_detection << std::endl <<
+        //                 "Feature matching elapsed time: " << vo_elapsed_time.feature_matching << std::endl <<
+        //                 "Motion estimation elapsed time: " << vo_elapsed_time.motion_estimation);
         VisoInfo info_msg;
         info_msg.header.stamp = l_image_msg->header.stamp;
         info_msg.got_lost = !success;
@@ -366,18 +389,21 @@ protected:
 
           } else {
 
-            info_msg.num_inliers = 0 ;
+            info_msg.num_inliers = 0;
 
           }
 
         } else {
 
-          info_msg.num_inliers = 0 ;
+          info_msg.num_inliers = 0;
 
         }
         
+        info_msg.feature_detection_runtime = vo_elapsed_time.feature_detection;
+        info_msg.feature_matching_runtime = vo_elapsed_time.feature_matching;
+        info_msg.motion_estimation_runtime = vo_elapsed_time.motion_estimation;
         ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
-        info_msg.runtime = time_elapsed.toSec();
+        info_msg.vo_runtime = time_elapsed.toSec();
         info_pub_.publish(info_msg);
       }
     }

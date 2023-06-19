@@ -61,7 +61,7 @@ public:
   //                     when small/no motions are observed to obtain Tr_delta wrt
   //                     an older coordinate system / time step than the previous one.
   // output: returns false if motion too small or an error occured
-  bool process (uint8_t *I,int32_t* dims,bool replace=false, double cameraHeight=2.0, bool mono_odometry=true);
+  bool process (uint8_t *I, int32_t* dims, Matcher::visual_odometry_elapsed_time& vo_elapsed_time, bool replace=false, double cameraHeight=2.0, bool mono_odometry=true);
 
 private:
 

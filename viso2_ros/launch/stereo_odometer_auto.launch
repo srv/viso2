@@ -4,27 +4,30 @@
     <param name="/use_sim_time"      value = "true"/>
 
     <!-- Image parameters -->
-    <arg name = "resolution"         default = "full"/>
     <arg name = "camera"             default = "/stereo_down"/>
+    <arg name = "resolution"         default = "full"/>
     <arg name = "enable_decimate_x1" default = "false"/>
     <arg name = "enable_decimate_x2" default = "false"/>
     <arg name = "enable_decimate_x4" default = "true"/>
 
     <!-- Frame parameters -->
     <arg name = "odom_frame_name"      default = "/odom"/>
-    <arg name = "sensor_frame_name"    default = "/turbot/stereo_down/left_optical"/>
-    <arg name = "base_link_frame_name" default = "/turbot/base_link"/>
+    <arg name = "sensor_frame_name"    default = "/robot_0/stereo_down/left_optical"/>
+    <arg name = "base_link_frame_name" default = "/robot_0/base_link"/>
+
+    <!-- Robots parameters -->
+    <arg name = "robot_name"           default = "robot_0"/>
 
     <!-- BAGFILES -->
 
-    <!-- Portals Vells -->
-    <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-41-06_0.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-47-26_1.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-14-53-45_2.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-00-04_3.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-06-23_4.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/images_2021-02-25-15-12-43_5.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06/topics_2021-02-25-14-41-52_0.bag"/>
+<!-- Portals Vells -->
+    <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-41-06_0.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-47-26_1.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-53-45_2.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-15-00-04_3.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-15-06-23_4.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-15-12-43_5.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/topics_2021-02-25-14-41-52_0.bag"/>
 
     <!-- Portals Vells 2 -->
     <!-- <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
@@ -37,25 +40,25 @@
                                     
     <!-- Initial pose and orientation parameters --> 
     <!-- Portals Vells: -->
-    <arg name = "t_x" default = "74.568675009499998"/> <!-- N -->
-    <arg name = "t_y" default = "18.5392068604"/> <!-- E -->
-    <arg name = "t_z" default = "2.20875"/> <!-- A -->
-    <arg name = "q_x" default = "0.02478365567"/>
-    <arg name = "q_y" default = "-0.08955947924"/>
-    <arg name = "q_z" default = "0.5741207366"/>
-    <arg name = "q_w" default = "0.8134803316"/>
+    <arg name = "t_x" default = "74.5675"/> 
+    <arg name = "t_y" default = "19.919"/> 
+    <arg name = "t_z" default = "2.20875"/> 
+    <arg name = "q_x" default = "0.0210341"/>
+    <arg name = "q_y" default = "-0.0752682"/>
+    <arg name = "q_z" default = "0.565774"/>
+    <arg name = "q_w" default = "0.820848"/>
 
     <!-- Portals Vells 2: -->
-    <!-- <arg name = "t_x" default = "96.497500509414621"/> 
-    <arg name = "t_y" default = "27.471066082539075"/>
+    <!-- <arg name = "t_x" default = "96.4975005094146"/>
+    <arg name = "t_y" default = "27.4710660825391"/>
     <arg name = "t_z" default = "2.46875"/>
-    <arg name = "q_x" default = "0.069248291848890"/>
+    <arg name = "q_x" default = "0.06924829184889"/>
     <arg name = "q_y" default = "0.061946236427001"/>
     <arg name = "q_z" default = "-0.993023205573187"/>
     <arg name = "q_w" default = "0.072610268293763"/> -->
 
     <!-- PLAY bagfile -->
-    <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile)" required="true" />
+<node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile) --topics /stereo_down/left/camera_info /stereo_down/left/image_raw /stereo_down/right/camera_info /stereo_down/right/image_raw /turbot/navigator/altitude_raw" required="true" />
 
     <!-- RUN stereo image proc -->
     <include file = "$(find viso2_ros)/launch/stereo_3D.launch" if = "$(eval enable_decimate_x1 == true)">
@@ -76,11 +79,11 @@
         <arg name = "resolution" value = "$(arg resolution)" />
     </include>
 
-    <!-- Static TF's -->
-    <node pkg="tf" type="static_transform_publisher" name="turbot_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /turbot/base_link /turbot/stereo_stick 30" />
-    <node pkg="tf" type="static_transform_publisher" name="stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /turbot/stereo_stick /turbot/stereo_down/base 30" />
-    <node pkg="tf" type="static_transform_publisher" name="stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /turbot/stereo_down/base /turbot/stereo_down 30" />
-    <node pkg="tf" type="static_transform_publisher" name="stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /turbot/stereo_down /turbot/stereo_down/left_optical 30" />
+<!-- Static TF's -->
+    <node pkg="tf" type="static_transform_publisher" name="$(arg robot_name)_base_link_to_stereo_stick" args="0.4 0.0 0.8 0.0 0.0 0.0 /$(arg robot_name)/base_link /$(arg robot_name)/stereo_stick 30" />
+    <node pkg="tf" type="static_transform_publisher" name="$(arg robot_name)_stereo_stick_to_stereo_base" args="0.0 0.0 0.0 1.57 0.0 1.57 /$(arg robot_name)/stereo_stick /$(arg robot_name)/stereo_down/base 30" />
+    <node pkg="tf" type="static_transform_publisher" name="$(arg robot_name)_stereo_base_to_stereo" args="0.0 0.0 0.0 0.0 0.0 -1.57 /$(arg robot_name)/stereo_down/base /$(arg robot_name)/stereo_down 30" />
+    <node pkg="tf" type="static_transform_publisher" name="$(arg robot_name)_stereo_to_left" args="-0.06 0.0 0.0 0.0 0.0 0.0 /$(arg robot_name)/stereo_down /$(arg robot_name)/stereo_down/left_optical 30" />
 
     <!-- Viso2 -->
     <rosparam command="load" file="$(find viso2_ros)/config/viso2_stereo_parameters_auto.yaml"/>

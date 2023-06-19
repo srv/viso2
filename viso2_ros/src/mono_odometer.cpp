@@ -64,6 +64,7 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& info_msg)
   {
     ros::WallTime start_time = ros::WallTime::now();
+    Matcher::visual_odometry_elapsed_time vo_elapsed_time;
  
     bool first_run = false;
 
@@ -103,7 +104,7 @@ protected:
   
     if (first_run)
     { // fbf 22/07/2020 pass the cameraHeight from the continuously obtained topic given by the altitude estimator 
-      visual_odometer_->process(image_data, dims,cameraHeight,true); //cameraHeigh will update this value at every odometry calculation
+      visual_odometer_->process(image_data, dims, vo_elapsed_time, cameraHeight, true); //cameraHeigh will update this value at every odometry calculation
       tf::Transform delta_transform;
       delta_transform.setIdentity();
       integrateAndPublish(delta_transform, image_msg->header.stamp);
@@ -115,7 +116,7 @@ protected:
       }else{
         std::cout << "Replace is FALSE" << std::endl;
       }
-      bool success = visual_odometer_->process(image_data, dims, replace_, cameraHeight, true); 
+      bool success = visual_odometer_->process(image_data, dims, vo_elapsed_time, replace_, cameraHeight, true); 
       if(success)
       {
         ROS_INFO("SUCCESS");
@@ -150,8 +151,11 @@ protected:
       info_msg.change_reference_frame = false;
       info_msg.num_matches = visual_odometer_->getNumberOfMatches();
       info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+      info_msg.feature_detection_runtime = vo_elapsed_time.feature_detection;
+      info_msg.feature_matching_runtime = vo_elapsed_time.feature_matching;
+      info_msg.motion_estimation_runtime = vo_elapsed_time.motion_estimation;
       ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
-      info_msg.runtime = time_elapsed.toSec();
+      info_msg.vo_runtime = time_elapsed.toSec();
       info_pub_.publish(info_msg);
     }
   }

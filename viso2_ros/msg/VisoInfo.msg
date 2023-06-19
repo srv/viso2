@@ -22,4 +22,7 @@ int32 num_matches
 int32 num_inliers
 
 # runtime of last iteration in seconds
-float64 runtime
+float64 vo_runtime
+float64 feature_detection_runtime
+float64 feature_matching_runtime
+float64 motion_estimation_runtime

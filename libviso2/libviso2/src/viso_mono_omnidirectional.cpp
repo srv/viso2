@@ -28,10 +28,10 @@ VisualOdometryMonoOmnidirectional::~VisualOdometryMonoOmnidirectional () {
 }
 
 
-bool VisualOdometryMonoOmnidirectional::process (uint8_t *I, int32_t* dims, bool replace)
+bool VisualOdometryMonoOmnidirectional::process (uint8_t *I, int32_t* dims, Matcher::visual_odometry_elapsed_time& vo_elapsed_time, bool replace)
 {
-  matcher->pushBack(I,dims,replace);
-  matcher->matchFeatures(0);
+  matcher->pushBack(I, dims, replace, vo_elapsed_time);
+  matcher->matchFeatures(0, vo_elapsed_time);
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();
   return updateMotion(0.0, false);

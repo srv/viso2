@@ -33,45 +33,63 @@ VisualOdometryStereo::~VisualOdometryStereo() {
 
 //BMNF:
 /**********************************************************************************************************/
-bool VisualOdometryStereo::newProcess(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int n_octave_layers,
-                                      double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
-                                      double hessian_threshold_surf, int n_octaves_surf,
-                                      double homography_reprojection_threshold, int epipolar_constrain) 
+bool VisualOdometryStereo::newProcess(Mat left_img, 
+                                      Mat right_img, 
+                                      bool replace, 
+                                      bool bucketing, 
+                                      int combination, 
+                                      int n_octave_layers,
+                                      double contrast_threshold_sift, 
+                                      double edge_threshold_sift, 
+                                      double sigma_sift, 
+                                      double hessian_threshold_surf, 
+                                      int n_octaves_surf, 
+                                      double homography_reprojection_threshold,
+                                      int epipolar_constrain,
+                                      Matcher::visual_odometry_elapsed_time& vo_elapsed_time) 
 {
 
-  Matcher::elapsed_time delta_time;
+  clock_t motion_estimation_start_time, motion_estimation_end_time;
 
   // If "replace" is "false" current images becomes previous images and new images becomes current images.
   // Then compute the new circle match. If "replace" is "true" current images becomes previous images and
   // new images becomes current images but the circle match is not calculated.
-  matcher->newMatchingCircle(left_img, right_img, replace, combination, n_octave_layers,
-                               contrast_threshold_sift, edge_threshold_sift, sigma_sift, 
-                               hessian_threshold_surf, n_octaves_surf, 
-                               homography_reprojection_threshold, epipolar_constrain, delta_time);
+  matcher->newMatchingCircle(left_img, 
+                             right_img, 
+                             replace, 
+                             combination, 
+                             n_octave_layers,
+                             contrast_threshold_sift, 
+                             edge_threshold_sift, 
+                             sigma_sift, 
+                             hessian_threshold_surf,
+                             n_octaves_surf, 
+                             homography_reprojection_threshold,
+                             epipolar_constrain, 
+                             vo_elapsed_time);
 
-  std::cout << "Feature detection elapsed time: " << delta_time.feature_detection << std::endl;
-  std::cout << "Feature matching elapsed time: " << delta_time.feature_matching << std::endl;
-
-  if(bucketing == true){
-
+  if(bucketing)
     matcher->bucketFeatures(param.bucket.max_features, param.bucket.bucket_width, param.bucket.bucket_height); 
-
-  }
                        
   p_matched = matcher->getMatches();
 
-  // std::cout << "P_matched_size after bucketing: " << p_matched.size() << std::endl;
-  // std::cout << "***********************************************" << std::endl;
+  motion_estimation_start_time = clock();
 
-  return updateMotion(0.0,false);
+  bool correct_update_motion = updateMotion(0.0, false);
+
+  motion_estimation_end_time = clock();
+
+  vo_elapsed_time.motion_estimation = ((motion_estimation_end_time - motion_estimation_start_time) / (double)CLOCKS_PER_SEC);
+
+  return correct_update_motion;
 }
 /**********************************************************************************************************/
 
 
-bool VisualOdometryStereo::process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace) {
-  matcher->pushBack(I1,I2,dims,replace);
-  if (Tr_valid) matcher->matchFeatures(2,&Tr_delta);
-  else          matcher->matchFeatures(2);
+bool VisualOdometryStereo::process (uint8_t *I1, uint8_t *I2, int32_t* dims, Matcher::visual_odometry_elapsed_time& vo_elapsed_time, bool replace) {
+  matcher->pushBack(I1, I2, dims, replace, vo_elapsed_time);
+  if (Tr_valid) matcher->matchFeatures(2, vo_elapsed_time, &Tr_delta);
+  else          matcher->matchFeatures(2, vo_elapsed_time);
   matcher->bucketFeatures(param.bucket.max_features,param.bucket.bucket_width,param.bucket.bucket_height);                          
   p_matched = matcher->getMatches();
   return updateMotion(0.0,false);

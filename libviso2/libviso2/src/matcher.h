@@ -86,10 +86,18 @@ public:
     }
   };
 
-  struct elapsed_time
+  struct visual_odometry_elapsed_time
   {
     double feature_detection;
     double feature_matching;
+    double motion_estimation;
+
+    visual_odometry_elapsed_time()
+    {
+      feature_detection = 0.0;
+      feature_matching = 0.0;
+      motion_estimation = 0.0;
+    }
   };
 
   // constructor (with default parameters)
@@ -144,19 +152,19 @@ public:
   //                         the input images, otherwise the current image is first copied
   //                         to the previous image (ring buffer functionality, descriptors need
   //                         to be computed only once)
-  void pushBack (uint8_t *I1,uint8_t* I2,int32_t* dims,const bool replace);
+  void pushBack (uint8_t *I1, uint8_t* I2, int32_t* dims, const bool replace, Matcher::visual_odometry_elapsed_time& vo_elapsed_time);
 
   // computes features from a single image and pushes it back to a ringbuffer,
   // which interally stores the features of the current and previous image pair
   // use this function for flow computation
   // parameter description see above
-  void pushBack (uint8_t *I1,int32_t* dims,const bool replace) { pushBack(I1,0,dims,replace); }
+  void pushBack (uint8_t *I1, int32_t* dims, const bool replace, Matcher::visual_odometry_elapsed_time& vo_elapsed_time) { pushBack(I1, 0, dims, replace, vo_elapsed_time); }
 
   // match features currently stored in ring buffer (current and previous frame)
   // input: method ... 0 = flow, 1 = stereo, 2 = quad matching
   //        Tr_delta: uses motion from previous frame to better search for
   //                  matches, if specified
-  void matchFeatures(int32_t method, Matrix *Tr_delta = 0);
+  void matchFeatures(int32_t method, Matcher::visual_odometry_elapsed_time& vo_elapsed_time, Matrix *Tr_delta = 0);
 
   // feature bucketing: keeps only max_features per bucket, where the domain
   // is split into buckets of size (bucket_width,bucket_height)
@@ -193,11 +201,19 @@ public:
   @homography_reprojection_threshold: OpenCV parameter. Constrain to calculate the homography.
   @epipolar_constrain: OpenCV parameter. Constraint to calculate the fundamental matrix.
   ***********************************************************************************************************/
-  void newMatchingCircle(Mat left_img, Mat right_img, bool odometer_lost, int combination, int n_octave_layers,
-                         double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
-                         double hessian_threshold_surf, int n_octaves_surf,
-                         double homography_reprojection_threshold, int epipolar_constrain,
-                         elapsed_time& delta_time); 
+  void newMatchingCircle(Mat left_img, 
+                         Mat right_img, 
+                         bool odometer_lost, 
+                         int combination, 
+                         int n_octave_layers,
+                         double contrast_threshold_sift, 
+                         double edge_threshold_sift, 
+                         double sigma_sift, 
+                         double hessian_threshold_surf, 
+                         int n_octaves_surf,
+                         double homography_reprojection_threshold, 
+                         int epipolar_constrain,
+                         visual_odometry_elapsed_time& vo_elapsed_time); 
 
 private:
 
@@ -348,8 +364,15 @@ private:
   Returns:
   @s: structure with the information of the matching.
   ***********************************************************************************************************/
-  auxiliar_return newMatching(vector<KeyPoint> kpts1, vector<KeyPoint> kpts2, Mat desc1, Mat desc2, bool homography,
-                               int combination, int k, double homography_reprojection_threshold, int epipolar_constrain); 
+  auxiliar_return newMatching(vector<KeyPoint> kpts1, 
+                              vector<KeyPoint> kpts2, 
+                              Mat desc1, 
+                              Mat desc2, 
+                              bool homography,
+                              int combination, 
+                              int k, 
+                              double homography_reprojection_threshold, 
+                              int epipolar_constrain); 
 
 };
 

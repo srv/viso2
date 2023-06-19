@@ -64,7 +64,7 @@ public:
   //                     when small/no motions are observed to obtain Tr_delta wrt
   //                     an older coordinate system / time step than the previous one.
   // output: returns false if an error occured
-  bool process (uint8_t *I1,uint8_t *I2,int32_t* dims,bool replace=false);
+  bool process (uint8_t *I1, uint8_t *I2, int32_t* dims, Matcher::visual_odometry_elapsed_time& vo_elapsed_time, bool replace=false);
   
   //BMNF: 
   /**********************************************************************************************************
@@ -94,10 +94,20 @@ public:
   Returns:
   @updateMotion: Boolean that returns if the motion update is correct or if an error occured.
   ***********************************************************************************************************/
-  bool newProcess(Mat left_img, Mat right_img, bool replace, bool bucketing, int combination, int n_octave_layers,
-                  double contrast_threshold_sift, double edge_threshold_sift, double sigma_sift, 
-                  double hessian_threshold_surf, int n_octaves_surf, 
-                  double homography_reprojection_threshold, int epipolar_constrain) ; 
+  bool newProcess(Mat left_img, 
+                  Mat right_img, 
+                  bool replace, 
+                  bool bucketing, 
+                  int combination, 
+                  int n_octave_layers,
+                  double contrast_threshold_sift, 
+                  double edge_threshold_sift, 
+                  double sigma_sift, 
+                  double hessian_threshold_surf, 
+                  int n_octaves_surf, 
+                  double homography_reprojection_threshold, 
+                  int epipolar_constrain,
+                  Matcher::visual_odometry_elapsed_time& vo_elapsed_time) ; 
 
   using VisualOdometry::process;
 
