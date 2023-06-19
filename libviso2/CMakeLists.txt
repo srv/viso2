@@ -3,7 +3,7 @@ project(libviso2)
 set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 
 set(OpenCV_DIR /usr/local/share/OpenCV)
-set(OpenCV_DIR /home/bomiquel/OpenCV/OpenCV320/build)
+# set(OpenCV_DIR /home/bomiquel/OpenCV/OpenCV320/build)
 
 message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
 message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
