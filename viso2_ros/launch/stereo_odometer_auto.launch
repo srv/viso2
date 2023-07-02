@@ -20,42 +20,42 @@
 
     <!-- BAGFILES -->
 
-<!-- Portals Vells -->
-    <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-41-06_0.bag
+    <!-- Portals Vells -->
+    <!-- <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-41-06_0.bag
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-47-26_1.bag
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-14-53-45_2.bag
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-15-00-04_3.bag
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-15-06-23_4.bag
                                         /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/images_2021-02-25-15-12-43_5.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/topics_2021-02-25-14-41-52_0.bag"/>
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/14_41_06_new_frame_id/topics_2021-02-25-14-41-52_0.bag"/> -->
 
     <!-- Portals Vells 2 -->
-    <!-- <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-15-56-26_0.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-02-45_1.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-09-05_2.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-15-24_3.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-21-43_4.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/images_2021-02-25-16-28-03_5.bag
-                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25/topics_2021-02-25-15-56-37_0.bag"/> -->
+    <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/images_2021-02-25-15-56-26_0.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/images_2021-02-25-16-02-45_1.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/images_2021-02-25-16-09-05_2.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/images_2021-02-25-16-15-24_3.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/images_2021-02-25-16-21-43_4.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/images_2021-02-25-16-28-03_5.bag
+                                        /home/bomiquel/datasets/bagfiles/portals/2021_02_25/15_56_25_new_frame_id/topics_2021-02-25-15-56-37_0.bag"/>
                                     
     <!-- Initial pose and orientation parameters --> 
     <!-- Portals Vells: -->
-    <arg name = "t_x" default = "74.5675"/> 
+    <!-- <arg name = "t_x" default = "74.5675"/> 
     <arg name = "t_y" default = "19.919"/> 
     <arg name = "t_z" default = "2.20875"/> 
     <arg name = "q_x" default = "0.0210341"/>
     <arg name = "q_y" default = "-0.0752682"/>
     <arg name = "q_z" default = "0.565774"/>
-    <arg name = "q_w" default = "0.820848"/>
+    <arg name = "q_w" default = "0.820848"/> -->
 
     <!-- Portals Vells 2: -->
-    <!-- <arg name = "t_x" default = "96.4975005094146"/>
+    <arg name = "t_x" default = "96.4975005094146"/>
     <arg name = "t_y" default = "27.4710660825391"/>
     <arg name = "t_z" default = "2.46875"/>
     <arg name = "q_x" default = "0.06924829184889"/>
     <arg name = "q_y" default = "0.061946236427001"/>
     <arg name = "q_z" default = "-0.993023205573187"/>
-    <arg name = "q_w" default = "0.072610268293763"/> -->
+    <arg name = "q_w" default = "0.072610268293763"/>
 
     <!-- PLAY bagfile -->
 <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile) --topics /stereo_down/left/camera_info /stereo_down/left/image_raw /stereo_down/right/camera_info /stereo_down/right/image_raw /turbot/navigator/altitude_raw" required="true" />
