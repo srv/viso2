@@ -86,7 +86,7 @@ private:
   int epipolar_constrain_;
   double homography_reprojection_threshold_;
   // Altitude control
-  double assigned_altitude_;
+  double max_altitude_;
 
 public:
 
@@ -121,7 +121,7 @@ public:
     local_nh.param<double>("homography_reprojection_threshold", homography_reprojection_threshold_, 1.0); 
     local_nh.param<int>("epipolar_constrain", epipolar_constrain_, 3);
     // Control
-    local_nh.param<double>("assinged_altitude", assigned_altitude_, 3.0);
+    local_nh.param<double>("max_altitude", max_altitude_, 3.0);
 
     altitude_sub_ = local_nh.subscribe("/altitude_control", 1, &StereoOdometer::altitudeCB, this);
 
@@ -179,7 +179,7 @@ protected:
                     "  n_octave_layers = " << n_octave_layers_ << std::endl <<
                     "  homography_reprojection_threshold = " << homography_reprojection_threshold_ << std::endl <<
                     "  epipolar_constrain = " << epipolar_constrain_ << std::endl <<
-                    "  assigned_altitude = " << assigned_altitude_                   
+                    "  max_altitude = " << max_altitude_                   
                     );
   }
 
@@ -220,7 +220,7 @@ protected:
 
     int32_t dims[] = {l_image_msg->width, l_image_msg->height, l_step};
 
-    if(altitude_ < assigned_altitude_){
+    if(altitude_ < max_altitude_){
       // on first run or when odometer got lost, only feed the odometer with
       // images without retrieving data
       if (first_run_ || got_lost_)
