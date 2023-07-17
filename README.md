@@ -1,29 +1,143 @@
-viso2
-==========
-ROS Stack containing a wrapper for libviso2, a visual odometry library. 
-http://www.ros.org/wiki/viso2 for the list of contained packages.
-***
+## Overview
+
+This branch of the [ROS][link_ros] wrapper for [LIBVISO2][link_libviso2] contains a series of modifications to improve the performance of the stereo visual odometer for AUVs with bottom-looking cameras.
+
+The branch contains, like the others, the version for monocular and omnidirectional cameras, but these have not been modified. The only modified version is the one for stereo cameras.
 
 ## Installation
 
-1. Install ROS Melodic: http://wiki.ros.org/ROS/Installation
-2. Install Opencv-3.2.0 and Opencv-3.2.0_contrib: https://www.programmersought.com/article/83872474263/ 
-3. If there is a problem with libopencv_core.so.3.2 follow the instructions below: https://github.com/cggos/DIPDemoQt/issues/1
-4. Download in a catkin workspace the github repository
-5. If it is necessary modify the CMakeList.txt to link correctly the libraries from Opencv-3.2.0_contrib
-6. Compile the repository
+1. [Install][link_ros_melodic] ROS Melodic.
+2. [Install][link_opencv_contrib] Opencv-3.2.0 with Opencv-3.2.0_contrib. If there are any problems with libopencv_core.so.3.2 follow these [instructions][link_installation_error].
+3. Download in a catkin workspace the viso2 repository from github.
+4. Change branch to melodic-new-feature-tracker.
+5. If it is necessary modify the CMakeList.txt to link correctly the libraries from Opencv-3.2.0_contrib.
+6. Compile.
 
 ## User guide
-### Simple mode
 
-1. Modify stereo_odometer.launch (change the path to the bagfiles or delete them if you are not going to use them, change the name of the cameras to the name of your cameras and change the remap of the topicals).
-2. Modify viso2_parameters.yaml
-3. Change the disparity parameters to yours
-4. Run the stereo odometer using: roslaunch viso2_ros stereo_odometer.launch
+### Parameters
 
-### Automatic mode
+#### LIBVISO2 parameters
+* `nms_n` - This parameter is used in the feature detection stage to define the quadratic region centered around the pixel under consideration (the window).
+* `nms_tau` - This parameter is used in the feature detection stage to define the threshold for a point to be considered as keypoint.
+* `half_resolution` - If enabled reduces the image by half to speed it up.
+* `match_binsize` - This parameter defines the window for keypoint searching between stereo pairs
+* `match_radius` - This parameter is used in the feature matching stage to find matches between current and previous frames.
+* `match_disp_tolerance` - Defines the maximum v-disparity tolerance between matches of stereo pairs.
+* `multi_stage` - If disabled, the algorithm searches matchings between current and previous left images. If it is enabled, the algorithm searches matchings between current left, current right previous right and previous left images.
+* `refinement` - Specifies whether or not to refine feature matches to subpixel resolution.
+* `outlier_disp_tolerance` - Has the same meaning than match-disp-tolerance but in the u-axis.
+* `outlier_flow_tolerance` - This parameter defines the x/y-disparity for matches between current and reference frame.
+* `max_features` - Maximal number of features per bucket. The algorithm divides the images into a grid and define a maximum number of features per bucket.
+* `bucket_width` - Width of bucket (in pixels).
+* `bucket_height` - Height of bucket (in pixels).
+* `inlier_threshold` - Fundamental matrix inlier threshold. This parameter is used to eliminate mismatched points in the reprojection process.
+* `ransac_iters` - Number of RANSAC iterations for the minimization of the reprojection errors.
 
-1. Modify stereo_odometer_auto.launch (change the path to the bagfiles or delete them if you are not going to use them, change the name of the cameras to the name of your cameras and change the remap of the topicals).
-2. Modify viso2_parameters_auto.yaml
-3. Change the disparity parameters to yours
-4. Run the script experiment_automator.py: python3 experiment_automator.py --out_path=folder/to/save/the/results
+#### Wrapper parameters
+* `odom_frame_id` - String with the name of the odom frame.
+* `sensor_frame_id` - String with the name of the camera frame.
+* `base_link_frame_id` - String with the name of the base link frame.
+
+#### New parameters
+* `detection_and_matching_version` - This parameter allows to select which version of LIBVISO2 to use. 0 -> the original version of LIBVISO2, 1 -> LIBVISO2 with SIFT as feature detector and feature descriptor + the new feature matcher, 2 -> LIBVISO2 with SURF as feature detector and SIFT as descriptor + the new feature matcher, 3 -> LIBVISO2 with SURF as feature detector and BRISK as descriptor + the new feature matcher, 4 -> LIBVISO2 with SURF as feature detector and FREAK as descriptor + the new feature matcher.
+* `contrast_threshold_sift` - This parameter assigns a threshold by which SIFT detects and removes features with low contrast.
+* `edge_threshold_sift` - This parameter sets a threshold by which SIFT detects and eliminates edge-type features, which are not very robust to noise.
+* `sigma_sift` - This parameter allocates the standard deviation of the Gaussian blur applied by SIFT when generating the scale space.
+* `hessian_threshold_surf` - This parameter assigns the threshold that SURF uses to determine whether an image point is a keypoint or not.
+* `n_octave_layers` - This parameter allocates the number of frames per octave to be generated by both SIFT and SURF when creating their respective scale-spaces.
+* `homography_reprojection_threshold` - This parameter assigns the maximum reprojection error, in pixels, when calculating homographies between images that do not belong to the same stereo pair.
+* `enable_bucketing` - This parameter allows to enable or disable bucketing.
+* `max_altitude` - Maximum altitude at which the algorithm calculates the odometry. This parameter avoids position calculation while the robot dives and emerges, thus avoiding the use of images with poor or non-existent visibility.
+* `initial_translation_x` - Initial position of the robot base link.
+* `initial_translation_y` - Initial position of the robot base link.
+* `initial_translation_z` - Initial position of the robot base link.
+* `initial_rotation_x` - Initial orientation of the robot base link.
+* `initial_rotation_y` - Initial orientation of the robot base link.
+* `initial_rotation_z` - Initial orientation of the robot base link.
+* `initial_rotation_w` - Initial orientation of the robot base link.
+
+### Subscribed topics
+* `stereo_namespace/left/image_rect` - Left image rectified (type sensor_msgs::Image).
+* `stereo_namespace/right/image_rect` - Right image rectified (type sensor_msgs::Image).
+* `stereo_namespace/left/camera_info` - Extrinsic and intrinsic camera parameters (type sensor_msgs::CameraInfo).
+* `stereo_namespace/right/camera_info` - Extrinsic and intrinsic camera parameters (type sensor_msgs::CameraInfo).
+* `altitude_control` - Altitude of the AUV (type sensor_msgs::Range).
+
+### Published topics
+* `/stereo_odometer/odometry` - The odometry of the robot (type nav_msgs::Odometry).
+* `/stereo_odometer/pose` - The pose of the robot (type geometry_msgs::PoseStamped).
+* `/stereo_odometer/point_cloud` - The pointcloud of the scene (type sensor_msgs::PointCloud2).
+* `/stereo_odometer/info` - The internal performance of the algorithm (type viso2::VisoInfo).
+
+### Run code
+
+You can run the node using the following launch file (tests were performed with 480x360px images, larger images can significantly slow down the algorithm).
+
+```bash
+<launch>
+    <!-- Image parameters -->
+    <arg name = "camera"                      default = "/stereo_down"/>
+    
+    <!-- Frame parameters -->
+    <arg name = "odom_frame_name"             default = "/odom"/>
+    <arg name = "sensor_frame_name"           default = "/robot_namespace/$(arg camera)/left_optical"/>
+    <arg name = "base_link_frame_name"        default = "/robot_namespace/base_link"/>
+
+    <!-- Run the stereo image proc -->
+    <node ns = "$(arg camera)" pkg = "stereo_image_proc" type = "stereo_image_proc" name = "stereo_image_proc" />
+
+    <!-- Viso2 -->
+    <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen">
+        <remap from = "stereo"                              to = "$(arg camera)"/> <!-- Camera namespace -->
+        <remap from = "image"                               to = "image_rect"/>  <!-- Image type -->
+        <remap from = "/altitude_control"                   to = "/robot_namespace/altitude"/>
+        <param name = "nms_n"                               value = "3"/>
+        <param name = "nms_tau"                             value = "3"/>
+        <param name = "half_resolution"                     value = "0"/>
+        <param name = "match_binsize"                       value = "50"/>
+        <param name = "match_radius"                        value = "200"/>
+        <param name = "match_disp_tolerance"                value = "1"/>
+        <param name = "multi_stage"                         value = "1"/>
+        <param name = "refinement"                          value = "1"/>
+        <param name = "outlier_disp_tolerance"              value = "5"/>
+        <param name = "outlier_flow_tolerance"              value = "5"/>
+        <param name = "max_features"                        value = "2"/>
+        <param name = "bucket_width"                        value = "50"/>
+        <param name = "bucket_height"                       value = "50"/>
+        <param name = "inlier_threshold"                    value = "1"/>
+        <param name = "ransac_iters"                        value = "300"/>
+
+        <param name = "odom_frame_id"                       value = "/odom"/>
+        <param name = "sensor_frame_id"                     value = "/robot_namespace/$(arg camera)/left_optical"/>
+        <param name = "base_link_frame_id"                  value = "/robot_namespace/base_link"/>
+
+        <param name = "detection_and_matching_version"      value = "0"/> <!-- 0=Original LIBVISO2, 1=SIFT-SIFT, 2=SURF-SIFT, 3=SURF-BRISK, 4=SURF-FREAK -->
+        <param name = "contrast_threshold_sift"             value = "0.03"/>
+        <param name = "edge_threshold_sift"                 value = "10"/>
+        <param name = "sigma_sift"                          value = "1.6"/>
+        <param name = "hessian_threshold_surf"              value = "500"/>
+        <param name = "n_octave_layers"                     value = "3"/>
+        <param name = "homography_reprojection_threshold"   value = "3"/>
+        <param name = "enable_bucketing"                    value = "true"/>
+        <param name = "max_altitude"                        value = "2.5"/>
+        <param name = "initial_translation_x"               value = "0.0"/>
+        <param name = "initial_translation_y"               value = "0.0"/>
+        <param name = "initial_translation_z"               value = "0.0"/>
+        <param name = "initial_rotation_x"                  value = "0.0"/>
+        <param name = "initial_rotation_y"                  value = "0.0"/>
+        <param name = "initial_rotation_z"                  value = "0.0"/>
+        <param name = "initial_rotation_w"                  value = "1.0"/>
+    </node>
+</launch>
+```
+
+## Acknowledges
+
+This work is co-financed by the PID2020-115332RB-C33 by Ministerio de Ciencia e Innovación, identified as MCIN/AEI/10.13039/501100011033 and by "ERDF (European Regional Development Fund) A way of making Europe", and by the Comunitat Autonoma de les Illes Balears through the Direcció General de Política Universitaria i Recerca with funds from the Tourist Stay Tax Law (PRD2018/34). 
+
+[link_ros]: http://www.ros.org/
+[link_libviso2]: https://www.cvlibs.net/software/libviso/
+[link_ros_melodic]: http://wiki.ros.org/ROS/Installation
+[link_opencv_contrib]: https://www.programmersought.com/article/83872474263/
+[link_installation_error]: https://github.com/cggos/DIPDemoQt/issues/1

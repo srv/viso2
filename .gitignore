@@ -27,3 +27,4 @@ libviso2/libviso2/build
 *.swh
 *.swg
 .vscode/
+*/.vscode/
