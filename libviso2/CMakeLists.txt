@@ -1,14 +1,7 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(libviso2)
-set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 
 set(OpenCV_DIR /usr/local/share/OpenCV)
-# set(OpenCV_DIR /home/bomiquel/OpenCV/OpenCV320/build)
-
-message(STATUS "OpenCV_INCLUDE_DIRS = ${OpenCV_INCLUDE_DIRS}")
-message(STATUS "OpenCV_LIB_DIR = ${OpenCV_LIB_DIR}")
-message(STATUS "OpenCV_LIBS = ${OpenCV_LIBS}")
-message(STATUS "OpenCV_LIBRARIES = ${OpenCV_LIBRARIES}")
 
 find_package(catkin REQUIRED COMPONENTS
   OpenCV REQUIRED
@@ -29,19 +22,12 @@ catkin_package(
   LIBRARIES viso2
 )
 
-if(OPENCV_ENABLE_NONFREE)
-    message("  Non-free algorithms are enabled")
-else()
-    message("  Non-free algorithms are NOT enabled")
-endif()
-
 include_directories(libviso2/src
   ${catkin_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
 )
-link_directories(${OpenCV_LIBRARY_DIRS})
 
-#TARGET_LINK_LIBRARIES(libviso2 ${OpenCV_LIBS})
+link_directories(${OpenCV_LIBRARY_DIRS})
 
 add_library(viso2
   libviso2/src/filter.cpp
@@ -63,8 +49,8 @@ install(TARGETS viso2
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY ${PROJECT_NAME}/src
+install(DIRECTORY ${PROJECT_NAME}/src/
   DESTINATION ${CATKIN_PACKAGE_INCLUDE_DESTINATION}
-  PATTERN ".cpp" EXCLUDE
+  PATTERN "*.cpp" EXCLUDE
 )
 
