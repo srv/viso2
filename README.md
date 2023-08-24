@@ -4,6 +4,21 @@ This branch of the [ROS][link_ros] wrapper for [LIBVISO2][link_libviso2] contain
 
 The branch contains, like the others, the version for monocular and omnidirectional cameras, but these have not been modified. The only modified version is the one for stereo cameras.
 
+## Related paper
+
+CITATION:
+```bash
+@article{Nordfeldt-Fiol2023,
+    author = {Nordfeldt-Fiol, Bo Miquel and Bonin-Font, Francisco and Oliver, Gabriel},
+    year = {2023},
+    month = {08},
+    title = {Evolving Real-time Stereo Odometry for AUV Navigation in Challenging Marine Environments},
+    volume = {108},
+    journal = {Journal of Intelligent & Robotic Systems},
+    doi = {10.1007/s10846-023-01932-0}
+}
+```
+
 ## Installation
 
 1. [Install][link_ros_melodic] ROS Melodic.
