@@ -6,7 +6,7 @@ The branch contains, like the others, the version for monocular and omnidirectio
 
 ## Related paper
 
-CITATION:
+### Citation:
 ```bash
 @article{Nordfeldt-Fiol2023,
     author = {Nordfeldt-Fiol, Bo Miquel and Bonin-Font, Francisco and Oliver, Gabriel},
