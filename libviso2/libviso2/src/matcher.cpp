@@ -267,7 +267,7 @@ Matcher::auxiliar_return Matcher::newMatching(vector<KeyPoint> kpts1,
 
     try{
 
-      H = cv::findHomography(coord1_aft_match, coord2_aft_match, CV_RANSAC, homography_reprojection_threshold, ransac_inliers_mask);
+      H = cv::findHomography(coord1_aft_match, coord2_aft_match, cv::RANSAC, homography_reprojection_threshold, ransac_inliers_mask);
 
     } catch (cv::Exception& e) {
 
@@ -281,7 +281,7 @@ Matcher::auxiliar_return Matcher::newMatching(vector<KeyPoint> kpts1,
 
     try{
 
-      F = cv::findFundamentalMat(coord1_aft_match, coord2_aft_match, ransac_inliers_mask, CV_RANSAC, epipolar_constrain);
+      F = cv::findFundamentalMat(coord1_aft_match, coord2_aft_match, ransac_inliers_mask, cv::RANSAC, epipolar_constrain);
 
     } catch (cv::Exception& e) {
 

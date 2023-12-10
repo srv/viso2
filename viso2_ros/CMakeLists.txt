@@ -1,9 +1,8 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.0.2)
 project(viso2_ros)
 set(CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 
-set(OpenCV_DIR /usr/local/share/OpenCV)
-# set(OpenCV_DIR /home/bomiquel/OpenCV/OpenCV320/build)
+set(OpenCV_DIR /usr/local/lib/cmake/opencv4/)
 set(OPENCV_ENABLE_NONFREE "Enable non-free algorithms" TRUE)
 
 find_package(catkin REQUIRED COMPONENTS
@@ -63,7 +62,7 @@ add_dependencies(get_first_point ${catkin_EXPORTED_TARGETS}) # BMNF(07/04/2022):
 add_dependencies(get_first_point ${PROJECT_NAME}_gencpp) # BMNF(07/04/2022): NEW 
 
 target_link_libraries(stereo_odometer ${OpenCV_LIBRARIES} ${catkin_LIBRARIES})
-find_package(Boost REQUIRED COMPONENTS signals thread)
+find_package(Boost REQUIRED COMPONENTS thread)
 include_directories(${Boost_INCLUDE_DIRS})
 
 target_link_libraries(stereo_odometer ${OpenCV_LIB} ${OpenCV_LIBRARIES} ${Boost_LIBRARIES} ${catkin_LIBRARIES})
