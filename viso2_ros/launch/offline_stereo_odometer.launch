@@ -1,0 +1,99 @@
+<launch>
+
+    <!-- Robots parameters -->
+    <arg name = "robot_name"         default = "girona500"/>
+
+    <!-- Camera parameters -->
+    <arg name = "camera_name"        default = "stereo_ch3"/>
+    <arg name = "resolution"         default = "full"/>
+    <arg name = "slave_camera_name"  default = "right"/>
+    <arg name = "master_camera_name" default = "left"/>
+
+    <!-- Image flags -->
+    <arg name = "enable_decimate_x1" default = "false"/>
+    <arg name = "enable_decimate_x2" default = "false"/>
+    <arg name = "enable_decimate_x4" default = "true"/>
+    <arg name = "enable_decimate_x8" default = "false"/>
+
+    <!-- Bagfiles parameters -->
+    <param name = "/use_sim_time"    value = "true"/>
+
+    <!-- UJI -->
+    <!-- 2024_07_02/experiment_0_proc -->
+    <arg name = "bagfile" default = "/home/bomiquel/datasets/bagfiles/uji/2024_07_02/experiment_0_proc/2024-07-02-16-33-14.bag"/>
+
+    <!-- Static TF's -->
+    <node pkg = "tf" type = "static_transform_publisher" name = "girona500_base_link_to_stereo_down" args = "0.57 -0.062 0.505 0.0 0.0 0.0 $(arg robot_name)/base_link $(arg robot_name)/stereo_down 30" />
+    <node pkg = "tf" type = "static_transform_publisher" name = "girona500_stereo_down_to_left_optical" args = "0.0 0.0 0.0 1.57 0.0 0.0 $(arg robot_name)/stereo_down $(arg robot_name)/stereo_down/left_optical 30" />
+
+    <group ns = "$(arg robot_name)">
+
+        <!-- Initial pose and orientation parameters -->  
+        <!-- UJI 2024_07_02/experiment_0_proc -->
+        <arg name = "t_x" default = "7.256682862"/> 
+        <arg name = "t_y" default = "0.605927856"/> 
+        <arg name = "t_z" default = "-1.758014793"/> 
+        <arg name = "q_x" default = "-0.002890934"/>
+        <arg name = "q_y" default = "0.030017629"/>
+        <arg name = "q_z" default = "0.998787796"/>
+        <arg name = "q_w" default = "0.038904031"/>
+
+        <!-- Sends initial pose -->
+        <node pkg = "viso2_ros" type = "initial_pose_server_node" name = "initial_pose_server_node" output = "screen">
+            <param name = "tx"          value = "$(arg t_x)"/>
+            <param name = "ty"          value = "$(arg t_y)"/>
+            <param name = "tz"          value = "$(arg t_z)"/>
+            <param name = "qx"          value = "$(arg q_x)"/>
+            <param name = "qy"          value = "$(arg q_y)"/>
+            <param name = "qz"          value = "$(arg q_z)"/>
+            <param name = "qw"          value = "$(arg q_w)"/>
+            <param name = "world_frame" value = "world_ned"/>
+            <param name = "robot_frame" value = "base_link"/>
+            <remap from = "get_pose"    to    = "stereo_odometer/get_first_odom"/>
+        </node>
+
+        <!-- Processes stereo images -->
+        <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_pipeline.launch">
+            <arg name = "stereo"             value = "$(arg camera_name)"/>
+            <arg name = "resolution"         value = "$(arg resolution)"/>
+            <arg name = "slave_camera_name"  value = "$(arg slave_camera_name)"/>
+            <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+            <arg name = "enable_decimate_x1" value = "$(arg enable_decimate_x1)"/>
+            <arg name = "enable_decimate_x2" value = "$(arg enable_decimate_x2)"/>
+            <arg name = "enable_decimate_x4" value = "$(arg enable_decimate_x4)"/>
+            <arg name = "enable_decimate_x8" value = "$(arg enable_decimate_x8)"/>
+        </include>
+
+        <!-- Viso2 stereo odometer -->
+        <rosparam command = "load" file = "$(find viso2_ros)/config/params.yaml"/>
+        <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x1 == true)">
+            <remap from = "get_first_odom"              to = "stereo_odometer/get_first_odom"/>
+            <remap from = "left_camera_info"            to = "$(arg camera_name)/$(arg master_camera_name)/camera_info"/>
+            <remap from = "right_camera_info"           to = "$(arg camera_name)/$(arg slave_camera_name)/camera_info"/>
+            <remap from = "left_image_rect_color"       to = "$(arg camera_name)/$(arg master_camera_name)/image_rect_color"/>
+            <remap from = "right_image_rect_color"      to = "$(arg camera_name)/$(arg slave_camera_name)/image_rect_color"/> 
+        </node>
+        <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x2 == true)">
+            <remap from = "get_first_odom"              to = "stereo_odometer/get_first_odom"/>
+            <remap from = "left_camera_info"            to = "$(arg camera_name)/scaled_x2/$(arg master_camera_name)/camera_info"/>
+            <remap from = "right_camera_info"           to = "$(arg camera_name)/scaled_x2/$(arg slave_camera_name)/camera_info"/>
+            <remap from = "left_image_rect_color"       to = "$(arg camera_name)/scaled_x2/$(arg master_camera_name)/image_rect_color"/>
+            <remap from = "right_image_rect_color"      to = "$(arg camera_name)/scaled_x2/$(arg slave_camera_name)/image_rect_color"/> 
+        </node>
+        <node pkg = "viso2_ros" type = "stereo_odometer" name = "stereo_odometer" output = "screen" if = "$(eval enable_decimate_x4 == true)">
+            <remap from = "get_first_odom"              to = "stereo_odometer/get_first_odom"/>
+            <remap from = "left_camera_info"            to = "$(arg camera_name)/scaled_x4/$(arg master_camera_name)/camera_info"/>
+            <remap from = "right_camera_info"           to = "$(arg camera_name)/scaled_x4/$(arg slave_camera_name)/camera_info"/>
+            <remap from = "left_image_rect_color"       to = "$(arg camera_name)/scaled_x4/$(arg master_camera_name)/image_rect_color"/>
+            <remap from = "right_image_rect_color"      to = "$(arg camera_name)/scaled_x4/$(arg slave_camera_name)/image_rect_color"/> 
+        </node>
+
+    </group>
+
+    <!-- Play bagfile -->
+    <node pkg = "rosbag" type = "play" name = "rosbag" args = "-r 1 --clock $(arg bagfile) --topics /$(arg robot_name)/$(arg camera_name)/$(arg master_camera_name)/camera_info
+                                                                                                    /$(arg robot_name)/$(arg camera_name)/$(arg master_camera_name)/image_raw
+                                                                                                    /$(arg robot_name)/$(arg camera_name)/$(arg slave_camera_name)/camera_info
+                                                                                                    /$(arg robot_name)/$(arg camera_name)/$(arg slave_camera_name)/image_raw"
+                                                                                                    required = "true"/>
+</launch>

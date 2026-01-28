@@ -1,20 +1,23 @@
 #include <ros/ros.h>
-#include <sensor_msgs/image_encodings.h>
-#include <image_geometry/stereo_camera_model.h>
+#include <pcl/point_types.h>
+#include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
 #include <pcl_ros/point_cloud.h>
-#include <pcl/point_types.h>
+#include <sensor_msgs/image_encodings.h>
+#include <sensor_msgs/CameraInfo.h>
+#include <image_geometry/stereo_camera_model.h>
+#include <message_filters/subscriber.h>
+#include <message_filters/time_synchronizer.h>
+#include <message_filters/sync_policies/approximate_time.h>
+#include <image_transport/subscriber_filter.h>
 
 #include <viso_stereo.h>
 
-#include <viso2_ros/VisoInfo.h>
-
-#include "stereo_processor.h"
 #include "odometer_base.h"
 #include "odometry_params.h"
 
-// to remove after debugging
-#include <opencv2/highgui/highgui.hpp>
+#include "viso2_ros/VisoInfo.h"
+#include "viso2_ros/GetTransform.h"
 
 namespace viso2_ros
 {
@@ -43,7 +46,7 @@ static const boost::array<double, 36> BAD_COVARIANCE =
     0, 0, 0, 0, 0, 9999 } };
 
 
-class StereoOdometer : public StereoProcessor, public OdometerBase
+class StereoOdometer : public OdometerBase
 {
 
 private:
@@ -51,38 +54,74 @@ private:
   boost::shared_ptr<VisualOdometryStereo> visual_odometer_;
   VisualOdometryStereo::parameters visual_odometer_params_;
 
-  ros::Publisher point_cloud_pub_;
+  // NodeHandles.
+  ros::NodeHandle nh_;
+  ros::NodeHandle nhp_;
+  image_transport::ImageTransport it_;
+
+  // Publishers
   ros::Publisher info_pub_;
+  ros::Publisher point_cloud_pub_;
+  
+  // Client service.
+  ros::ServiceClient initial_odom_client_;
+
+  // Subscribers.
+  image_transport::SubscriberFilter l_img_sub_;
+  image_transport::SubscriberFilter r_img_sub_;
+  message_filters::Subscriber<sensor_msgs::CameraInfo> l_info_sub_;
+  message_filters::Subscriber<sensor_msgs::CameraInfo> r_info_sub_;
 
   bool got_lost_;
 
-  // change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below
+  // Change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below.
   int ref_frame_change_method_;
   bool change_reference_frame_;
-  double ref_frame_motion_threshold_; // method 1. Change the reference frame if last motion is small
-  int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low
+  double ref_frame_motion_threshold_; // method 1. Change the reference frame if last motion is small.
+  int ref_frame_inlier_threshold_; // method 2. Change the reference frame if the number of inliers is low.
+  
   Matrix reference_motion_;
+
+  // Topic sync.
+  typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
+                                                          sensor_msgs::Image,
+                                                          sensor_msgs::CameraInfo,
+                                                          sensor_msgs::CameraInfo> SyncPolicy_;
+  typedef message_filters::Synchronizer<SyncPolicy_> Sync_;
+  std::shared_ptr<Sync_> sync_;
 
 public:
 
   typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
 
-  StereoOdometer(const std::string& transport) :
-    StereoProcessor(transport), OdometerBase(),
-    got_lost_(false), change_reference_frame_(false)
+  StereoOdometer() : OdometerBase(),
+    nh_{}, nhp_{"~"}, it_{nh_}, got_lost_(false), change_reference_frame_(false)
   {
-    // Read local parameters
-    ros::NodeHandle local_nh("~");
-    odometry_params::loadParams(local_nh, visual_odometer_params_);
+    // Read local parameters.
+    odometry_params::loadParams(nhp_, visual_odometer_params_);
+    nhp_.param("ref_frame_change_method", ref_frame_change_method_, 0);
+    nhp_.param("ref_frame_motion_threshold", ref_frame_motion_threshold_, 5.0);
+    nhp_.param("ref_frame_inlier_threshold", ref_frame_inlier_threshold_, 150);
 
-    local_nh.param("ref_frame_change_method", ref_frame_change_method_, 0);
-    local_nh.param("ref_frame_motion_threshold", ref_frame_motion_threshold_, 5.0);
-    local_nh.param("ref_frame_inlier_threshold", ref_frame_inlier_threshold_, 150);
-
-    point_cloud_pub_ = local_nh.advertise<PointCloud>("point_cloud", 1);
-    info_pub_ = local_nh.advertise<VisoInfo>("info", 1);
-
+    // Reference motion.
     reference_motion_ = Matrix::eye(4);
+
+    // Publishers.
+    info_pub_ = nhp_.advertise<VisoInfo>("info", 1);
+    point_cloud_pub_ = nhp_.advertise<PointCloud>("point_cloud", 1);
+
+    // Client service.
+    initial_odom_client_ = nhp_.serviceClient<viso2_ros::GetTransform>("get_first_odom");
+
+    // Subscribers.
+    l_img_sub_.subscribe(it_, "left_image_rect_color", 5);
+    r_img_sub_.subscribe(it_, "right_image_rect_color", 5);
+    l_info_sub_.subscribe(nh_, "left_camera_info", 5);
+    r_info_sub_.subscribe(nh_, "right_camera_info", 5);
+
+    // Message sync.
+    sync_ = std::make_shared<Sync_>(SyncPolicy_(10), l_img_sub_, r_img_sub_, l_info_sub_, r_info_sub_);
+    sync_->registerCallback(boost::bind(&StereoOdometer::imageCallback, this, _1, _2, _3, _4));
   }
 
 protected:
@@ -91,13 +130,7 @@ protected:
       const sensor_msgs::CameraInfoConstPtr& l_info_msg,
       const sensor_msgs::CameraInfoConstPtr& r_info_msg)
   {
-    int queue_size;
-    bool approximate_sync;
-    ros::NodeHandle local_nh("~");
-    local_nh.param("queue_size", queue_size, 5);
-    local_nh.param("approximate_sync", approximate_sync, false);
-
-    // read calibration info from camera info message
+    // Read calibration info from camera info message
     // to fill remaining parameters
     image_geometry::StereoCameraModel model;
     model.fromCameraInfo(*l_info_msg, *r_info_msg);
@@ -107,15 +140,15 @@ protected:
     visual_odometer_params_.calib.f   = model.left().fx();
 
     visual_odometer_.reset(new VisualOdometryStereo(visual_odometer_params_));
-    if (l_info_msg->header.frame_id != "") setSensorFrameId(l_info_msg->header.frame_id);
+    if (l_info_msg->header.frame_id != "") 
+      setSensorFrameId(l_info_msg->header.frame_id);
     ROS_INFO_STREAM("Initialized libviso2 stereo odometry "
                     "with the following parameters:" << std::endl <<
                     visual_odometer_params_ <<
-                    "  queue_size = " << queue_size << std::endl <<
-                    "  approximate_sync = " << approximate_sync << std::endl <<
                     "  ref_frame_change_method = " << ref_frame_change_method_ << std::endl <<
                     "  ref_frame_motion_threshold = " << ref_frame_motion_threshold_ << std::endl <<
                     "  ref_frame_inlier_threshold = " << ref_frame_inlier_threshold_);
+    setPose(getInitialOdom());
   }
 
   void imageCallback(
@@ -158,7 +191,7 @@ protected:
       // on first run publish zero once
       if (first_run)
       {
-        tf::Transform delta_transform;
+        tf2::Transform delta_transform;
         delta_transform.setIdentity();
         integrateAndPublish(delta_transform, l_image_msg->header.stamp);
       }
@@ -188,12 +221,12 @@ protected:
         }
         reference_motion_ = motion; // store last motion as reference
 
-        tf::Matrix3x3 rot_mat(
+        tf2::Matrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
-        tf::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
-        tf::Transform delta_transform(rot_mat, t);
+        tf2::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
+        tf2::Transform delta_transform(rot_mat, t);
 
         setPoseCovariance(STANDARD_POSE_COVARIANCE);
         setTwistCovariance(STANDARD_TWIST_COVARIANCE);
@@ -211,7 +244,7 @@ protected:
       {
         setPoseCovariance(BAD_COVARIANCE);
         setTwistCovariance(BAD_COVARIANCE);
-        tf::Transform delta_transform;
+        tf2::Transform delta_transform;
         delta_transform.setIdentity();
         integrateAndPublish(delta_transform, l_image_msg->header.stamp);
 
@@ -222,7 +255,6 @@ protected:
 
       if(success)
       {
-
         // Proceed depending on the reference frame change method
         switch ( ref_frame_change_method_ )
         {
@@ -242,9 +274,11 @@ protected:
             break;
           }
           default:
+          {
             change_reference_frame_ = false;
+            break;
+          }
         }
-
       }
       else
         change_reference_frame_ = false;
@@ -263,6 +297,30 @@ protected:
       info_msg.runtime = time_elapsed.toSec();
       info_pub_.publish(info_msg);
     }
+  }
+
+  tf2::Transform getInitialOdom()
+  {
+    tf2::Transform initial_pose;
+    viso2_ros::GetTransform srv;
+    if (initial_odom_client_.call(srv))
+    {
+      tf2::fromMsg(srv.response.tf.transform, initial_pose);
+      ROS_WARN_STREAM("[VO->Initial odom:] GetTransform service call successful. The initial odometry is as follows:" << std::endl <<
+                      "tx: " << initial_pose.getOrigin().getX() << std::endl << 
+                      "ty: " << initial_pose.getOrigin().getY() << std::endl << 
+                      "tz: " << initial_pose.getOrigin().getZ() << std::endl << 
+                      "qx: " << initial_pose.getRotation().getX() << std::endl << 
+                      "qy: " << initial_pose.getRotation().getY() << std::endl << 
+                      "qz: " << initial_pose.getRotation().getZ() << std::endl << 
+                      "qw: " << initial_pose.getRotation().getW());
+    }
+    else
+    {
+      ROS_WARN_STREAM("[VO->Initial odom:] Failed to call GetTransform service. The initial odometry will be assumed as the identity.");
+      initial_pose.setIdentity();
+    }
+    return initial_pose;
   }
 
   double computeFeatureFlow(
@@ -331,21 +389,15 @@ protected:
 
 int main(int argc, char **argv)
 {
+  // Init ROS.
   ros::init(argc, argv, "stereo_odometer");
-  if (ros::names::remap("stereo") == "stereo") {
-    ROS_WARN("'stereo' has not been remapped! Example command-line usage:\n"
-             "\t$ rosrun viso2_ros stereo_odometer stereo:=narrow_stereo image:=image_rect");
-  }
-  if (ros::names::remap("image").find("rect") == std::string::npos) {
-    ROS_WARN("stereo_odometer needs rectified input images. The used image "
-             "topic is '%s'. Are you sure the images are rectified?",
-             ros::names::remap("image").c_str());
-  }
+  ros::start();
 
-  std::string transport = argc > 1 ? argv[1] : "raw";
-  viso2_ros::StereoOdometer odometer(transport);
+  // Create visual stereo odometer.
+  viso2_ros::StereoOdometer odometer;
 
   ros::spin();
+
   return 0;
 }
 

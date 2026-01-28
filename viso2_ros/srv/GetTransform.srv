@@ -1,0 +1,19 @@
+# @file GetTransform.srv
+# @brief Custom service to send a transform matrix between
+#        ROS nodes.
+# @package viso2_ros
+# @project viso2_ros
+#
+# @author
+#   Bo Miquel Nordfeldt-Fiol (2026)
+#
+# @license BSD-4-Clause
+#   This file is part of the viso2_ros project and is released under
+#   the GPL License. See the LICENSE file for details.
+
+
+# Request
+time timestamp
+---
+# Response
+geometry_msgs/TransformStamped tf

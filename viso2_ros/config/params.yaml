@@ -1,0 +1,4 @@
+stereo_odometer:
+  odom_frame_id: odom
+  sensor_frame_id: girona500/stereo_down/left_optical
+  base_link_frame_id: girona500/base_link

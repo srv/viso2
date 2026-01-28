@@ -1,0 +1,23 @@
+<launch>
+
+    <arg name = "slave_camera_name"/>
+    <arg name = "master_camera_name"/>
+    <arg name = "decimation"   default = "2" />
+    <arg name = "name"         default = "x$(arg decimation)" />
+    <arg name = "nodelet_args" value = "standalone image_proc/crop_decimate" />
+
+    <node pkg = "nodelet" type = "nodelet" name = "image_proc_decimate_master_x$(arg decimation)" output = "screen" respawn = "true" args = "$(arg nodelet_args)" >
+        <remap from = "camera"       to = "$(arg master_camera_name)" />
+        <remap from = "camera_out"   to = "scaled_$(arg name)/$(arg master_camera_name)"/>
+        <param name = "decimation_x" value = "$(arg decimation)" />
+        <param name = "decimation_y" value = "$(arg decimation)" />
+    </node>
+
+    <node pkg = "nodelet" type = "nodelet" name = "image_proc_decimate_slave_x$(arg decimation)" output = "screen" respawn = "true" args = "$(arg nodelet_args)" >
+        <remap from = "camera"       to = "$(arg slave_camera_name)" />
+        <remap from = "camera_out"   to = "scaled_$(arg name)/$(arg slave_camera_name)"/>
+        <param name = "decimation_x" value = "$(arg decimation)" />
+        <param name = "decimation_y" value = "$(arg decimation)" />
+    </node>
+
+</launch>
