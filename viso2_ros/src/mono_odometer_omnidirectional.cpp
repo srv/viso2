@@ -89,7 +89,7 @@ protected:
     if (first_run)
     {
       visual_odometer_->process(image_data, dims);
-      tf::Transform delta_transform;
+      tf2::Transform delta_transform;
       delta_transform.setIdentity();
       integrateAndPublish(delta_transform, image_msg->header.stamp);
     }
@@ -105,12 +105,12 @@ protected:
                   visual_odometer_->getNumberOfInliers());
         ROS_DEBUG_STREAM("libviso2 returned the following motion:\n" << camera_motion);
 
-        tf::Matrix3x3 rot_mat(
+        tf2::Matrix3x3 rot_mat(
           camera_motion.val[0][0], camera_motion.val[0][1], camera_motion.val[0][2],
           camera_motion.val[1][0], camera_motion.val[1][1], camera_motion.val[1][2],
           camera_motion.val[2][0], camera_motion.val[2][1], camera_motion.val[2][2]);
-        tf::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
-        tf::Transform delta_transform(rot_mat, t);
+        tf2::Vector3 t(camera_motion.val[0][3], camera_motion.val[1][3], camera_motion.val[2][3]);
+        tf2::Transform delta_transform(rot_mat, t);
 
         integrateAndPublish(delta_transform, image_msg->header.stamp);
       }
@@ -118,7 +118,7 @@ protected:
       {
         ROS_DEBUG("Call to VisualOdometryMono::process() failed. Assuming motion too small.");
         replace_ = true;
-        tf::Transform delta_transform;
+        tf2::Transform delta_transform;
         delta_transform.setIdentity();
         integrateAndPublish(delta_transform, image_msg->header.stamp);
       }

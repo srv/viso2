@@ -1,0 +1,77 @@
+<launch>
+
+  <arg name = "stereo"             default = "stereo_down"/>
+  <arg name = "resolution"         default = "full"/>
+  <arg name = "slave_camera_name"  default = "right"/>
+  <arg name = "master_camera_name" default = "left"/>
+  <arg name = "enable_decimate_x1" default = "false"/>
+  <arg name = "enable_decimate_x2" default = "false"/>
+  <arg name = "enable_decimate_x4" default = "false"/>
+  <arg name = "enable_decimate_x8" default = "false"/>
+
+  <!-- x1 decimate -->
+  <group if = "$(arg enable_decimate_x1)">
+    <group ns="$(arg stereo)">
+      <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_image_proc.launch">
+        <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+        <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+        <arg name = "disparity_params" value = "$(find viso2_ros)/config/disparity/disparity_params_$(arg resolution)_x1.yaml"/>
+      </include>
+    </group>
+  </group>
+
+  <!-- x2 decimate -->
+  <group if = "$(arg enable_decimate_x2)">
+    <group ns="$(arg stereo)">
+      <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_crop_decimate.launch">
+        <arg name = "decimation"         value = "2"/>
+        <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+        <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+      </include>
+      <group ns="scaled_x2" >
+        <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_image_proc.launch">
+          <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+          <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+          <arg name = "disparity_params" value = "$(find viso2_ros)/config/disparity/disparity_params_$(arg resolution)_x2.yaml"/>
+        </include>
+      </group>
+    </group>
+  </group>
+
+  <!-- x4 decimate -->
+  <group if = "$(arg enable_decimate_x4)">
+    <group ns="$(arg stereo)">
+      <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_crop_decimate.launch">
+        <arg name = "decimation" value = "4"/>
+        <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+        <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+      </include>
+      <group ns="scaled_x4" >
+        <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_image_proc.launch">
+          <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+          <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+          <arg name = "disparity_params" value = "$(find viso2_ros)/config/disparity/disparity_params_$(arg resolution)_x4.yaml"/>
+        </include>
+      </group>
+    </group>
+  </group>
+
+  <!-- x8 decimate -->
+  <group if = "$(arg enable_decimate_x8)">
+    <group ns="$(arg stereo)">
+      <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_crop_decimate.launch">
+        <arg name = "decimation" value = "8"/>
+        <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+        <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+      </include>
+      <group ns="scaled_x8" >
+        <include file = "$(find viso2_ros)/launch/stereo_processing/stereo_image_proc.launch">
+          <arg name = "master_camera_name" value = "$(arg master_camera_name)"/>
+          <arg name = "slave_camera_name" value = "$(arg slave_camera_name)"/>
+          <arg name = "disparity_params" value = "$(find viso2_ros)/config/disparity/disparity_params_$(arg resolution)_x8.yaml"/>
+        </include>
+      </group>
+    </group>
+  </group>
+
+</launch>

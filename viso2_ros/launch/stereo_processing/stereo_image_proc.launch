@@ -1,0 +1,26 @@
+<launch>
+
+  <arg name = "disparity_params"/>
+  <arg name = "slave_camera_name"/>
+  <arg name = "master_camera_name"/>
+
+  <node pkg = "stereo_image_proc" type = "stereo_image_proc" name = "stereo_image_proc" respawn = "true" output="screen">
+    <rosparam file = "$(arg disparity_params)"/>
+    <param name = "approximate_sync" value = "true" />
+    <!-- Remap inputs -->
+    <remap from="left/image_raw"    to="$(arg master_camera_name)/image_raw" />
+    <remap from="left/camera_info"  to="$(arg master_camera_name)/camera_info" />
+    <remap from="right/image_raw"   to="$(arg slave_camera_name)/image_raw" />
+    <remap from="right/camera_info" to="$(arg slave_camera_name)/camera_info" />
+    <!-- Remap outputs -->
+    <remap from="left/image_mono"        to="$(arg master_camera_name)/image_mono" />
+    <remap from="left/image_rect"        to="$(arg master_camera_name)/image_rect" />
+    <remap from="left/image_rect_color"  to="$(arg master_camera_name)/image_rect_color" />
+    <remap from="left/image_color"       to="$(arg master_camera_name)/image_color" />
+    <remap from="right/image_mono"       to="$(arg slave_camera_name)/image_mono" />
+    <remap from="right/image_rect"       to="$(arg slave_camera_name)/image_rect" />
+    <remap from="right/image_rect_color" to="$(arg slave_camera_name)/image_rect_color" />
+    <remap from="right/image_color"      to="$(arg slave_camera_name)/image_color" />
+  </node>
+
+</launch>
