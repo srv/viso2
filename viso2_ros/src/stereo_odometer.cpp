@@ -1,4 +1,5 @@
 #include <ros/ros.h>
+#include <std_msgs/Int32.h>
 #include <pcl/point_types.h>
 #include <sensor_msgs/Image.h>
 #include <cv_bridge/cv_bridge.h>
@@ -62,6 +63,8 @@ private:
   // Publishers
   ros::Publisher info_pub_;
   ros::Publisher point_cloud_pub_;
+  ros::Publisher inliers_num_pub_;
+  ros::Publisher temporal_matches_num_pub_;
   
   // Client service.
   ros::ServiceClient initial_odom_client_;
@@ -109,6 +112,8 @@ public:
     // Publishers.
     info_pub_ = nhp_.advertise<VisoInfo>("info", 1);
     point_cloud_pub_ = nhp_.advertise<PointCloud>("point_cloud", 1);
+    inliers_num_pub_ = nhp_.advertise<std_msgs::Int32>("inliers_num", 1);
+    temporal_matches_num_pub_ = nhp_.advertise<std_msgs::Int32>("temporal_matches_num", 1);
 
     // Client service.
     initial_odom_client_ = nhp_.serviceClient<viso2_ros::GetTransform>("get_first_odom");
@@ -286,11 +291,25 @@ protected:
       if(!change_reference_frame_)
         ROS_DEBUG_STREAM("Changing reference frame");
 
-      // create and publish viso2 info msg
+      // Publish temporal matches and inliers number.
+      std_msgs::Int32 msg;
+      if (temporal_matches_num_pub_.getNumSubscribers() > 0)
+      {
+        msg.data = visual_odometer_->getNumberOfMatches();
+        temporal_matches_num_pub_.publish(msg);
+      }
+      if (inliers_num_pub_.getNumSubscribers() > 0)
+      {
+        msg.data = visual_odometer_->getNumberOfInliers();
+        inliers_num_pub_.publish(msg);
+      }
+
+      // Create and publish viso2 info msg
       VisoInfo info_msg;
       info_msg.header.stamp = l_image_msg->header.stamp;
       info_msg.got_lost = !success;
       info_msg.change_reference_frame = !change_reference_frame_;
+      info_msg.motion_estimate_valid = success;
       info_msg.num_matches = visual_odometer_->getNumberOfMatches();
       info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
       ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
