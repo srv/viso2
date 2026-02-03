@@ -76,6 +76,8 @@ private:
   message_filters::Subscriber<sensor_msgs::CameraInfo> r_info_sub_;
 
   bool got_lost_;
+  int32_t p_matches_;
+  int32_t p_inliers_;
 
   // Change reference frame method. 0, 1 or 2. 0 means allways change. 1 and 2 explained below.
   int ref_frame_change_method_;
@@ -98,7 +100,7 @@ public:
   typedef pcl::PointCloud<pcl::PointXYZRGB> PointCloud;
 
   StereoOdometer() : OdometerBase(),
-    nh_{}, nhp_{"~"}, it_{nh_}, got_lost_(false), change_reference_frame_(false)
+    nh_{}, nhp_{"~"}, it_{nh_}, got_lost_(false), p_matches_{0}, p_inliers_{0}, change_reference_frame_(false)
   {
     // Read local parameters.
     odometry_params::loadParams(nhp_, visual_odometer_params_);
@@ -186,6 +188,7 @@ protected:
     ROS_ASSERT(l_image_msg->width == r_image_msg->width);
     ROS_ASSERT(l_image_msg->height == r_image_msg->height);
 
+    bool success = false;
     int32_t dims[] = {(int32_t)l_image_msg->width, (int32_t)l_image_msg->height, l_step};
     // on first run or when odometer got lost, only feed the odometer with
     // images without retrieving data
@@ -203,8 +206,7 @@ protected:
     }
     else
     {
-      bool success = visual_odometer_->process(
-          l_image_data, r_image_data, dims, change_reference_frame_);
+      success = visual_odometer_->process(l_image_data, r_image_data, dims, change_reference_frame_);
       if (success)
       {
         Matrix motion = Matrix::inv(visual_odometer_->getMotion());
@@ -290,32 +292,52 @@ protected:
 
       if(!change_reference_frame_)
         ROS_DEBUG_STREAM("Changing reference frame");
+    }
 
-      // Publish temporal matches and inliers number.
-      std_msgs::Int32 msg;
-      if (temporal_matches_num_pub_.getNumSubscribers() > 0)
-      {
-        msg.data = visual_odometer_->getNumberOfMatches();
-        temporal_matches_num_pub_.publish(msg);
-      }
-      if (inliers_num_pub_.getNumSubscribers() > 0)
-      {
-        msg.data = visual_odometer_->getNumberOfInliers();
-        inliers_num_pub_.publish(msg);
-      }
+    // Publish temporal matches and inliers number.
+    std_msgs::Int32 msg;
+    int32_t c_matches = visual_odometer_->getNumberOfMatches();
+    int32_t c_inliers = visual_odometer_->getNumberOfInliers();
+    if (temporal_matches_num_pub_.getNumSubscribers() > 0)
+    {
+      if (got_lost_ && c_matches == p_matches_)
+        msg.data = 0;
+      else
+        msg.data = c_matches;
+      temporal_matches_num_pub_.publish(msg);
+    }
+    if (inliers_num_pub_.getNumSubscribers() > 0)
+    {
+      if (got_lost_ && c_inliers == p_inliers_)
+        msg.data = 0;
+      else
+        msg.data = c_inliers;
+      inliers_num_pub_.publish(msg);
+    }
 
-      // Create and publish viso2 info msg
+    // Create and publish viso2 info msg
+    if (info_pub_.getNumSubscribers() > 0)
+    {
       VisoInfo info_msg;
       info_msg.header.stamp = l_image_msg->header.stamp;
-      info_msg.got_lost = !success;
+      info_msg.got_lost = got_lost_;
       info_msg.change_reference_frame = !change_reference_frame_;
       info_msg.motion_estimate_valid = success;
-      info_msg.num_matches = visual_odometer_->getNumberOfMatches();
-      info_msg.num_inliers = visual_odometer_->getNumberOfInliers();
+      if (got_lost_ && c_matches == p_matches_)
+        info_msg.num_matches = 0;
+      else
+        info_msg.num_matches = c_matches;
+      if (got_lost_ && c_inliers == p_inliers_)
+        info_msg.num_inliers = 0;
+      else
+        info_msg.num_inliers = c_inliers;
       ros::WallDuration time_elapsed = ros::WallTime::now() - start_time;
       info_msg.runtime = time_elapsed.toSec();
       info_pub_.publish(info_msg);
     }
+
+    p_matches_ = c_matches;
+    p_inliers_ = c_inliers;
   }
 
   tf2::Transform getInitialOdom()
