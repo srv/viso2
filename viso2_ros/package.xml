@@ -2,7 +2,7 @@
 <package format="2">
 
   <name>viso2_ros</name>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
 
   <description>This is the ROS wrapper for libviso2, library for visual odometry (see package libviso2).</description>
 
